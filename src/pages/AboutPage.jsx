@@ -17,7 +17,7 @@ const AboutPage = () => {
 
   const team = [
     {
-      name: 'Théodor',
+      name: 'Silvain',
       role: 'Directeur Général',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
       description: "8 ans d'expérience dans l'immobilier de luxe"
