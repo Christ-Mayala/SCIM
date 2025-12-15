@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, 
   ArrowLeft, Share2, Calendar, Eye, Car, Waves, TreePine,
