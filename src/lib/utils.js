@@ -1,11 +1,12 @@
-import { Building2, Home, Landmark, MapPinned, Store } from 'lucide-react';
+import { Building2, Home, Landmark, MapPin, Store } from 'lucide-react';
 
 export function cn(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
 export const validateEmail = (email) => {
-  const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\\.,;:\s@\"]+\.)+[^<>()[\]\\.,;:\s@\"]{2,})$/i;
+  const re =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.)+[^<>()[\]\\.,;:\s@"]{2,})$/i;
   return re.test(String(email).toLowerCase());
 };
 
@@ -77,7 +78,10 @@ export const getImageUrl = (imagePath) => {
     origin = String(raw).replace(/\/api\/.*$/i, '') || raw;
   }
 
-  const path = String(imagePath).startsWith('/') ? String(imagePath) : `/${imagePath}`;
+  const path = String(imagePath).startsWith('/')
+    ? String(imagePath)
+    : `/${imagePath}`;
+
   return `${origin}${path}`;
 };
 
@@ -85,7 +89,7 @@ export const getPropertyTypeIcon = (category) => {
   const icons = {
     Appartement: Building2,
     Maison: Home,
-    Terrain: MapPinned,
+    Terrain: MapPin,
     Commercial: Store,
     Autre: Landmark,
   };
@@ -97,11 +101,19 @@ export const getPropertyFeatures = (property) => {
   const features = [];
 
   if (property.nombre_chambres) {
-    features.push(`${property.nombre_chambres} chambre${property.nombre_chambres > 1 ? 's' : ''}`);
+    features.push(
+      `${property.nombre_chambres} chambre${
+        property.nombre_chambres > 1 ? 's' : ''
+      }`
+    );
   }
 
   if (property.nombre_salles_bain) {
-    features.push(`${property.nombre_salles_bain} salle${property.nombre_salles_bain > 1 ? 's' : ''} de bain`);
+    features.push(
+      `${property.nombre_salles_bain} salle${
+        property.nombre_salles_bain > 1 ? 's' : ''
+      } de bain`
+    );
   }
 
   if (property.superficie) {
@@ -121,10 +133,16 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
+
   return Math.round(distance * 100) / 100;
 };
