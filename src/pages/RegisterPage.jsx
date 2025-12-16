@@ -1,13 +1,10 @@
-// src/pages/RegisterPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle, Building, Shield, Star, ArrowRight, Key } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import {Button} from '../components/ui/Button';
-import {Input} from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { validateEmail, validatePhone } from '../lib/utils';
-import Alert from '../components/common/Alert';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +19,7 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const { register, loading, isAuthenticated, clearError } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +34,17 @@ const RegisterPage = () => {
     clearError();
     return () => clearError();
   }, [clearError]);
+
+  useEffect(() => {
+    // Calculate password strength
+    let strength = 0;
+    if (formData.password.length >= 8) strength++;
+    if (/[A-Z]/.test(formData.password)) strength++;
+    if (/[a-z]/.test(formData.password)) strength++;
+    if (/[0-9]/.test(formData.password)) strength++;
+    if (/[^A-Za-z0-9]/.test(formData.password)) strength++;
+    setPasswordStrength(strength);
+  }, [formData.password]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -74,8 +83,8 @@ const RegisterPage = () => {
       newErrors.password = 'Le mot de passe est requis';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Minimum 8 caractères';
-    } else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(formData.password)) {
-      newErrors.password = 'Inclure une majuscule, une minuscule, un chiffre et un symbole';
+    } else if (passwordStrength < 3) {
+      newErrors.password = 'Mot de passe trop faible';
     }
 
     if (!formData.confirmPassword) {
@@ -112,157 +121,423 @@ const RegisterPage = () => {
     }
   };
 
+  const benefits = [
+    { icon: Building, text: "Accès à tout notre catalogue de biens" },
+    { icon: Star, text: "Favoris et recherches sauvegardées" },
+    { icon: Shield, text: "Transactions sécurisées et suivies" },
+    { icon: User, text: "Profil personnalisé de propriétaire/locataire" },
+  ];
+
+  const passwordRequirements = [
+    { label: '8 caractères minimum', met: formData.password.length >= 8 },
+    { label: 'Une majuscule', met: /[A-Z]/.test(formData.password) },
+    { label: 'Une minuscule', met: /[a-z]/.test(formData.password) },
+    { label: 'Un chiffre', met: /[0-9]/.test(formData.password) },
+    { label: 'Un caractère spécial', met: /[^A-Za-z0-9]/.test(formData.password) },
+  ];
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-gold-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full bg-gold-dark/20 blur-3xl" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.08),transparent_55%)]" />
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="inline-flex items-center justify-center bg-zinc-50 rounded-full mb-6 shadow-lg"> 
-            <img src="/images/scim-logo.jpg" alt="SCIM" className="h-20 w-20 rounded-full object-cover" />
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gold-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-gold-dark/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 right-1/3 w-80 h-80 bg-gold-primary/5 rounded-full blur-3xl" />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px),
+                           linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+          backgroundSize: '50px 50px',
+        }}></div>
+      </div>
+
+      <div className="relative flex min-h-screen">
+        {/* Left Panel - Benefits */}
+        <div className="hidden lg:flex lg:w-1/2 relative">
+          <div className="absolute inset-0">
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: 'url("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80")',
+              }}
+            ></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/95 via-zinc-900/90 to-zinc-900/80"></div>
+          </div>
+          
+          <div className="relative flex flex-col justify-between p-12 w-full">
+            {/* Logo */}
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl">
+                <img 
+                  src="/images/scim-logo.jpg" 
+                  alt="SCIM" 
+                  className="h-16 w-16 rounded-full object-cover border-4 border-white/20"
+                />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">SCIM</div>
+                <div className="text-sm text-gray-300">Immobilier Congo</div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="max-w-md">
+              <div className="inline-flex items-center space-x-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
+                <Key className="w-4 h-4" />
+                <span className="text-sm font-medium text-white">Création de compte</span>
+              </div>
+              
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                Rejoignez notre <br />
+                <span className="text-gold-primary">communauté immobilière</span>
+              </h1>
+              
+              <p className="text-xl text-gray-300 mb-10 leading-relaxed">
+                Créez votre compte gratuit et accédez à des opportunités immobilières exclusives.
+              </p>
+
+              {/* Benefits List */}
+              <div className="space-y-6 mb-12">
+                <h3 className="text-lg font-semibold text-white mb-4">Vos avantages :</h3>
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                      <benefit.icon className="w-5 h-5 text-gold-primary" />
+                    </div>
+                    <span className="text-gray-300">{benefit.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Testimonial */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-gray-300 italic mb-4">
+                  "Grâce à SCIM, j'ai trouvé la maison parfaite pour ma famille en moins d'une semaine !"
+                </p>
+                <div className="text-sm text-gray-400">- Marie K., propriétaire depuis 2023</div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-sm text-gray-400">
+              <p>© 2024 SCIM Immobilier • Déjà 5 000+ membres</p>
+            </div>
           </div>
         </div>
 
-        <h2 className="mt-6 text-center text-3xl font-bold text-white">
-          Créer votre compte
-        </h2>
-        <p className="mt-2 text-center text-sm text-zinc-300">
-          Ou{' '}
-          <Link
-            to="/login"
-            className="font-medium text-gold-primary hover:text-gold-dark transition-colors"
-          >
-            connectez-vous à votre compte existant
-          </Link>
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {errors.general && (
-              <Alert type="error">{errors.general}</Alert>
-            )}
-            {/* Nom complet */}
-            <Input
-              label="Nom complet"
-              type="text"
-              name="nom"
-              value={formData.nom}
-              onChange={handleChange}
-              error={errors.nom}
-              placeholder="Votre nom complet"
-            />
-            {errors.nom && (
-              <p className="text-xs text-red-600 mt-1">{errors.nom}</p>
-            )}
-
-            {/* Email */}
-            <Input
-              label="Adresse email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              placeholder="votre@email.com"
-            />
-            {errors.email && (
-              <p className="text-xs text-red-600 mt-1">{errors.email}</p>
-            )}
-
-            {/* Téléphone */}
-            <Input
-              label="Numéro de téléphone"
-              type="tel"
-              name="telephone"
-              value={formData.telephone}
-              onChange={handleChange}
-              error={errors.telephone}
-              placeholder="+242 06 123 45 67"
-            />
-            {errors.telephone && (
-              <p className="text-xs text-red-600 mt-1">{errors.telephone}</p>
-            )}
-
-            {/* Mot de passe */}
-            <div className="relative">
-              <Input
-                label="Mot de passe"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                placeholder="••••••••"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+        {/* Right Panel - Register Form */}
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+          <div className="w-full max-w-md">
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex flex-col items-center mb-8">
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl mb-4">
+                <img 
+                  src="/images/scim-logo.jpg" 
+                  alt="SCIM" 
+                  className="h-20 w-20 rounded-full object-cover border-4 border-white/20"
+                />
+              </div>
+              <h1 className="text-2xl font-bold text-white text-center">Rejoignez SCIM Immobilier</h1>
+              <p className="text-gray-400 text-center mt-2">Créez votre compte en 2 minutes</p>
             </div>
-            {errors.password && (
-              <p className="text-xs text-red-600 mt-1">{errors.password}</p>
-            )}
 
-            {/* Confirmation mot de passe */}
-            <div className="relative">
-              <Input
-                label="Confirmer le mot de passe"
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                placeholder="••••••••"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                  Créez votre compte
+                </h2>
+                <p className="text-gray-300">
+                  Rejoignez la première plateforme immobilière du Congo
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {errors.general && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <p className="text-red-400 text-sm">{errors.general}</p>
+                </div>
+              )}
+
+              {/* Form */}
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {/* Full Name */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
+                    <User className="w-4 h-4 mr-2" />
+                    Nom complet *
+                  </label>
+                  <Input
+                    type="text"
+                    name="nom"
+                    value={formData.nom}
+                    onChange={handleChange}
+                    placeholder="Votre nom et prénom"
+                    className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
+                      errors.nom ? 'border-red-500' : ''
+                    }`}
+                  />
+                  {errors.nom && (
+                    <p className="mt-1 text-sm text-red-400 flex items-center">
+                      <span className="mr-1">⚠</span>
+                      {errors.nom}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Email */}
+                  <div>
+                    <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Email *
+                    </label>
+                    <Input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="votre@email.com"
+                      className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
+                        errors.email ? 'border-red-500' : ''
+                      }`}
+                    />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-400 flex items-center">
+                        <span className="mr-1">⚠</span>
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
+                      <Phone className="w-4 h-4 mr-2" />
+                      Téléphone *
+                    </label>
+                    <Input
+                      type="tel"
+                      name="telephone"
+                      value={formData.telephone}
+                      onChange={handleChange}
+                      placeholder="+242 06 123 45 67"
+                      className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
+                        errors.telephone ? 'border-red-500' : ''
+                      }`}
+                    />
+                    {errors.telephone && (
+                      <p className="mt-1 text-sm text-red-400 flex items-center">
+                        <span className="mr-1">⚠</span>
+                        {errors.telephone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
+                    <Lock className="w-4 h-4 mr-2" />
+                    Mot de passe *
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Créez un mot de passe sécurisé"
+                      className={`w-full pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
+                        errors.password ? 'border-red-500' : ''
+                      }`}
+                    />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  
+                  {/* Password Strength */}
+                  {formData.password && (
+                    <div className="mt-3">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-xs text-gray-400">Force du mot de passe</span>
+                        <span className="text-xs text-gray-400">
+                          {passwordStrength < 3 ? 'Faible' : passwordStrength < 4 ? 'Moyen' : 'Fort'}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-300 ${
+                            passwordStrength < 3 ? 'bg-red-500' : 
+                            passwordStrength < 4 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${passwordStrength * 20}%` }}
+                        ></div>
+                      </div>
+                      
+                      {/* Requirements */}
+                      <div className="mt-3 space-y-1">
+                        {passwordRequirements.map((req, index) => (
+                          <div key={index} className="flex items-center">
+                            {req.met ? (
+                              <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                            ) : (
+                              <div className="w-3 h-3 border border-gray-500 rounded-full mr-2"></div>
+                            )}
+                            <span className={`text-xs ${req.met ? 'text-green-400' : 'text-gray-400'}`}>
+                              {req.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-400 flex items-center">
+                      <span className="mr-1">⚠</span>
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
+                    <Lock className="w-4 h-4 mr-2" />
+                    Confirmer le mot de passe *
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Retapez votre mot de passe"
+                      className={`w-full pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
+                        errors.confirmPassword ? 'border-red-500' : ''
+                      }`}
+                    />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-400 flex items-center">
+                      <span className="mr-1">⚠</span>
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                {/* Terms */}
+                <div className="flex items-start space-x-3">
+                  <label className="flex items-start cursor-pointer">
+                    <div className="relative mt-1">
+                      <input
+                        type="checkbox"
+                        name="acceptTerms"
+                        checked={formData.acceptTerms}
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        formData.acceptTerms 
+                          ? 'bg-gold-primary border-gold-primary' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.acceptTerms && <CheckCircle className="w-3 h-3 text-white" />}
+                      </div>
+                    </div>
+                    <span className="ml-2 text-sm text-gray-300">
+                      J'accepte les{' '}
+                      <Link to="/terms" className="text-gold-primary hover:text-gold-dark">
+                        conditions d'utilisation
+                      </Link>{' '}
+                      et la{' '}
+                      <Link to="/privacy" className="text-gold-primary hover:text-gold-dark">
+                        politique de confidentialité
+                      </Link>
+                    </span>
+                  </label>
+                </div>
+                {errors.acceptTerms && (
+                  <p className="mt-1 text-sm text-red-400 flex items-center">
+                    <span className="mr-1">⚠</span>
+                    {errors.acceptTerms}
+                  </p>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  loading={loading}
+                  className="w-full group py-4 bg-gradient-to-r from-gold-primary to-gold-dark hover:from-gold-dark hover:to-gold-primary text-lg font-semibold shadow-lg hover:shadow-xl"
+                  disabled={!formData.acceptTerms || loading}
+                >
+                  <span className="flex items-center justify-center">
+                    {loading ? 'Création en cours...' : 'Créer mon compte gratuit'}
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Button>
+              </form>
+
+              {/* Login Link */}
+              <div className="mt-8 text-center">
+                <p className="text-gray-400">
+                  Vous avez déjà un compte ?{' '}
+                  <Link
+                    to="/login"
+                    className="font-semibold text-gold-primary hover:text-gold-dark transition-colors group"
+                  >
+                    <span className="flex items-center justify-center">
+                      Connectez-vous ici
+                      <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Link>
+                </p>
+              </div>
+
+              {/* Security Info */}
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-center space-x-2 text-xs text-gray-400">
+                  <Shield className="w-3 h-3" />
+                  <span>Inscription sécurisée • Vos données sont protégées</span>
+                </div>
+              </div>
             </div>
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-600 mt-1">{errors.confirmPassword}</p>
-            )}
 
-            {/* CGU */}
-            <div className="flex items-center">
-              <input
-                id="acceptTerms"
-                name="acceptTerms"
-                type="checkbox"
-                checked={formData.acceptTerms}
-                onChange={handleChange}
-                className="h-4 w-4 text-gold-primary border-gray-300 rounded"
-              />
-              <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-900">
-                J'accepte les{' '}
-                <Link to="/terms" className="text-gold-primary hover:text-gold-dark">
-                  conditions d'utilisation
-                </Link>{' '}
-                et la{' '}
-                <Link to="/privacy" className="text-gold-primary hover:text-gold-dark">
-                  politique de confidentialité
-                </Link>
-              </label>
+            {/* Mobile Benefits */}
+            <div className="lg:hidden mt-8">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Pourquoi s'inscrire ?</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-300">
+                      <benefit.icon className="w-4 h-4 text-gold-primary" />
+                      <span className="text-sm">{benefit.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            {errors.acceptTerms && (
-              <p className="text-sm text-red-500 mt-1">{errors.acceptTerms}</p>
-            )}
-
-            <Button type="submit" loading={loading} className="w-full" size="lg">
-              Créer mon compte
-            </Button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
