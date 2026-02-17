@@ -101,15 +101,19 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (email, password) => api.post('/users/login', { email, password }),
-  register: (userData) => api.post('/users/register', userData),
-  logout: () => api.post('/users/logout'),
-  getProfile: () => api.get('/users/profil'),
+  login: (email, password) => api.post('/user/login', { email, password }),
+  register: (userData) => api.post('/user/register', userData),
+  logout: () => api.post('/users/logout'), // Reste sur /users (feature SCIM) car non dispo dans module natif
+  getProfile: () => api.get('/user/profile'),
   updateProfile: (userData) => {
-    const id = userData?._id || userData?.id;
-    return api.put(`/users/${id}`, userData);
+    // Utilisation du module natif /user/profile (PATCH) qui utilise le token (pas besoin d'ID)
+    // Le module natif attend un FormData si avatar, ou JSON sinon. 
+    // api.js gère déjà la conversion FormData dans l'interceptor si besoin, 
+    // mais ici on doit s'assurer d'envoyer le bon format.
+    // Pour simplifier et matcher l'existant, on envoie userData directement.
+    return api.patch('/user/profile', userData);
   },
-  refreshToken: () => api.post('/users/refresh-token'),
+  refreshToken: () => api.post('/users/refresh-token'), // Reste sur /users
   requestPasswordReset: (email) => api.post('/users/reset-request', { email }),
   verifyResetCode: (email, code) => api.post('/users/reset-verify', { email, code }),
   resetPassword: (email, code, newPassword) => api.post('/users/reset-password', { email, code, newPassword }),

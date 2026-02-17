@@ -36,7 +36,7 @@ Notes importantes:
 - Framework: Vite React
 - Build: `npm run build`
 - Output: `dist`
-- Env: `VITE_API_URL=https://<render-service>.onrender.com/api`
+- Env: `VITE_API_URL=https://dryapi.onrender.com/api`
 
 ---
 
