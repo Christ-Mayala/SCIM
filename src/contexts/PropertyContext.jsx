@@ -25,6 +25,10 @@ const initialState = {
     city: '',
     bedrooms: '',
     bathrooms: '',
+    transactionType: '',
+    minSurface: '',
+    maxSurface: '',
+    sortBy: 'date-desc',
   },
 };
 
@@ -76,11 +80,16 @@ const toApiFilters = (filters = {}) => {
   if (filters?.category) apiFilters.categorie = filters.category;
   if (filters?.minPrice) apiFilters.prixMin = filters.minPrice;
   if (filters?.maxPrice) apiFilters.prixMax = filters.maxPrice;
+
   if (filters?.transactionType) apiFilters.transactionType = filters.transactionType;
   if (filters?.isBonPlan !== undefined && filters?.isBonPlan !== '') apiFilters.isBonPlan = filters.isBonPlan;
 
   if (filters?.bedrooms) apiFilters.nombre_chambres = filters.bedrooms;
   if (filters?.bathrooms) apiFilters.nombre_salles_bain = filters.bathrooms;
+
+  if (filters?.minSurface) apiFilters.superficieMin = filters.minSurface;
+  if (filters?.maxSurface) apiFilters.superficieMax = filters.maxSurface;
+  if (filters?.sortBy) apiFilters.sortBy = filters.sortBy;
 
   if (filters?.limit) apiFilters.limit = filters.limit;
 

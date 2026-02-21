@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, X, MapPin, Home, DollarSign, Calendar } from 'lucide-react';
 import { debounce } from '../../utils/performance';
+import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 
 const SearchFilters = ({ 
   onFiltersChange,
@@ -111,70 +113,46 @@ const SearchFilters = ({
     <div className={`bg-white rounded-lg shadow-sm border p-6 ${className}`}>
       {/* Barre de recherche principale */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <input
+        <Input
           type="text"
           placeholder="Rechercher par titre, adresse, quartier..."
           value={filters.search}
           onChange={handleSearchChange}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
+          leftIcon={<Search className="w-5 h-5" />}
+          className="py-3"
         />
       </div>
 
       {/* Filtres rapides */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <Home className="inline w-4 h-4 mr-1" />
-            Type de bien
-          </label>
-          <select
+          <Select
+            label="Type de bien"
             value={filters.type}
             onChange={(e) => handleFilterChange('type', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-          >
-            {propertyTypes.map(type => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
+            options={propertyTypes}
+            leftIcon={<Home className="w-4 h-4" />}
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <Calendar className="inline w-4 h-4 mr-1" />
-            Statut
-          </label>
-          <select
+          <Select
+            label="Statut"
             value={filters.statut}
             onChange={(e) => handleFilterChange('statut', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-          >
-            {statusOptions.map(status => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+            options={statusOptions}
+            leftIcon={<Calendar className="w-4 h-4" />}
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <MapPin className="inline w-4 h-4 mr-1" />
-            Ville
-          </label>
-          <select
+          <Select
+            label="Ville"
             value={filters.ville}
             onChange={(e) => handleFilterChange('ville', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-          >
-            {cities.map(city => (
-              <option key={city.value} value={city.value}>
-                {city.label}
-              </option>
-            ))}
-          </select>
+            options={cities}
+            leftIcon={<MapPin className="w-4 h-4" />}
+          />
         </div>
       </div>
 
@@ -211,19 +189,17 @@ const SearchFilters = ({
               Prix (CFA)
             </label>
             <div className="grid grid-cols-2 gap-2">
-              <input
+              <Input
                 type="number"
                 placeholder="Prix minimum"
                 value={filters.prixMin}
                 onChange={(e) => handleFilterChange('prixMin', e.target.value)}
-                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               />
-              <input
+              <Input
                 type="number"
                 placeholder="Prix maximum"
                 value={filters.prixMax}
                 onChange={(e) => handleFilterChange('prixMax', e.target.value)}
-                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -231,37 +207,21 @@ const SearchFilters = ({
           {/* Chambres et salles de bain */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Chambres
-              </label>
-              <select
+              <Select
+                label="Chambres"
                 value={filters.nombreChambres}
                 onChange={(e) => handleFilterChange('nombreChambres', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              >
-                {roomOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                options={roomOptions}
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Salles de bain
-              </label>
-              <select
+              <Select
+                label="Salles de bain"
                 value={filters.nombreSallesBain}
                 onChange={(e) => handleFilterChange('nombreSallesBain', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              >
-                {roomOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                options={roomOptions}
+              />
             </div>
           </div>
 
@@ -271,19 +231,17 @@ const SearchFilters = ({
               Superficie (m²)
             </label>
             <div className="grid grid-cols-2 gap-2">
-              <input
+              <Input
                 type="number"
                 placeholder="Superficie minimum"
                 value={filters.superficieMin}
                 onChange={(e) => handleFilterChange('superficieMin', e.target.value)}
-                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               />
-              <input
+              <Input
                 type="number"
                 placeholder="Superficie maximum"
                 value={filters.superficieMax}
                 onChange={(e) => handleFilterChange('superficieMax', e.target.value)}
-                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               />
             </div>
           </div>

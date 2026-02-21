@@ -45,10 +45,15 @@ const PropertiesPage = () => {
       city: searchParams.get('city') || '',
       bedrooms: searchParams.get('bedrooms') || '',
       bathrooms: searchParams.get('bathrooms') || '',
+      transactionType: searchParams.get('transactionType') || '',
+      minSurface: searchParams.get('minSurface') || '',
+      maxSurface: searchParams.get('maxSurface') || '',
+      sortBy: searchParams.get('sortBy') || 'date-desc',
     };
 
     const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
+    setSortBy(initialFilters.sortBy);
     setFilters(initialFilters);
     fetchProperties(pageParam, initialFilters);
     setRestored(true);
@@ -81,8 +86,9 @@ const PropertiesPage = () => {
 
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
-    // Note: In a real app, you'd send this to the backend
-    // For now, we'll just update the local state
+    const nextFilters = { ...filters, sortBy: newSortBy };
+    setFilters({ sortBy: newSortBy });
+    fetchProperties(1, nextFilters);
   };
 
   const renderPagination = () => {
@@ -187,6 +193,7 @@ const PropertiesPage = () => {
                 onChange={(e) => handleSortChange(e.target.value)}
                 options={sortOptions}
                 className="w-full sm:w-auto"
+                leftIcon={<SortAsc className="w-4 h-4" />}
               />
 
               {/* View Mode */}

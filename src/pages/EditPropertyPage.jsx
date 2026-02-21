@@ -1,11 +1,12 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { UploadCloud, X, Plus, Save, Tag, CalendarClock, Banknote, Percent, Ruler, BedDouble, Bath, Sofa, MapPin, Building2 } from 'lucide-react';
+import { UploadCloud, X, Plus, Save, Tag, CalendarClock, Banknote, Percent, Ruler, BedDouble, Bath, Sofa, MapPin, Building2, Home, Key, Eye, Coins } from 'lucide-react';
 import { useProperty } from '../contexts/PropertyContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
+import { Checkbox } from '../components/ui/checkbox';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const EditPropertyPage = () => {
@@ -255,6 +256,7 @@ const EditPropertyPage = () => {
                   value={formData.titre}
                   onChange={handleChange}
                   error={errors.titre}
+                  leftIcon={<Tag className="w-4 h-4" />}
                 />
               </div>
 
@@ -274,6 +276,7 @@ const EditPropertyPage = () => {
                 value={formData.transactionType}
                 onChange={handleChange}
                 options={transactionOptions}
+                leftIcon={<Key className="w-4 h-4" />}
               />
 
               <Select
@@ -282,6 +285,7 @@ const EditPropertyPage = () => {
                 value={formData.categorie}
                 onChange={handleChange}
                 options={categoryOptions}
+                leftIcon={<Home className="w-4 h-4" />}
               />
 
               <Select
@@ -290,6 +294,7 @@ const EditPropertyPage = () => {
                 value={formData.status}
                 onChange={handleChange}
                 options={statusOptions}
+                leftIcon={<Eye className="w-4 h-4" />}
               />
 
               <Input
@@ -302,7 +307,14 @@ const EditPropertyPage = () => {
                 leftIcon={<Banknote className="w-4 h-4" />}
               />
 
-              <Select label="Devise" name="devise" value={formData.devise} onChange={handleChange} options={deviseOptions} />
+              <Select 
+                label="Devise" 
+                name="devise" 
+                value={formData.devise} 
+                onChange={handleChange} 
+                options={deviseOptions}
+                leftIcon={<Coins className="w-4 h-4" />}
+              />
 
               <Input
                 label="Prix original (optionnel)"
@@ -335,6 +347,7 @@ const EditPropertyPage = () => {
                 value={formData.adresse}
                 onChange={handleChange}
                 error={errors.adresse}
+                leftIcon={<MapPin className="w-4 h-4" />}
               />
             </div>
           </div>
@@ -390,16 +403,19 @@ const EditPropertyPage = () => {
                   { key: 'balcon', label: 'Balcon' },
                   { key: 'gardien', label: 'Gardien' },
                 ].map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      name={key}
+                  <div key={key} className="flex items-center gap-2">
+                    <Checkbox
+                      id={key}
                       checked={Boolean(formData[key])}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-gold-primary focus:ring-gold-primary border-gray-300 rounded"
+                      onCheckedChange={(checked) =>
+                        handleChange({ target: { name: key, type: 'checkbox', checked } })
+                      }
+                      className="border-gray-300 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
                     />
-                    <span className="text-sm text-zinc-700">{label}</span>
-                  </label>
+                    <label htmlFor={key} className="text-sm text-zinc-700 cursor-pointer select-none">
+                      {label}
+                    </label>
+                  </div>
                 ))}
               </div>
             </div>
@@ -408,22 +424,23 @@ const EditPropertyPage = () => {
           <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
             <h2 className="text-lg font-semibold text-zinc-900 mb-4">Bon plan</h2>
 
-            <label className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4">
-              <input
-                type="checkbox"
-                name="isBonPlan"
+            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4">
+              <Checkbox
+                id="isBonPlan"
                 checked={Boolean(formData.isBonPlan)}
-                onChange={handleChange}
-                className="h-4 w-4 text-gold-primary focus:ring-gold-primary border-gray-300 rounded"
+                onCheckedChange={(checked) =>
+                  handleChange({ target: { name: 'isBonPlan', type: 'checkbox', checked } })
+                }
+                className="border-gold-primary data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
               />
-              <div className="flex-1">
+              <label htmlFor="isBonPlan" className="flex-1 cursor-pointer select-none">
                 <div className="text-sm font-medium text-zinc-900 inline-flex items-center gap-2">
                   <Tag className="w-4 h-4 text-gold-primary" />
                   Marquer comme bon plan
                 </div>
                 <div className="text-xs text-zinc-600">Label + expiration</div>
-              </div>
-            </label>
+              </label>
+            </div>
 
             {formData.isBonPlan ? (
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -433,6 +450,7 @@ const EditPropertyPage = () => {
                   value={formData.bonPlanLabel}
                   onChange={handleChange}
                   error={errors.bonPlanLabel}
+                  leftIcon={<Tag className="w-4 h-4" />}
                 />
 
                 <Input

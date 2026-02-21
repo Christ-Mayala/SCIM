@@ -136,7 +136,22 @@ export const AuthProvider = ({ children }) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         const response = await authAPI.login(email, password);
-        const { token, user } = response.data;
+        
+        // Extraction robuste des données
+        let data = response.data;
+        if (data && typeof data === 'object') {
+             // Si la réponse est { success: true, data: { ... } }
+             if (data.data && (data.success || data.token === undefined)) {
+                 data = data.data;
+             }
+        }
+        
+        const { token, user } = data || {};
+
+        if (!token || !user) {
+           console.error('Login failed: Token or User missing', { data });
+           throw new Error('Réponse de connexion invalide');
+        }
 
         persistSession(token, user);
 
@@ -144,8 +159,17 @@ export const AuthProvider = ({ children }) => {
         try {
           const me = await authAPI.getProfile();
           profileUser = me.data;
-          persistSession(token, profileUser);
-        } catch (_) {}
+          // Si me.data est enveloppé
+          if (profileUser && profileUser.data && profileUser.success) {
+              profileUser = profileUser.data;
+          }
+
+          if (profileUser) {
+             persistSession(token, profileUser);
+          }
+        } catch (err) {
+          console.error('Erreur récupération profil après login:', err);
+        }
 
         dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token } });
         toast.success('Connexion réussie');
@@ -172,7 +196,18 @@ export const AuthProvider = ({ children }) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         const response = await authAPI.register(userData);
-        const { token, user } = response.data;
+        
+        // Extraction robuste
+        let data = response.data;
+        if (data && data.data && (data.success || data.token === undefined)) {
+            data = data.data;
+        }
+        
+        const { token, user } = data || {};
+
+        if (!token || !user) {
+             throw new Error("Réponse d'inscription invalide");
+        }
 
         persistSession(token, user);
 
@@ -180,7 +215,12 @@ export const AuthProvider = ({ children }) => {
         try {
           const me = await authAPI.getProfile();
           profileUser = me.data;
-          persistSession(token, profileUser);
+          if (profileUser && profileUser.data && profileUser.success) {
+              profileUser = profileUser.data;
+          }
+          if (profileUser) {
+            persistSession(token, profileUser);
+          }
         } catch (_) {}
 
         dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token } });
@@ -218,7 +258,13 @@ export const AuthProvider = ({ children }) => {
     async (payload) => {
       try {
         const response = await authAPI.updateProfile(payload);
-        const updated = response.data;
+        let updated = response.data;
+        if (updated && updated.data && (updated.success || !updated._id)) {
+            updated = updated.data;
+        }
+        
+        if (!updated) throw new Error("Réponse de mise à jour invalide");
+
         persistSession(state.token, updated);
         dispatch({ type: 'SET_USER', payload: { user: updated, token: state.token } });
         toast.success('Profil mis à jour');

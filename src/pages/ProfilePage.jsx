@@ -147,47 +147,38 @@ const ProfilePage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="relative">
-                <Input
-                  label="Nom complet"
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleChange}
-                  error={errors.nom}
-                  disabled={!isEditing}
-                  className="pl-10"
-                />
-                <User className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-              </div>
+              <Input
+                label="Nom complet"
+                type="text"
+                name="nom"
+                value={formData.nom}
+                onChange={handleChange}
+                error={errors.nom}
+                disabled={!isEditing}
+                leftIcon={<User className="w-5 h-5" />}
+              />
 
-              <div className="relative">
-                <Input
-                  label="Adresse email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
-                  disabled={!isEditing}
-                  className="pl-10"
-                />
-                <Mail className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-              </div>
+              <Input
+                label="Adresse email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                error={errors.email}
+                disabled={!isEditing}
+                leftIcon={<Mail className="w-5 h-5" />}
+              />
 
-              <div className="relative">
-                <Input
-                  label="Numéro de téléphone"
-                  type="tel"
-                  name="telephone"
-                  value={formData.telephone}
-                  onChange={handleChange}
-                  error={errors.telephone}
-                  disabled={!isEditing}
-                  className="pl-10"
-                />
-                <Phone className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-              </div>
+              <Input
+                label="Numéro de téléphone"
+                type="tel"
+                name="telephone"
+                value={formData.telephone}
+                onChange={handleChange}
+                error={errors.telephone}
+                disabled={!isEditing}
+                leftIcon={<Phone className="w-5 h-5" />}
+              />
 
               {isEditing ? (
                 <div className="flex flex-wrap gap-3 pt-2">
@@ -226,8 +217,12 @@ const ProfilePage = () => {
                       type="password"
                       placeholder="Mot de passe actuel"
                       value={pwdData.currentPassword}
-                      onChange={(e) => setPwdData({ ...pwdData, currentPassword: e.target.value })}
+                      onChange={(e) => {
+                        setPwdData({ ...pwdData, currentPassword: e.target.value });
+                        if (pwdErrors.currentPassword) setPwdErrors({ ...pwdErrors, currentPassword: '' });
+                      }}
                       error={pwdErrors.currentPassword}
+                      leftIcon={<Lock className="w-5 h-5" />}
                     />
                   </div>
                   <div>
@@ -235,8 +230,12 @@ const ProfilePage = () => {
                       type="password"
                       placeholder="Nouveau mot de passe"
                       value={pwdData.newPassword}
-                      onChange={(e) => setPwdData({ ...pwdData, newPassword: e.target.value })}
+                      onChange={(e) => {
+                        setPwdData({ ...pwdData, newPassword: e.target.value });
+                        if (pwdErrors.newPassword) setPwdErrors({ ...pwdErrors, newPassword: '' });
+                      }}
                       error={pwdErrors.newPassword}
+                      leftIcon={<Lock className="w-5 h-5" />}
                     />
                   </div>
                   <div>
@@ -244,8 +243,12 @@ const ProfilePage = () => {
                       type="password"
                       placeholder="Confirmer"
                       value={pwdData.confirm}
-                      onChange={(e) => setPwdData({ ...pwdData, confirm: e.target.value })}
+                      onChange={(e) => {
+                        setPwdData({ ...pwdData, confirm: e.target.value });
+                        if (pwdErrors.confirm) setPwdErrors({ ...pwdErrors, confirm: '' });
+                      }}
                       error={pwdErrors.confirm}
+                      leftIcon={<Lock className="w-5 h-5" />}
                     />
                   </div>
                   <div className="sm:col-span-2 md:col-span-3 flex flex-col sm:flex-row justify-end gap-3">
@@ -266,18 +269,18 @@ const ProfilePage = () => {
                 <div className="text-2xl font-semibold text-zinc-900">{stats.favoritesCount ?? 0}</div>
                 <div className="text-sm text-zinc-600">Favoris</div>
               </div>
-              <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
+              {/* <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
                 <div className="text-2xl font-semibold text-zinc-900">{stats.visitedCount ?? 0}</div>
                 <div className="text-sm text-zinc-600">Visites</div>
-              </div>
+              </div> */}
               <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
                 <div className="text-2xl font-semibold text-zinc-900">{stats.ratingsCount ?? 0}</div>
                 <div className="text-sm text-zinc-600">Notes données</div>
               </div>
-              <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
+              {/* <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
                 <div className="text-2xl font-semibold text-zinc-900">{Number(stats.avgGiven || 0).toFixed(1)}</div>
                 <div className="text-sm text-zinc-600">Moyenne</div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

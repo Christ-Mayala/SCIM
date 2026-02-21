@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, User, Key, Building, Shield, CheckCircle, Arro
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail } from '../lib/utils';
 import Alert from '../components/common/Alert';
 
@@ -217,89 +218,63 @@ const LoginPage = () => {
 
                 {/* Email Field */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Adresse email
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="votre@email.com"
-                      className={`w-full pl-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.email ? 'border-red-500' : ''
-                      }`}
-                    />
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  </div>
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                      <span className="mr-1">⚠</span>
-                      {errors.email}
-                    </p>
-                  )}
+                  <Input
+                    label="Adresse email"
+                    labelClassName="text-gray-300"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="votre@email.com"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    leftIcon={<Mail className="w-5 h-5" />}
+                    error={errors.email}
+                    errorClassName="text-red-400"
+                  />
                 </div>
 
                 {/* Password Field */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                    <Lock className="w-4 h-4 mr-2" />
-                    Mot de passe
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className={`w-full pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.password ? 'border-red-500' : ''
-                      }`}
-                    />
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                      <span className="mr-1">⚠</span>
-                      {errors.password}
-                    </p>
-                  )}
+                  <Input
+                    label="Mot de passe"
+                    labelClassName="text-gray-300"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    leftIcon={<Lock className="w-5 h-5" />}
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    }
+                    error={errors.password}
+                    errorClassName="text-red-400"
+                  />
                 </div>
 
                 {/* Remember & Forgot */}
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center cursor-pointer">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        rememberMe 
-                          ? 'bg-gold-primary border-gold-primary' 
-                          : 'border-gray-400'
-                      }`}>
-                        {rememberMe && <CheckCircle className="w-3 h-3 text-white" />}
-                      </div>
-                    </div>
-                    <span className="ml-2 text-sm text-gray-300">Se souvenir de moi</span>
-                  </label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked)}
+                      className="border-gray-400 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
+                    />
+                    <label
+                      htmlFor="rememberMe"
+                      className="text-sm text-gray-300 cursor-pointer select-none"
+                    >
+                      Se souvenir de moi
+                    </label>
+                  </div>
 
                   <Link
                     to="/forgot-password"

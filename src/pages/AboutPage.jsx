@@ -197,64 +197,120 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Story Section avec timeline */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <div className="inline-flex items-center space-x-2 mb-6">
-                  <div className="w-12 h-px bg-gold-primary"></div>
-                  <span className="text-gold-primary font-semibold uppercase tracking-wider text-sm">Notre Histoire</span>
-                </div>
-                
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight">
-                  Plus de 5 ans d'innovation <br />
-                  <span className="text-gold-primary">et d'excellence</span>
-                </h2>
-                
-                <div className="space-y-6">
-                  <p className="text-gray-700 text-lg leading-relaxed">
-                    SCIM Immobilier a été fondée avec une vision claire : 
-                    révolutionner l'expérience immobilière en plaçant 
-                    <span className="font-semibold text-gray-900"> l'humain au cœur de chaque transaction</span>.
-                  </p>
-                  
-                  <p className="text-gray-700 text-lg leading-relaxed">
-                    Notre parcours est marqué par une croissance organique, 
-                    bâtie sur la confiance de nos clients et l'expertise de notre équipe.
-                  </p>
-                  
-                  <ul className="space-y-3">
-                    {['Expertise certifiée', 'Transparence totale', 'Accompagnement personnalisé', 'Solutions innovantes'].map((item, idx) => (
-                      <li key={idx} className="flex items-start">
-                        <CheckCircle className="w-6 h-6 text-gold-primary mr-3 flex-shrink-0 mt-1" />
-                        <span className="text-gray-700">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+        {/* Story Section avec timeline améliorée */}
+        <section className="py-24 bg-white overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-gold-primary/5 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-gray-100 rounded-full blur-3xl opacity-60"></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
               
-              <div className="relative">
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-                    alt="Équipe SCIM Immobilier"
-                    className="w-full h-96 object-cover"
+              {/* Image Composition (Left) */}
+              <div className="relative order-2 lg:order-1">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white z-10 aspect-[4/5] group">
+                  <img 
+                    src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                    alt="Bureau SCIM" 
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="p-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Notre Parcours en Chiffres</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {milestones.map((milestone, idx) => (
-                        <div key={idx} className="text-center">
-                          <div className="text-2xl font-bold text-gold-primary mb-1">{milestone.year}</div>
-                          <div className="text-sm font-medium text-gray-900">{milestone.title}</div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 w-full p-8 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                    <p className="text-gold-primary font-bold tracking-widest uppercase text-xs mb-2">Depuis 2018</p>
+                    <h3 className="text-3xl font-bold mb-2">L'excellence immobilière</h3>
+                    <p className="text-gray-300 text-sm max-w-sm">Une expertise reconnue et une passion inébranlable pour chaque projet.</p>
                   </div>
                 </div>
+                
+                {/* Floating Badge/Card */}
+                <div className="absolute -bottom-12 -right-12 w-64 bg-white p-6 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 z-20 hidden md:block animate-bounce-slow">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 bg-gold-primary/10 rounded-full text-gold-primary">
+                      <TrendingUp className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Croissance</p>
+                      <p className="text-xs text-green-500 font-bold">+125% cette année</p>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-gold-primary w-3/4 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Decorative dots */}
+                <div className="absolute -top-12 -left-12 opacity-30 z-0">
+                    <svg width="100" height="100" fill="none" viewBox="0 0 100 100">
+                        <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <circle cx="2" cy="2" r="2" className="text-gold-primary" fill="currentColor" />
+                        </pattern>
+                        <rect width="100" height="100" fill="url(#dots)" />
+                    </svg>
+                </div>
               </div>
+
+              {/* Content (Right) */}
+              <div className="space-y-8 order-1 lg:order-2">
+                <div>
+                    <div className="inline-flex items-center space-x-2 mb-6 px-4 py-1.5 bg-gold-primary/10 rounded-full border border-gold-primary/20">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-primary"></span>
+                      </span>
+                      <span className="text-gold-primary font-bold uppercase tracking-wider text-xs">Notre Histoire</span>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                        Une vision <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-gold-dark">
+                            audacieuse
+                        </span>
+                    </h2>
+                    
+                    <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-gold-primary pl-6 italic">
+                        "Nous ne vendons pas seulement des biens immobiliers, nous créons des lieux de vie et d'avenir pour nos clients."
+                    </p>
+                </div>
+
+                <div className="space-y-6">
+                    <p className="text-gray-600 leading-relaxed">
+                        Fondée sur la conviction que l'immobilier est avant tout une aventure humaine, SCIM a su s'imposer comme un acteur incontournable. Notre approche combine <span className="font-bold text-gray-900">expertise technique</span> et <span className="font-bold text-gray-900">écoute active</span>.
+                    </p>
+                </div>
+
+                {/* Milestones / Timeline Stylisée */}
+                <div className="space-y-0 relative">
+                    {milestones.map((item, idx) => (
+                        <div key={idx} className="flex gap-6 group relative pb-8 last:pb-0">
+                             {idx !== milestones.length - 1 && (
+                                <div className="absolute left-[19px] top-8 bottom-0 w-0.5 bg-gray-100 group-hover:bg-gold-primary/30 transition-colors"></div>
+                            )}
+                            <div className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full bg-white border-2 border-gray-200 group-hover:border-gold-primary group-hover:scale-110 transition-all flex items-center justify-center shadow-sm">
+                                <div className="w-3 h-3 rounded-full bg-gray-300 group-hover:bg-gold-primary transition-colors"></div>
+                            </div>
+                            <div className="pt-1">
+                                <div className="flex items-center gap-3 mb-1">
+                                    <span className="text-2xl font-bold text-gray-300 group-hover:text-gold-primary transition-colors">{item.year}</span>
+                                    <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
+                                </div>
+                                <p className="text-gray-500 text-sm">{item.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="pt-6 flex gap-4">
+                    <Link to="/contact">
+                        <Button className="bg-gray-900 hover:bg-black text-white px-8 py-6 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all group">
+                            Commencer votre projet
+                            <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </Link>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>

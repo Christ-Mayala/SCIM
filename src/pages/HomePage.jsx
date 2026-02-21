@@ -4,6 +4,7 @@ import { Search, TrendingUp, Shield, Award, ArrowRight, Star, MapPin, Home, Buil
 import { useProperty } from '../contexts/PropertyContext';
 import PropertyCard from '../components/properties/PropertyCard';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { formatPrice } from '../lib/utils';
 import SEOHead from '../components/seo/SEOHead';
@@ -170,19 +171,20 @@ const HomePage = () => {
             <form onSubmit={handleSearch} className="max-w-3xl mx-auto mb-12">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-gold-primary/20 to-gold-dark/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                <div className="relative">
-                  <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6 z-10" />
-                  <input
+                <div className="relative flex items-center gap-3">
+                  <Input
                     type="text"
                     placeholder="Recherchez un bien, un quartier, une opportunité..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-14 pr-32 py-5 text-lg rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all duration-300"
+                    className="flex-1 pl-14 py-5 text-lg rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all duration-300"
+                    leftIcon={<Search className="text-gray-400 w-6 h-6" />}
                   />
                   <Button
                     type="submit"
+                    aria-label="Explorer"
                     size="lg"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gold-primary to-gold-dark hover:from-gold-dark hover:to-gold-primary"
+                    className="px-6 py-5 rounded-2xl bg-gradient-to-r from-gold-primary to-gold-dark hover:from-gold-dark hover:to-gold-primary"
                   >
                     <span className="flex items-center">
                       Explorer

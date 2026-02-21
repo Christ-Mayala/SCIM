@@ -2,10 +2,10 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-function Input({ className, type, error, label, leftIcon, rightIcon, ...props }) {
+function Input({ className, type, error, errorClassName, label, labelClassName, leftIcon, rightIcon, ...props }) {
   return (
-    <div className={cn("w-full", className && "")}> 
-      {label ? <div className="mb-2 text-sm font-medium text-gray-700">{label}</div> : null}
+    <div className="w-full">
+      {label ? <div className={cn("mb-2 text-sm font-medium text-gray-700", labelClassName)}>{label}</div> : null}
       <div className={cn("relative")}>
         {leftIcon ? <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{leftIcon}</div> : null}
         <input
@@ -18,12 +18,13 @@ function Input({ className, type, error, label, leftIcon, rightIcon, ...props })
             rightIcon ? "pr-10" : "",
             "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+            className
           )}
           {...props}
         />
         {rightIcon ? <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">{rightIcon}</div> : null}
       </div>
-      {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
+      {error ? <div className={cn("mt-1 text-xs text-red-600", errorClassName)}>{error}</div> : null}
     </div>
   );
 }

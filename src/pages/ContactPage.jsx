@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, MessageCircle, User, FileText, Calendar, CheckCircle, Shield, Building } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { validateEmail } from '../lib/utils';
 import SEO from '../components/layout/SEO';
@@ -138,6 +139,8 @@ const ContactPage = () => {
     "Autre"
   ];
 
+  const subjectOptions = subjects.map(s => ({ value: s, label: s }));
+
   return (
     <>
       <SEO title={seoConfig.contact.title} description={seoConfig.contact.description} />
@@ -219,26 +222,21 @@ const ContactPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <User className="w-4 h-4 mr-2" />
-                        Nom complet *
-                      </label>
                       <Input
+                        label="Nom complet *"
                         name="nom"
                         value={formData.nom}
                         onChange={handleChange}
                         error={errors.nom}
                         placeholder="Votre nom et prénom"
                         className="w-full"
+                        leftIcon={<User className="w-5 h-5" />}
                       />
                     </div>
 
                     <div>
-                      <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <Mail className="w-4 h-4 mr-2" />
-                        Email *
-                      </label>
                       <Input
+                        label="Email *"
                         type="email"
                         name="email"
                         value={formData.email}
@@ -246,56 +244,47 @@ const ContactPage = () => {
                         error={errors.email}
                         placeholder="votre@email.com"
                         className="w-full"
+                        leftIcon={<Mail className="w-5 h-5" />}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <Phone className="w-4 h-4 mr-2" />
-                        Téléphone
-                      </label>
                       <Input
+                        label="Téléphone"
                         type="tel"
                         name="telephone"
                         value={formData.telephone}
                         onChange={handleChange}
                         placeholder="+242 06 123 45 67"
                         className="w-full"
+                        leftIcon={<Phone className="w-5 h-5" />}
                       />
                     </div>
 
                     <div>
-                      <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Sujet *
-                      </label>
-                      <select
+                      <Select
+                        label="Sujet *"
                         name="sujet"
                         value={formData.sujet}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          errors.sujet ? 'border-red-500' : 'border-gray-300'
-                        } bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all`}
-                      >
-                        <option value="">Sélectionnez un sujet</option>
-                        {subjects.map((subject, index) => (
-                          <option key={index} value={subject}>{subject}</option>
-                        ))}
-                      </select>
-                      {errors.sujet && (
-                        <p className="mt-1 text-sm text-red-600">{errors.sujet}</p>
-                      )}
+                        options={subjectOptions}
+                        error={errors.sujet}
+                        placeholder="Sélectionnez un sujet"
+                        leftIcon={<FileText className="w-5 h-5" />}
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Message *
-                    </label>
                     <Textarea
+                      label={
+                        <span className="flex items-center">
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Message *
+                        </span>
+                      }
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
@@ -403,29 +392,25 @@ const ContactPage = () => {
                   <h3 className="text-xl font-bold text-gray-900">Notre agence à Brazzaville</h3>
                 </div>
                 
-                <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/40 to-gray-900/20"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white p-6">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4">
-                        <MapPin className="w-8 h-8" />
-                      </div>
-                      <p className="font-bold text-lg mb-1">SCIM Immobilier</p>
-                      <p className="text-sm opacity-90">123 Avenue des Ball</p>
-                      <p className="text-sm opacity-90">Bacongo, Brazzaville</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-xl">
-                    <div className="text-sm text-gray-600 mb-1">Parking</div>
-                    <div className="font-bold text-gray-900">Gratuit</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-xl">
-                    <div className="text-sm text-gray-600 mb-1">Accès</div>
-                    <div className="font-bold text-gray-900">Handicapé</div>
-                  </div>
+                <div className="relative aspect-video rounded-xl overflow-hidden ring-1 ring-gray-200">
+                  <iframe
+                    title="SCIM Immobilier — Brazzaville"
+                    src="https://www.google.com/maps?q=SCIM+Immobilier,+Bacongo,+Brazzaville&output=embed"
+                    className="absolute inset-0 w-full h-full"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
+                  <a
+                    href="https://maps.app.goo.gl/9LoE7pMV6gA9vee87"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-3 left-3 z-10 inline-flex items-center gap-2 bg-black/50 text-white rounded-xl px-3 py-2 backdrop-blur-sm hover:bg-black/60"
+                    aria-label="Voir l’emplacement sur Google Maps"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm font-medium">Voir sur Google Maps</span>
+                  </a>
                 </div>
               </div>
             </div>

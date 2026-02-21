@@ -2,10 +2,16 @@ import axios from 'axios';
 
 const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const API_BASE_URL = (() => {
-  const u = String(rawBaseUrl || '').trim();
-  if (!u) return 'http://localhost:5000/api/v1/scim';
-  if (/\/api\/v\d+\/scim\/?$/.test(u)) return u.replace(/\/$/, '');
-  return `${u.replace(/\/$/, '')}/api/v1/scim`;
+  let u = String(rawBaseUrl || '').trim().replace(/\/$/, '');
+  
+  // Si l'URL se termine déjà par le path complet (ex: /api/v1/scim), on la garde telle quelle
+  if (/\/api\/v\d+\/scim$/.test(u)) return u;
+  
+  // Si l'URL se termine par /api, on ajoute juste /v1/scim
+  if (u.endsWith('/api')) return `${u}/v1/scim`;
+  
+  // Sinon on ajoute le path complet /api/v1/scim
+  return `${u}/api/v1/scim`;
 })();
 
 const api = axios.create({
@@ -21,6 +27,7 @@ api.interceptors.request.use(
     try {
       const token = localStorage.getItem('token');
       if (token) {
+        config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
       }
 
@@ -45,7 +52,10 @@ api.interceptors.request.use(
 );
 
 const isAuthEndpoint = (url = '') =>
-  url.includes('/users/refresh-token') || url.includes('/users/login') || url.includes('/users/register');
+  url.includes('/users/refresh-token') || url.includes('/user/login') || url.includes('/user/register');
+
+const isPasswordResetEndpoint = (url = '') =>
+  url.includes('/password-reset/request') || url.includes('/password-reset/verify') || url.includes('/password-reset/reset');
 
 const makeApiError = ({ payload, response, originalRequest }) => {
   const err = new Error(payload?.message || 'Request failed');

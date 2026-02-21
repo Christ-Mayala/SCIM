@@ -71,7 +71,10 @@ export const MessageProvider = ({ children }) => {
   const [conversations, setConversations] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [conversationLoading, setConversationLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isContactSending, setIsContactSending] = useState(false);
   const [inboxPage, setInboxPage] = useState(1);
   const [inboxTotalPages, setInboxTotalPages] = useState(1);
   const [convPage, setConvPage] = useState(1);
@@ -82,6 +85,7 @@ export const MessageProvider = ({ children }) => {
   const typingStopTimeoutRef = useRef(null);
   const typingStartTimeoutRef = useRef(null);
   const typingActiveRef = useRef(false);
+  const conversationRequestIdRef = useRef(0);
 
   const currentConversationRef = useRef(null);
   const userIdRef = useRef(null);
@@ -98,7 +102,7 @@ export const MessageProvider = ({ children }) => {
     async (page = 1, { silent = false } = {}) => {
       if (!userId) return;
       try {
-        if (!silent) setLoading(true);
+        if (!silent) setInboxLoading(true);
         const response = await api.get('/message/inbox', { params: { page, limit: 10 } });
         const threads = response.data?.threads || [];
         const normalized = threads
@@ -128,7 +132,7 @@ export const MessageProvider = ({ children }) => {
       } catch (_) {
         toast.error('Erreur lors du chargement de la boîte de réception');
       } finally {
-        if (!silent) setLoading(false);
+        if (!silent) setInboxLoading(false);
       }
     },
     [userId],
@@ -162,21 +166,33 @@ export const MessageProvider = ({ children }) => {
   const fetchMessagesWithUser = useCallback(
     async (otherUserId, page = 1, { silent = false } = {}) => {
       if (!userId || !otherUserId) return;
+      const conversationId = String(otherUserId);
+      const requestId = ++conversationRequestIdRef.current;
+
+      if (page === 1) {
+        setCurrentConversation(conversationId);
+        setTypingFromOther(false);
+      }
+
       try {
-        if (!silent) setLoading(true);
-        const response = await api.get(`/message/${otherUserId}`, { params: { page, limit: 20 } });
+        if (!silent) setConversationLoading(true);
+        const response = await api.get(`/message/${conversationId}`, { params: { page, limit: 20 } });
+        if (requestId !== conversationRequestIdRef.current) return;
         const list = response.data?.messages || response.data || [];
 
         setMessages((prev) => (page === 1 ? list : [...list, ...(prev || [])]));
-        setCurrentConversation(otherUserId);
         setConvPage(response.data?.page || page);
         setConvTotalPages(response.data?.totalPages || 1);
 
-        await markThreadAsRead(otherUserId);
+        await markThreadAsRead(conversationId);
       } catch (_) {
-        toast.error('Erreur lors du chargement des messages');
+        if (requestId === conversationRequestIdRef.current) {
+          toast.error('Erreur lors du chargement des messages');
+        }
       } finally {
-        if (!silent) setLoading(false);
+        if (!silent && requestId === conversationRequestIdRef.current) {
+          setConversationLoading(false);
+        }
       }
     },
     [markThreadAsRead, userId],
@@ -186,9 +202,10 @@ export const MessageProvider = ({ children }) => {
     async (receiverId, content) => {
       if (!userId) return { success: false };
       const trimmed = String(content || '').trim();
-      if (!receiverId || !trimmed) return { success: false };
+      if (!receiverId || !trimmed || isSending) return { success: false };
 
       try {
+        setIsSending(true);
         const response = await api.post(`/message/${receiverId}`, { contenu: trimmed });
         const sent = response.data;
 
@@ -209,26 +226,31 @@ export const MessageProvider = ({ children }) => {
       } catch (error) {
         toast.error(error.response?.data?.message || "Erreur lors de l'envoi du message");
         return { success: false, error: error.response?.data?.message || 'Erreur inconnue' };
+      } finally {
+        setIsSending(false);
       }
     },
-    [fetchInbox, userId],
+    [fetchInbox, isSending, userId],
   );
 
   const contactScim = useCallback(
     async (subject, content) => {
-      if (!userId) return { success: false };
+      if (!userId || isContactSending) return { success: false };
       try {
+        setIsContactSending(true);
         await api.post('/message/scim', { sujet: subject, contenu: content });
-        toast.success("Message envoyé à l'administration");
+        toast.success("Message envoye a l'administration");
         fetchInbox(1, { silent: true });
         fetchUnreadCount();
         return { success: true };
       } catch (error) {
-        toast.error(error.response?.data?.message || "Erreur lors de l'envoi du message à l'administration");
+        toast.error(error.response?.data?.message || "Erreur lors de l'envoi du message a l'administration");
         return { success: false, error: error.response?.data?.message || 'Erreur inconnue' };
+      } finally {
+        setIsContactSending(false);
       }
     },
-    [fetchInbox, fetchUnreadCount, userId],
+    [fetchInbox, fetchUnreadCount, isContactSending, userId],
   );
 
   const markMessageAsRead = useCallback(
@@ -267,7 +289,9 @@ export const MessageProvider = ({ children }) => {
         setMessages([]);
         setConversations((prev) => (prev || []).filter((conv) => (conv?.otherUser?._id || conv?.otherUser?.id) !== otherUserId));
         if (currentConversationRef.current === otherUserId) {
+          conversationRequestIdRef.current += 1;
           setCurrentConversation(null);
+          setConversationLoading(false);
           setTypingFromOther(false);
         }
         fetchUnreadCount();
@@ -280,8 +304,10 @@ export const MessageProvider = ({ children }) => {
   );
 
   const clearCurrentConversation = useCallback(() => {
+    conversationRequestIdRef.current += 1;
     setCurrentConversation(null);
     setMessages([]);
+    setConversationLoading(false);
     setTypingFromOther(false);
     if (typingStopTimeoutRef.current) clearTimeout(typingStopTimeoutRef.current);
     if (typingStartTimeoutRef.current) clearTimeout(typingStartTimeoutRef.current);
@@ -339,10 +365,15 @@ export const MessageProvider = ({ children }) => {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      conversationRequestIdRef.current += 1;
       setConversations([]);
       setMessages([]);
       setCurrentConversation(null);
       setUnreadCount(0);
+      setInboxLoading(false);
+      setConversationLoading(false);
+      setIsSending(false);
+      setIsContactSending(false);
       setTypingFromOther(false);
       return;
     }
@@ -465,7 +496,11 @@ export const MessageProvider = ({ children }) => {
       conversations,
       currentConversation,
       unreadCount,
-      loading,
+      loading: inboxLoading || conversationLoading,
+      inboxLoading,
+      conversationLoading,
+      isSending,
+      isContactSending,
       fetchInbox,
       fetchMessagesWithUser,
       inboxPage,
@@ -497,7 +532,10 @@ export const MessageProvider = ({ children }) => {
       fetchUnreadCount,
       inboxPage,
       inboxTotalPages,
-      loading,
+      inboxLoading,
+      conversationLoading,
+      isSending,
+      isContactSending,
       markMessageAsRead,
       markThreadAsRead,
       messages,

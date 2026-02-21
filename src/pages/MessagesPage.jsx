@@ -28,7 +28,10 @@ const MessagesPage = () => {
     conversations,
     currentConversation,
     unreadCount,
-    loading,
+    inboxLoading,
+    conversationLoading,
+    isSending,
+    isContactSending,
     fetchInbox,
     inboxPage,
     inboxTotalPages,
@@ -79,7 +82,7 @@ const MessagesPage = () => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !currentConversation) return;
+    if (!newMessage.trim() || !currentConversation || isSending) return;
     const result = await sendMessage(currentConversation, newMessage);
     if (result.success) {
       setNewMessage('');
@@ -89,7 +92,7 @@ const MessagesPage = () => {
 
   const handleContactScim = async (e) => {
     e.preventDefault();
-    if (!newMessageForm.subject.trim() || !newMessageForm.content.trim()) return;
+    if (!newMessageForm.subject.trim() || !newMessageForm.content.trim() || isContactSending) return;
     const result = await contactScim(newMessageForm.subject, newMessageForm.content);
     if (result.success) {
       setNewMessageForm({ subject: '', content: '' });
@@ -130,17 +133,16 @@ const MessagesPage = () => {
           </Button>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             placeholder="Rechercher une conversation..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            leftIcon={<Search className="w-4 h-4" />}
           />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {loading ? (
+        {inboxLoading ? (
           <div className="flex justify-center py-8">
             <LoadingSpinner />
           </div>
@@ -268,7 +270,7 @@ const MessagesPage = () => {
                 </Button>
               </div>
             )}
-            {loading ? (
+            {conversationLoading ? (
               <div className="flex justify-center py-8">
                 <LoadingSpinner />
               </div>
@@ -336,7 +338,8 @@ const MessagesPage = () => {
                   placeholder="Tapez votre message..."
                   rows={1}
                   className="resize-none"
-                  onKeyPress={(e) => {
+                  disabled={isSending}
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       handleSendMessage(e);
@@ -344,9 +347,9 @@ const MessagesPage = () => {
                   }}
                 />
               </div>
-              <Button type="submit" disabled={!newMessage.trim()} className="flex items-center space-x-1 shrink-0">
+              <Button type="submit" disabled={!newMessage.trim() || isSending} className="flex items-center space-x-1 shrink-0">
                 <Send className="w-4 h-4" />
-                <span className="hidden sm:inline">Envoyer</span>
+                <span className="hidden sm:inline">{isSending ? 'Envoi...' : 'Envoyer'}</span>
               </Button>
             </form>
           </div>
@@ -424,8 +427,10 @@ const MessagesPage = () => {
             required
           />
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button type="submit" className="w-full sm:flex-1">Envoyer</Button>
-            <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setShowNewMessageModal(false)}>
+            <Button type="submit" disabled={isContactSending} className="w-full sm:flex-1">
+              {isContactSending ? 'Envoi...' : 'Envoyer'}
+            </Button>
+            <Button type="button" variant="outline" disabled={isContactSending} className="w-full sm:w-auto" onClick={() => setShowNewMessageModal(false)}>
               Annuler
             </Button>
           </div>

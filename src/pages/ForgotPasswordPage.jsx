@@ -2,34 +2,37 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { validateEmail } from '../lib/utils';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1/scim';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!email) {
-      toast.error('Veuillez saisir votre adresse email');
+      setErrors({ email: "L'email est requis" });
       return;
     }
 
+    if (!validateEmail(email)) {
+      setErrors({ email: "Format d'email invalide" });
+      return;
+    }
+
+    setErrors({});
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/users/reset-request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const { authAPI } = await import('../lib/api');
+      const response = await authAPI.requestPasswordReset(email);
 
-      const data = await response.json().catch(() => ({}));
+      const data = response.data || {};
 
       if (data?.success !== true) {
         toast.error(data?.message || "Erreur lors de l'envoi de l'email");
@@ -108,27 +111,29 @@ const ForgotPasswordPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Adresse email
-              </label>
-              <input
+              <Input
+                label="Adresse email"
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-colors"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors({ ...errors, email: '' });
+                }}
                 placeholder="votre@email.com"
                 required
+                leftIcon={<Mail className="w-5 h-5" />}
+                error={errors.email}
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full bg-gold-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation'}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">

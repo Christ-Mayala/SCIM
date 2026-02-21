@@ -1,28 +1,36 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { KeyRound, ArrowLeft } from 'lucide-react';
+import { KeyRound, ArrowLeft, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Input } from '../components/ui/Input';
 
 export default function VerifyCodePage() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1/scim';
-
   const handleVerify = async (e) => {
     e.preventDefault();
+    
+    const newErrors = {};
+    if (!email) newErrors.email = 'Email requis';
+    if (!code) newErrors.code = 'Code requis';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
 
     try {
-      const res = await fetch(`${API_BASE}/users/reset-verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
+      const { authAPI } = await import('../lib/api');
+      const res = await authAPI.verifyResetCode(email, code);
 
-      const data = await res.json().catch(() => ({}));
+      const data = res.data || {};
       if (data?.success !== true) {
         toast.error(data?.message || 'Code invalide');
         return;
@@ -51,41 +59,53 @@ export default function VerifyCodePage() {
 
           <form onSubmit={handleVerify} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
+              <Input
+                label="Email"
                 type="email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-colors"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors(prev => ({...prev, email: ''}));
+                }}
                 placeholder="votre@email.com"
                 required
+                leftIcon={<Mail className="w-5 h-5" />}
+                error={errors.email}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Code</label>
-              <input
+              <Input
+                label="Code"
                 type="text"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-colors"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  if (errors.code) setErrors(prev => ({...prev, code: ''}));
+                }}
                 placeholder="123456"
                 required
+                leftIcon={<KeyRound className="w-5 h-5" />}
+                error={errors.code}
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               className="w-full bg-gold-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-gold-dark transition-colors disabled:opacity-50"
               disabled={loading}
             >
               {loading ? 'Vérification...' : 'Valider'}
-            </button>
+            </Button>
 
-            <Link to="/login" className="w-full text-gold-primary py-3 px-4 rounded-lg font-medium hover:bg-gold-light/30 transition-colors flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/login')}
+              className="w-full text-gold-primary py-3 px-4 rounded-lg font-medium hover:bg-gold-light/30 transition-colors flex items-center justify-center gap-2"
+            >
               <ArrowLeft className="w-4 h-4" />
               Retour
-            </Link>
+            </Button>
           </form>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, 
   ArrowLeft, Share2, Calendar, Eye, Car, Waves, TreePine,
-  Home, Shield, Award, ChevronLeft, ChevronRight
+  Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,18 +35,43 @@ const PropertyDetailPage = () => {
   
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showContactModal, setShowContactModal] = useState(false);
-  const [contactName, setContactName] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [contactMessage, setContactMessage] = useState('');
-  const [userRating, setUserRating] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
+  
+  // Contact Form State
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+
+  const [userRating, setUserRating] = useState(0);
 
   const [reservationDate, setReservationDate] = useState('');
   const [reservationLoading, setReservationLoading] = useState(false);
 
   const images = property?.images || [];
   const owner = property?.utilisateur || property?.proprietaire || null;
+
+  useEffect(() => {
+    if (user) {
+      setContactForm(prev => ({
+        ...prev,
+        name: user.nom || '',
+        email: user.email || '',
+        phone: user.telephone || ''
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (property) {
+      setContactForm(prev => ({
+        ...prev,
+        message: `Bonjour, je suis intéressé(e) par la propriété "${property.titre}" à ${property.ville}.`
+      }));
+    }
+  }, [property]);
 
   const minDateTimeLocal = useMemo(() => {
     const d = new Date();
@@ -126,15 +151,6 @@ const PropertyDetailPage = () => {
 
   const isFavorite = favorites.includes(id);
 
-  useEffect(() => {
-    if (showContactModal) {
-      setContactName(user?.nom || '');
-      setContactEmail(user?.email || '');
-      setContactPhone(user?.telephone || '');
-      setContactMessage(`Bonjour, je suis intéressé(e) par la propriété "${property?.titre || ''}" à ${property?.ville || ''}.`);
-    }
-  }, [showContactModal, user, property]);
-
   const handleFavoriteClick = () => {
     if (isAuthenticated) {
       toggleFavorite(id);
@@ -142,6 +158,34 @@ const PropertyDetailPage = () => {
       navigate('/login');
     }
   };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const subject = `Demande d'information • ${property?.titre || ''}`;
+      const lines = [
+        `Nom: ${contactForm.name}`,
+        `Email: ${contactForm.email}`,
+        `Téléphone: ${contactForm.phone}`,
+        `Propriété: ${property?.titre || ''} (#${property?._id || ''})`,
+        `Ville: ${property?.ville || ''}`,
+        '',
+        'Message:',
+        contactForm.message
+      ];
+      const content = lines.join('\n');
+      const result = await contactScim(subject, content);
+      if (result?.success) {
+        toast.success("Votre demande a été envoyée à l'administration");
+        setShowContactModal(false);
+      } else {
+        toast.error("Échec de l'envoi de la demande");
+      }
+    } catch (err) {
+      toast.error("Échec de l'envoi de la demande");
+    }
+  };
+
 
   const handleRating = async (rating) => {
     if (isAuthenticated) {
@@ -267,31 +311,85 @@ const PropertyDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Header Section */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                 <span className="px-3 py-1 bg-gold-primary/10 text-gold-primary text-sm font-semibold rounded-full uppercase tracking-wider">
+                    {property.categorie}
+                 </span>
+                 <span className={cn(
+                   "px-3 py-1 text-sm font-semibold rounded-full uppercase tracking-wider",
+                   property.transactionType === 'vente' ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
+                 )}>
+                    {property.transactionType === 'vente' ? 'Vente' : 'Location'}
+                 </span>
+                 {property.isBonPlan && (
+                    <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full uppercase tracking-wider animate-pulse">
+                      Bon Plan
+                    </span>
+                 )}
+              </div>
+              
+              <div className="flex justify-between items-start gap-4">
+                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                   {property.titre}
+                 </h1>
+                 <div className="text-right shrink-0">
+                    <div className="text-3xl md:text-4xl font-bold text-gold-primary">
+                      {formatPrice(property.prix)}
+                    </div>
+                    {property.prixOriginal && property.prixOriginal > property.prix && (
+                      <div className="text-sm text-gray-500 line-through mt-1">
+                        {formatPrice(property.prixOriginal)}
+                      </div>
+                    )}
+                 </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-gray-600 text-lg">
+                <MapPin className="w-5 h-5 text-gold-primary" />
+                <span>{property.adresse}, {property.ville}</span>
+              </div>
+            </div>
+
             {/* Image Gallery */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-100">
               {images.length > 0 ? (
                 <>
                   <div 
-                    className="aspect-[16/10] bg-gray-200 cursor-pointer"
+                    className="relative aspect-[16/10] bg-gray-100 cursor-zoom-in group"
                     onClick={() => setShowImageModal(true)}
                   >
                     <img
                       src={getImageUrl(images[selectedImageIndex]?.url)}
                       alt={property.titre}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                       <span className="bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
+                         Voir les photos
+                       </span>
+                    </div>
+                    <button 
+                      className="absolute bottom-4 right-4 bg-white/90 text-gray-900 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-lg backdrop-blur-md"
+                      onClick={(e) => { e.stopPropagation(); setShowImageModal(true); }}
+                    >
+                      {selectedImageIndex + 1} / {images.length}
+                    </button>
                   </div>
                   
                   {images.length > 1 && (
-                    <div className="p-4">
-                      <div className="flex space-x-2 overflow-x-auto">
+                    <div className="p-4 bg-white border-t border-gray-100">
+                      <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
                         {images.map((image, index) => (
                           <button
                             key={index}
                             onClick={() => setSelectedImageIndex(index)}
                             className={cn(
-                              'flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors',
-                              selectedImageIndex === index ? 'border-gold-primary' : 'border-gray-200'
+                              'relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden transition-all duration-200',
+                              selectedImageIndex === index 
+                                ? 'ring-2 ring-gold-primary ring-offset-2 opacity-100 scale-105' 
+                                : 'opacity-70 hover:opacity-100 hover:scale-105'
                             )}
                           >
                             <img
@@ -306,168 +404,67 @@ const PropertyDetailPage = () => {
                   )}
                 </>
               ) : (
-                <div className="aspect-[16/10] bg-gray-200 flex items-center justify-center">
+                <div className="aspect-[16/10] bg-gray-100 flex items-center justify-center">
                   <div className="text-gray-400 text-center">
-                    <Home className="w-16 h-16 mx-auto mb-4" />
-                    <p>Aucune image disponible</p>
+                    <Home className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">Aucune image disponible</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Property Info */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="text-sm bg-gold-light/50 text-zinc-900 px-3 py-1 rounded-full inline-flex items-center gap-2">
-                      {(() => {
-                        const Icon = getPropertyTypeIcon(property.categorie);
-                        return <Icon className="w-4 h-4 text-zinc-900" />;
-                      })()}
-                      <span>{property.categorie}</span>
-                    </span>
-
-                    <span className="text-sm bg-zinc-900 text-white px-3 py-1 rounded-full inline-flex items-center gap-2">
-                      <span className="opacity-90">{property.transactionType === 'vente' ? 'Vente' : 'Location'}</span>
-                    </span>
-
-                    {property.isBonPlan ? (
-                      <span className="text-sm bg-emerald-500/15 text-emerald-800 px-3 py-1 rounded-full inline-flex items-center gap-2 ring-1 ring-emerald-500/25">
-                        <span className="font-medium">Bon plan</span>
-                        {property.bonPlanLabel ? <span className="opacity-80">• {property.bonPlanLabel}</span> : null}
-                      </span>
-                    ) : null}
-                  </div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.titre}</h1>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <MapPin className="w-5 h-5" />
-                    <span>{property.adresse}, {property.ville}</span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end gap-1">
-                  <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-gold-primary leading-none">
-                    {formatPrice(property.prix)}
-                  </div>
-                  {property.prixOriginal && property.prixOriginal > property.prix ? (
-                    <div className="text-sm text-zinc-500 line-through">
-                      {formatPrice(property.prixOriginal)}
-                    </div>
-                  ) : null}
-                  {property.isBonPlan && property.prixOriginal && property.prixOriginal > property.prix ? (
-                    <div className="text-xs text-emerald-700">
-                      -{Math.round(((property.prixOriginal - property.prix) / property.prixOriginal) * 100)}%
-                    </div>
-                  ) : null}
-                  <StarRating value={property.noteMoyenne || 0} />
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-2 text-gray-600">
+            {/* Key Features Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {features.map((feature, index) => (
+                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-2 hover:shadow-md transition-shadow">
+                  <div className="w-10 h-10 rounded-full bg-gold-primary/10 flex items-center justify-center text-gold-primary">
                     <feature.icon className="w-5 h-5" />
-                    <span>{feature.label}</span>
                   </div>
-                ))}
-              </div>
-
-              {/* Description */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Description</h3>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                  {property.description || '—'}
-                </p>
-              </div>
-
-              {/* Rating Section */}
-              {isAuthenticated && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Noter cette propriété</h3>
-                  <div className="flex items-center space-x-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => handleRating(star)}
-                        className={cn(
-                          'w-8 h-8 transition-colors',
-                          star <= userRating ? 'text-gold-primary' : 'text-gray-300 hover:text-gold-light'
-                        )}
-                      >
-                        <Star className="w-full h-full fill-current" />
-                      </button>
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">
-                      {userRating > 0 ? `${userRating}/5` : 'Cliquez pour noter'}
-                    </span>
-                  </div>
+                  <span className="font-semibold text-gray-900 text-sm">{feature.label}</span>
                 </div>
-              )}
+              ))}
             </div>
 
-            {/* Additional Info */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Détails du bien</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Transaction</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.transactionType === 'vente' ? 'Vente' : 'Location'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Statut</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.status || 'active'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Devise</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.devise || 'XAF'}</div>
-                </div>
+            {/* Description */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
+                Description
+              </h3>
+              <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed">
+                {property.description ? (
+                  property.description.split('\n').map((paragraph, idx) => (
+                    <p key={idx} className="mb-4">{paragraph}</p>
+                  ))
+                ) : (
+                  <p className="italic text-gray-400">Aucune description fournie pour ce bien.</p>
+                )}
+              </div>
+            </div>
 
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Ville</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.ville || '—'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Adresse</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.adresse || '—'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Superficie</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.superficie ? `${property.superficie} m²` : '—'}</div>
-                </div>
-
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Chambres</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.nombre_chambres ?? '—'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Salles de bain</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.nombre_salles_bain ?? '—'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Salons</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.nombre_salons ?? '—'}</div>
-                </div>
-
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Publié</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.createdAt ? formatDate(property.createdAt) : '—'}</div>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                  <div className="text-xs uppercase tracking-wide text-zinc-500">Vues</div>
-                  <div className="mt-1 font-medium text-zinc-900">{property.vues || 0}</div>
-                </div>
-
-                {property.isBonPlan ? (
-                  <div className="rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-200 sm:col-span-2 lg:col-span-3">
-                    <div className="text-xs uppercase tracking-wide text-emerald-700">Bon plan</div>
-                    <div className="mt-1 text-sm text-emerald-900">
-                      {property.bonPlanLabel ? <span className="font-medium">{property.bonPlanLabel}</span> : <span className="font-medium">Offre spéciale</span>}
-                      {property.bonPlanExpiresAt ? <span className="opacity-80"> • expire le {formatDate(property.bonPlanExpiresAt)}</span> : null}
-                    </div>
-                  </div>
-                ) : null}
+            {/* Additional Details */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+               <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
+                Caractéristiques détaillées
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {[
+                   { label: 'Type de bien', value: property.categorie },
+                   { label: 'Statut', value: property.status || 'Actif' },
+                   { label: 'Surface', value: property.superficie ? `${property.superficie} m²` : null },
+                   { label: 'Chambres', value: property.nombre_chambres },
+                   { label: 'Salles de bain', value: property.nombre_salles_bain },
+                   { label: 'Salons', value: property.nombre_salons },
+                   { label: 'Garage', value: property.garage ? 'Oui' : 'Non' },
+                   { label: 'Piscine', value: property.piscine ? 'Oui' : 'Non' },
+                   { label: 'Jardin', value: property.jardin ? 'Oui' : 'Non' },
+                 ].map((item, i) => item.value != null && (
+                   <div key={i} className="flex justify-between items-center py-3 border-b border-gray-50 last:border-0">
+                      <span className="text-gray-500 font-medium">{item.label}</span>
+                      <span className="text-gray-900 font-semibold">{item.value}</span>
+                   </div>
+                 ))}
               </div>
             </div>
           </div>
@@ -475,78 +472,86 @@ const PropertyDetailPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Contact Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Contacter l\u0027agent</h3>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-gold-primary to-gold-dark rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold">
-                      {owner?.nom?.charAt(0) || owner?.name?.charAt(0) || 'O'}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">
-                      {owner?.nom || owner?.name || 'Agent SCIM'}
-                    </div>
-                    <div className="text-sm text-gray-600">Agent immobilier</div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Phone className="w-4 h-4" />
-                    <span>{owner?.telephone || '+242 06 123 45 67'}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Mail className="w-4 h-4" />
-                    <span>{owner?.email || 'contact@scim.app'}</span>
-                  </div>
-                </div>
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+              <div className="flex items-center gap-4 mb-6">
+                 <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
+                   {owner?.avatar ? (
+                     <img src={getImageUrl(owner.avatar)} alt={owner.nom} className="w-full h-full object-cover" />
+                   ) : (
+                     <div className="w-full h-full bg-gold-primary flex items-center justify-center text-white text-xl font-bold">
+                       {owner?.nom?.charAt(0) || 'A'}
+                     </div>
+                   )}
+                 </div>
+                 <div>
+                   <h3 className="text-lg font-bold text-gray-900">{owner?.nom || 'Agence SCIM'}</h3>
+                   <p className="text-sm text-gray-500">Agent immobilier certifié</p>
+                   <div className="flex items-center gap-1 text-gold-primary text-sm mt-1">
+                      <Star className="w-4 h-4 fill-current" />
+                      <span className="font-semibold">4.9</span>
+                      <span className="text-gray-400 font-normal">(12 avis)</span>
+                   </div>
+                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 <Button 
-                  className="w-full"
+                  className="w-full bg-gray-900 hover:bg-black text-white h-12 text-lg font-medium shadow-md transition-all hover:shadow-lg"
                   onClick={() => setShowContactModal(true)}
                 >
-                  Demander des informations
+                  Contacter l'agent
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full"
+                  className="w-full h-12 text-lg font-medium border-gray-300 hover:border-gray-900 hover:bg-gray-50"
                   onClick={() => window.location.href = `tel:${owner?.telephone || '+242061234567'}`}
                 >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Appeler maintenant
+                  <Phone className="w-5 h-5 mr-2" />
+                  {owner?.telephone || '+242 06 123 45 67'}
                 </Button>
+              </div>
+
+              <div className="text-center">
+                 <p className="text-xs text-gray-400">Réponse moyenne: &lt; 1h</p>
               </div>
             </div>
 
             {isAuthenticated && user?.role !== 'admin' ? (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Réserver une visite</h3>
-                <div className="text-sm text-gray-600 mb-4">Choisissez une date et envoyez votre demande de réservation.</div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                   <Calendar className="w-5 h-5 text-gold-primary" />
+                   Réserver une visite
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date et heure souhaitées</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="datetime-local"
+                        value={reservationDate}
+                        min={minDateTimeLocal}
+                        step={900}
+                        onChange={(e) => setReservationDate(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all outline-none appearance-none"
+                        style={{ colorScheme: 'light' }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">Sélectionnez une date et une heure (10h-17h)</p>
+                  </div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date et heure</label>
-                <input
-                  type="datetime-local"
-                  value={reservationDate}
-                  min={minDateTimeLocal}
-                  step={900}
-                  onChange={(e) => setReservationDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-                />
+                  {reservationValidationMessage && (
+                    <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-start gap-3 border border-red-100 animate-fade-in">
+                       <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                       <span className="font-medium">{reservationValidationMessage}</span>
+                    </div>
+                  )}
 
-                <div className="mt-2 text-xs text-gray-500">Heures autorisées: 10h00 → 17h00.</div>
-
-                {reservationValidationMessage ? (
-                  <div className="mt-2 text-sm text-red-600">{reservationValidationMessage}</div>
-                ) : null}
-
-                <div className="mt-4 flex gap-3">
                   <Button
-                    className="flex-1"
+                    className="w-full bg-gold-primary hover:bg-gold-dark text-white font-semibold h-12 rounded-xl shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
                     loading={reservationLoading}
                     disabled={!reservationDate || Boolean(reservationValidationMessage)}
                     onClick={async () => {
@@ -570,21 +575,21 @@ const PropertyDetailPage = () => {
                       }
                     }}
                   >
-                    Envoyer la demande
+                    Confirmer la demande
                   </Button>
+                  <p className="text-xs text-gray-400 text-center">Aucun paiement requis pour la réservation.</p>
                 </div>
               </div>
             ) : !isAuthenticated ? (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Réserver une visite</h3>
-                <div className="text-sm text-gray-600">Connectez-vous pour réserver une visite.</div>
-                <div className="mt-4">
-                  <Link to="/login">
-                    <Button className="w-full">Connexion</Button>
-                  </Link>
-                </div>
+              <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6 text-center">
+                <h3 className="text-lg font-bold text-blue-900 mb-2">Intéressé par ce bien ?</h3>
+                <p className="text-sm text-blue-700 mb-4">Connectez-vous pour planifier une visite ou contacter l'agent.</p>
+                <Link to="/login">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md">Se connecter</Button>
+                </Link>
               </div>
             ) : null}
+
 
             {/* Trust Indicators */}
             <div className="bg-white rounded-xl shadow-lg p-6">
@@ -624,32 +629,7 @@ const PropertyDetailPage = () => {
         title="Demander des informations"
         size="md"
       >
-        <form className="space-y-4" onSubmit={async (e) => {
-          e.preventDefault();
-          try {
-            const subject = `Demande d'information • ${property?.titre || ''}`;
-            const lines = [
-              `Nom: ${contactName || user?.nom || ''}`,
-              `Email: ${contactEmail || user?.email || ''}`,
-              `Téléphone: ${contactPhone || user?.telephone || ''}`,
-              `Propriété: ${property?.titre || ''} (#${property?._id || ''})`,
-              `Ville: ${property?.ville || ''}`,
-              '',
-              'Message:',
-              contactMessage || ''
-            ];
-            const content = lines.join('\n');
-            const result = await contactScim(subject, content);
-            if (result?.success) {
-              toast.success("Votre demande a été envoyée à l'administration");
-              setShowContactModal(false);
-            } else {
-              toast.error("Échec de l'envoi de la demande");
-            }
-          } catch (err) {
-            toast.error("Échec de l'envoi de la demande");
-          }
-        }}>
+        <form className="space-y-4" onSubmit={handleContactSubmit}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Votre nom
@@ -658,8 +638,8 @@ const PropertyDetailPage = () => {
               type="text"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               placeholder="Votre nom complet"
-              value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
+              value={contactForm.name}
+              onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
               required
             />
           </div>
@@ -671,8 +651,8 @@ const PropertyDetailPage = () => {
               type="email"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               placeholder="votre@email.com"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
+              value={contactForm.email}
+              onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
               required
             />
           </div>
@@ -684,8 +664,8 @@ const PropertyDetailPage = () => {
               type="tel"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               placeholder="+242 06 123 45 67"
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
+              value={contactForm.phone}
+              onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
               required
             />
           </div>
@@ -697,8 +677,8 @@ const PropertyDetailPage = () => {
               rows={4}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
               placeholder="Je suis intéressé(e) par cette propriété..."
-              value={contactMessage}
-              onChange={(e) => setContactMessage(e.target.value)}
+              value={contactForm.message}
+              onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
               required
             />
           </div>

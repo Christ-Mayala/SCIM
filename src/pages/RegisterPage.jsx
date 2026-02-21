@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle, Building, Shield, St
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail, validatePhone } from '../lib/utils';
 
 const RegisterPage = () => {
@@ -269,104 +270,81 @@ const RegisterPage = () => {
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {/* Full Name */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                    <User className="w-4 h-4 mr-2" />
-                    Nom complet *
-                  </label>
                   <Input
+                    label="Nom complet *"
+                    labelClassName="text-gray-300"
                     type="text"
                     name="nom"
                     value={formData.nom}
                     onChange={handleChange}
                     placeholder="Votre nom et prénom"
-                    className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                      errors.nom ? 'border-red-500' : ''
-                    }`}
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    leftIcon={<User className="w-5 h-5" />}
+                    error={errors.nom}
+                    errorClassName="text-red-400"
                   />
-                  {errors.nom && (
-                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                      <span className="mr-1">⚠</span>
-                      {errors.nom}
-                    </p>
-                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Email */}
                   <div>
-                    <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Email *
-                    </label>
                     <Input
+                      label="Email *"
+                      labelClassName="text-gray-300"
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="votre@email.com"
-                      className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.email ? 'border-red-500' : ''
-                      }`}
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                      leftIcon={<Mail className="w-5 h-5" />}
+                      error={errors.email}
+                      errorClassName="text-red-400"
                     />
-                    {errors.email && (
-                      <p className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.email}
-                      </p>
-                    )}
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Téléphone *
-                    </label>
                     <Input
+                      label="Téléphone *"
+                      labelClassName="text-gray-300"
                       type="tel"
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
                       placeholder="+242 06 123 45 67"
-                      className={`w-full bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.telephone ? 'border-red-500' : ''
-                      }`}
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                      leftIcon={<Phone className="w-5 h-5" />}
+                      error={errors.telephone}
+                      errorClassName="text-red-400"
                     />
-                    {errors.telephone && (
-                      <p className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.telephone}
-                      </p>
-                    )}
                   </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                    <Lock className="w-4 h-4 mr-2" />
-                    Mot de passe *
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Créez un mot de passe sécurisé"
-                      className={`w-full pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.password ? 'border-red-500' : ''
-                      }`}
-                    />
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
+                  <Input
+                    label="Mot de passe *"
+                    labelClassName="text-gray-300"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Créez un mot de passe sécurisé"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    leftIcon={<Lock className="w-5 h-5" />}
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    }
+                    error={errors.password}
+                    errorClassName="text-red-400"
+                  />
                   
                   {/* Password Strength */}
                   {formData.password && (
@@ -404,68 +382,46 @@ const RegisterPage = () => {
                       </div>
                     </div>
                   )}
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                      <span className="mr-1">⚠</span>
-                      {errors.password}
-                    </p>
-                  )}
                 </div>
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-300 mb-2">
-                    <Lock className="w-4 h-4 mr-2" />
-                    Confirmer le mot de passe *
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Retapez votre mot de passe"
-                      className={`w-full pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder-gray-500 ${
-                        errors.confirmPassword ? 'border-red-500' : ''
-                      }`}
-                    />
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                      <span className="mr-1">⚠</span>
-                      {errors.confirmPassword}
-                    </p>
-                  )}
+                  <Input
+                    label="Confirmer le mot de passe *"
+                    labelClassName="text-gray-300"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Retapez votre mot de passe"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    leftIcon={<Lock className="w-5 h-5" />}
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    }
+                    error={errors.confirmPassword}
+                    errorClassName="text-red-400"
+                  />
                 </div>
 
                 {/* Terms */}
                 <div className="flex items-start space-x-3">
-                  <label className="flex items-start cursor-pointer">
-                    <div className="relative mt-1">
-                      <input
-                        type="checkbox"
-                        name="acceptTerms"
-                        checked={formData.acceptTerms}
-                        onChange={handleChange}
-                        className="sr-only"
-                      />
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        formData.acceptTerms 
-                          ? 'bg-gold-primary border-gold-primary' 
-                          : 'border-gray-400'
-                      }`}>
-                        {formData.acceptTerms && <CheckCircle className="w-3 h-3 text-white" />}
-                      </div>
-                    </div>
-                    <span className="ml-2 text-sm text-gray-300">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="acceptTerms"
+                      checked={formData.acceptTerms}
+                      onCheckedChange={(checked) =>
+                        handleChange({ target: { name: 'acceptTerms', type: 'checkbox', checked } })
+                      }
+                      className="border-white/30 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
+                    />
+                    <label htmlFor="acceptTerms" className="text-sm text-gray-300 cursor-pointer select-none">
                       J'accepte les{' '}
                       <Link to="/terms" className="text-gold-primary hover:text-gold-dark">
                         conditions d'utilisation
@@ -474,12 +430,11 @@ const RegisterPage = () => {
                       <Link to="/privacy" className="text-gold-primary hover:text-gold-dark">
                         politique de confidentialité
                       </Link>
-                    </span>
-                  </label>
+                    </label>
+                  </div>
                 </div>
                 {errors.acceptTerms && (
-                  <p className="mt-1 text-sm text-red-400 flex items-center">
-                    <span className="mr-1">⚠</span>
+                  <p className="mt-1 text-xs text-red-400">
                     {errors.acceptTerms}
                   </p>
                 )}

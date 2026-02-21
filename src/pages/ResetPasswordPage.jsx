@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-
+import { Input } from '../components/ui/Input';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -15,14 +15,13 @@ const ResetPasswordPage = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [isPasswordReset, setIsPasswordReset] = useState(false);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1/scim';
 
   useEffect(() => {
     // Si on utilise le flux par code (email+code), on n'a pas de token
@@ -43,15 +42,10 @@ const ResetPasswordPage = () => {
 
   const verifyToken = async () => {
     try {
-      const response = await fetch(`${API_BASE}/users/reset-verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: emailParam, code: codeParam }),
-      });
+      const { authAPI } = await import('../lib/api');
+      const response = await authAPI.verifyResetCode(emailParam, codeParam);
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data?.success === true) {
         setIsTokenValid(true);
@@ -73,6 +67,9 @@ const ResetPasswordPage = () => {
       ...prev,
       [name]: value
     }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const validatePassword = (password) => {
@@ -84,37 +81,37 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
 
     const { newPassword, confirmPassword } = formData;
+    const newErrors = {};
 
     // Validation
     const passwordError = validatePassword(newPassword);
     if (passwordError) {
-      toast.error(passwordError);
-      return;
+      newErrors.newPassword = passwordError;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
+      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/users/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: token ? userEmail : emailParam,
-          code: token ? undefined : codeParam,
-          newPassword
-        }),
-      });
+      const { authAPI } = await import('../lib/api');
+      const response = await authAPI.resetPassword(
+        token ? userEmail : emailParam,
+        token ? undefined : codeParam,
+        newPassword
+      );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data?.success === true) {
         setIsPasswordReset(true);
@@ -234,62 +231,60 @@ const ResetPasswordPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Nouveau mot de passe
-              </label>
-              <div className="relative">
-                <input
-                  id="newPassword"
-                  name="newPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-colors"
-                  placeholder="Minimum 6 caractères"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
+              <Input
+                label="Nouveau mot de passe"
+                id="newPassword"
+                name="newPassword"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                placeholder="Minimum 6 caractères"
+                required
+                leftIcon={<Lock className="w-5 h-5" />}
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="hover:text-gray-600 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                }
+                error={errors.newPassword}
+              />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmer le mot de passe
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-colors"
-                  placeholder="Répétez le mot de passe"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
+              <Input
+                label="Confirmer le mot de passe"
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Répétez le mot de passe"
+                required
+                leftIcon={<Lock className="w-5 h-5" />}
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="hover:text-gray-600 focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                }
+                error={errors.confirmPassword}
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full bg-gold-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Réinitialisation...' : 'Réinitialiser le mot de passe'}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">
