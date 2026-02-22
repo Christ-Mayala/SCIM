@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Key, Building, Shield, CheckCircle, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Key, Building, Shield, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail } from '../lib/utils';
-import Alert from '../components/common/Alert';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -125,7 +124,7 @@ const LoginPage = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">SCIM</div>
-                <div className="text-sm text-gray-300">Immobilier Congo</div>
+                <div className="text-sm text-gray-200">Immobilier Congo</div>
               </div>
             </div>
 
@@ -141,7 +140,7 @@ const LoginPage = () => {
                 <span className="text-gold-primary">votre espace</span>
               </h1>
               
-              <p className="text-xl text-gray-300 mb-10 leading-relaxed">
+              <p className="text-xl text-gray-200 mb-10 leading-relaxed">
                 Retrouvez tous vos biens, messages et transactions en toute sécurité.
               </p>
 
@@ -152,7 +151,7 @@ const LoginPage = () => {
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
                       <benefit.icon className="w-5 h-5 text-gold-primary" />
                     </div>
-                    <span className="text-gray-300">{benefit.text}</span>
+                    <span className="text-gray-200">{benefit.text}</span>
                   </div>
                 ))}
               </div>
@@ -161,21 +160,21 @@ const LoginPage = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">500+</div>
-                  <div className="text-sm text-gray-400">Biens</div>
+                  <div className="text-sm text-gray-300">Biens</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">98%</div>
-                  <div className="text-sm text-gray-400">Satisfaction</div>
+                  <div className="text-sm text-gray-300">Satisfaction</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">24h</div>
-                  <div className="text-sm text-gray-400">Support</div>
+                  <div className="text-sm text-gray-300">Support</div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-300">
               <p>© 2024 SCIM Immobilier • Plateforme certifiée</p>
             </div>
           </div>
@@ -194,7 +193,7 @@ const LoginPage = () => {
                 />
               </div>
               <h1 className="text-2xl font-bold text-white text-center">SCIM Immobilier</h1>
-              <p className="text-gray-400 text-center mt-2">Connectez-vous à votre compte</p>
+              <p className="text-gray-300 text-center mt-2">Connectez-vous à votre compte</p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
@@ -203,7 +202,7 @@ const LoginPage = () => {
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
                   Bienvenue de retour
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-gray-200">
                   Connectez-vous pour accéder à votre espace personnel
                 </p>
               </div>
@@ -220,13 +219,13 @@ const LoginPage = () => {
                 <div>
                   <Input
                     label="Adresse email"
-                    labelClassName="text-gray-300"
+                    labelClassName="text-gray-200"
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="votre@email.com"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                     leftIcon={<Mail className="w-5 h-5" />}
                     error={errors.email}
                     errorClassName="text-red-400"
@@ -237,19 +236,19 @@ const LoginPage = () => {
                 <div>
                   <Input
                     label="Mot de passe"
-                    labelClassName="text-gray-300"
+                    labelClassName="text-gray-200"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                     leftIcon={<Lock className="w-5 h-5" />}
                     rightIcon={
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                        className="hover:text-gray-200 transition-colors focus:outline-none"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -270,7 +269,7 @@ const LoginPage = () => {
                     />
                     <label
                       htmlFor="rememberMe"
-                      className="text-sm text-gray-300 cursor-pointer select-none"
+                      className="text-sm text-gray-200 cursor-pointer select-none"
                     >
                       Se souvenir de moi
                     </label>
@@ -305,7 +304,7 @@ const LoginPage = () => {
                     <div className="w-full border-t border-white/10" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-4 bg-zinc-900/50 text-gray-400 text-sm">Ou continuez avec</span>
+                    <span className="px-4 bg-zinc-900/50 text-gray-300 text-sm">Ou continuez avec</span>
                   </div>
                 </div>
 
@@ -350,7 +349,7 @@ const LoginPage = () => {
 
               {/* Register Link */}
               <div className="mt-8 text-center">
-                <p className="text-gray-400">
+                <p className="text-gray-300">
                   Pas encore de compte ?{' '}
                   <Link
                     to="/register"
@@ -366,7 +365,7 @@ const LoginPage = () => {
 
               {/* Security Info */}
               <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center justify-center space-x-2 text-xs text-gray-400">
+                <div className="flex items-center justify-center space-x-2 text-xs text-gray-300">
                   <Shield className="w-3 h-3" />
                   <span>Connexion sécurisée • SSL encrypté</span>
                 </div>
@@ -379,7 +378,7 @@ const LoginPage = () => {
                 <h3 className="text-lg font-semibold text-white mb-4">Pourquoi se connecter ?</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-300">
+                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-200">
                       <benefit.icon className="w-4 h-4 text-gold-primary" />
                       <span className="text-sm">{benefit.text}</span>
                     </div>

@@ -52,7 +52,7 @@ api.interceptors.request.use(
 );
 
 const isAuthEndpoint = (url = '') =>
-  url.includes('/users/refresh-token') || url.includes('/user/login') || url.includes('/user/register');
+  url.includes('/users/refresh-token') || url.includes('/users/login') || url.includes('/users/register');
 
 const isPasswordResetEndpoint = (url = '') =>
   url.includes('/password-reset/request') || url.includes('/password-reset/verify') || url.includes('/password-reset/reset');
@@ -111,10 +111,10 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (email, password) => api.post('/user/login', { email, password }),
-  register: (userData) => api.post('/user/register', userData),
-  logout: () => api.post('/users/logout'), // Reste sur /users (feature SCIM) car non dispo dans module natif
-  getProfile: () => api.get('/user/profile'),
+  login: (email, password) => api.post('/users/login', { email, password }),
+  register: (userData) => api.post('/users/register', userData),
+  logout: () => api.post('/users/logout'),
+  getProfile: () => api.get('/users/profile'),
   updateProfile: (userData) => {
     // Utilisation du module natif /user/profile (PATCH) qui utilise le token (pas besoin d'ID)
     // Le module natif attend un FormData si avatar, ou JSON sinon. 

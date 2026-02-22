@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { KeyRound, ArrowLeft, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 
 export default function VerifyCodePage() {
   const [email, setEmail] = useState('');
@@ -29,17 +30,11 @@ export default function VerifyCodePage() {
     try {
       const { authAPI } = await import('../lib/api');
       const res = await authAPI.verifyResetCode(email, code);
-
-      const data = res.data || {};
-      if (data?.success !== true) {
-        toast.error(data?.message || 'Code invalide');
-        return;
-      }
-
-      toast.success(data?.message || 'Code valide');
+      toast.success(res?.data?.message || 'Code valide');
       navigate(`/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`);
     } catch (err) {
-      toast.error(err?.message || 'Erreur');
+      const message = err?.response?.data?.message || err?.message || 'Erreur';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +49,7 @@ export default function VerifyCodePage() {
               <KeyRound className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Vérification du code</h1>
-            <p className="text-gray-600">Saisissez l'email et le code reçu pour continuer.</p>
+            <p className="text-gray-700">Saisissez l'email et le code reçu pour continuer.</p>
           </div>
 
           <form onSubmit={handleVerify} className="space-y-5">

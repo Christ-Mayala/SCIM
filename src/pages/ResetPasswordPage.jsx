@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -44,20 +45,12 @@ const ResetPasswordPage = () => {
     try {
       const { authAPI } = await import('../lib/api');
       const response = await authAPI.verifyResetCode(emailParam, codeParam);
-
-      const data = response.data;
-
-      if (data?.success === true) {
-        setIsTokenValid(true);
-        setUserEmail(data.email);
-      } else {
-        setIsTokenValid(false);
-        toast.error(data.message || 'Code invalide ou expiré');
-      }
+      setIsTokenValid(true);
+      setUserEmail(response?.data?.email || emailParam || '');
     } catch (error) {
-      console.error('Erreur:', error);
       setIsTokenValid(false);
-      toast.error('Erreur de connexion au serveur');
+      const message = error?.response?.data?.message || error?.message || 'Erreur de connexion au serveur';
+      toast.error(message);
     }
   };
 
@@ -105,23 +98,16 @@ const ResetPasswordPage = () => {
 
     try {
       const { authAPI } = await import('../lib/api');
-      const response = await authAPI.resetPassword(
+      await authAPI.resetPassword(
         token ? userEmail : emailParam,
         token ? undefined : codeParam,
         newPassword
       );
-
-      const data = response.data;
-
-      if (data?.success === true) {
-        setIsPasswordReset(true);
-        toast.success('Mot de passe réinitialisé avec succès !');
-      } else {
-        toast.error(data.message || 'Erreur lors de la réinitialisation');
-      }
+      setIsPasswordReset(true);
+      toast.success('Mot de passe réinitialisé avec succès !');
     } catch (error) {
-      console.error('Erreur:', error);
-      toast.error('Erreur de connexion au serveur');
+      const message = error?.response?.data?.message || error?.message || 'Erreur de connexion au serveur';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +127,7 @@ const ResetPasswordPage = () => {
               Lien invalide ou expiré
             </h1>
             
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-700 mb-8">
               Ce lien de réinitialisation n'est plus valide. Veuillez demander un nouveau lien.
             </p>
             
@@ -180,7 +166,7 @@ const ResetPasswordPage = () => {
               Mot de passe réinitialisé !
             </h1>
             
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-700 mb-8">
               Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
             </p>
             
@@ -203,7 +189,7 @@ const ResetPasswordPage = () => {
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Vérification du lien...</p>
+            <p className="text-gray-700">Vérification du lien...</p>
           </div>
         </div>
       </div>
@@ -224,7 +210,7 @@ const ResetPasswordPage = () => {
               Nouveau mot de passe
             </h1>
             
-            <p className="text-gray-600">
+            <p className="text-gray-700">
               Créez un nouveau mot de passe pour <strong>{userEmail}</strong>
             </p>
           </div>
@@ -245,7 +231,7 @@ const ResetPasswordPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="hover:text-gray-600 focus:outline-none"
+                    className="hover:text-gray-700 focus:outline-none"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -269,7 +255,7 @@ const ResetPasswordPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="hover:text-gray-600 focus:outline-none"
+                    className="hover:text-gray-700 focus:outline-none"
                   >
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>

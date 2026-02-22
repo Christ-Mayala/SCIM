@@ -178,7 +178,7 @@ const RegisterPage = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">SCIM</div>
-                <div className="text-sm text-gray-300">Immobilier Congo</div>
+                <div className="text-sm text-gray-200">Immobilier Congo</div>
               </div>
             </div>
 
@@ -194,7 +194,7 @@ const RegisterPage = () => {
                 <span className="text-gold-primary">communauté immobilière</span>
               </h1>
               
-              <p className="text-xl text-gray-300 mb-10 leading-relaxed">
+              <p className="text-xl text-gray-200 mb-10 leading-relaxed">
                 Créez votre compte gratuit et accédez à des opportunités immobilières exclusives.
               </p>
 
@@ -206,7 +206,7 @@ const RegisterPage = () => {
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
                       <benefit.icon className="w-5 h-5 text-gold-primary" />
                     </div>
-                    <span className="text-gray-300">{benefit.text}</span>
+                    <span className="text-gray-200">{benefit.text}</span>
                   </div>
                 ))}
               </div>
@@ -218,15 +218,15 @@ const RegisterPage = () => {
                     <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-300 italic mb-4">
+                <p className="text-gray-200 italic mb-4">
                   "Grâce à SCIM, j'ai trouvé la maison parfaite pour ma famille en moins d'une semaine !"
                 </p>
-                <div className="text-sm text-gray-400">- Marie K., propriétaire depuis 2023</div>
+                <div className="text-sm text-gray-300">- Marie K., propriétaire depuis 2023</div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-300">
               <p>© 2024 SCIM Immobilier • Déjà 5 000+ membres</p>
             </div>
           </div>
@@ -245,7 +245,7 @@ const RegisterPage = () => {
                 />
               </div>
               <h1 className="text-2xl font-bold text-white text-center">Rejoignez SCIM Immobilier</h1>
-              <p className="text-gray-400 text-center mt-2">Créez votre compte en 2 minutes</p>
+              <p className="text-gray-300 text-center mt-2">Créez votre compte en 2 minutes</p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
@@ -254,7 +254,7 @@ const RegisterPage = () => {
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
                   Créez votre compte
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-gray-200">
                   Rejoignez la première plateforme immobilière du Congo
                 </p>
               </div>
@@ -272,13 +272,13 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Nom complet *"
-                    labelClassName="text-gray-300"
+                    labelClassName="text-gray-200"
                     type="text"
                     name="nom"
                     value={formData.nom}
                     onChange={handleChange}
                     placeholder="Votre nom et prénom"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                     leftIcon={<User className="w-5 h-5" />}
                     error={errors.nom}
                     errorClassName="text-red-400"
@@ -290,13 +290,13 @@ const RegisterPage = () => {
                   <div>
                     <Input
                       label="Email *"
-                      labelClassName="text-gray-300"
+                      labelClassName="text-gray-200"
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="votre@email.com"
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                       leftIcon={<Mail className="w-5 h-5" />}
                       error={errors.email}
                       errorClassName="text-red-400"
@@ -307,13 +307,13 @@ const RegisterPage = () => {
                   <div>
                     <Input
                       label="Téléphone *"
-                      labelClassName="text-gray-300"
+                      labelClassName="text-gray-200"
                       type="tel"
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
                       placeholder="+242 06 123 45 67"
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                       leftIcon={<Phone className="w-5 h-5" />}
                       error={errors.telephone}
                       errorClassName="text-red-400"
@@ -325,19 +325,19 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Mot de passe *"
-                    labelClassName="text-gray-300"
+                    labelClassName="text-gray-200"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Créez un mot de passe sécurisé"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                     leftIcon={<Lock className="w-5 h-5" />}
                     rightIcon={
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                        className="hover:text-gray-200 transition-colors focus:outline-none"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -350,8 +350,8 @@ const RegisterPage = () => {
                   {formData.password && (
                     <div className="mt-3">
                       <div className="flex justify-between mb-1">
-                        <span className="text-xs text-gray-400">Force du mot de passe</span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-300">Force du mot de passe</span>
+                        <span className="text-xs text-gray-300">
                           {passwordStrength < 3 ? 'Faible' : passwordStrength < 4 ? 'Moyen' : 'Fort'}
                         </span>
                       </div>
@@ -374,7 +374,7 @@ const RegisterPage = () => {
                             ) : (
                               <div className="w-3 h-3 border border-gray-500 rounded-full mr-2"></div>
                             )}
-                            <span className={`text-xs ${req.met ? 'text-green-400' : 'text-gray-400'}`}>
+                            <span className={`text-xs ${req.met ? 'text-green-400' : 'text-gray-300'}`}>
                               {req.label}
                             </span>
                           </div>
@@ -388,19 +388,19 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Confirmer le mot de passe *"
-                    labelClassName="text-gray-300"
+                    labelClassName="text-gray-200"
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Retapez votre mot de passe"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
                     leftIcon={<Lock className="w-5 h-5" />}
                     rightIcon={
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="hover:text-gray-300 transition-colors focus:outline-none"
+                        className="hover:text-gray-200 transition-colors focus:outline-none"
                       >
                         {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -421,7 +421,7 @@ const RegisterPage = () => {
                       }
                       className="border-white/30 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
                     />
-                    <label htmlFor="acceptTerms" className="text-sm text-gray-300 cursor-pointer select-none">
+                    <label htmlFor="acceptTerms" className="text-sm text-gray-200 cursor-pointer select-none">
                       J'accepte les{' '}
                       <Link to="/terms" className="text-gold-primary hover:text-gold-dark">
                         conditions d'utilisation
@@ -455,7 +455,7 @@ const RegisterPage = () => {
 
               {/* Login Link */}
               <div className="mt-8 text-center">
-                <p className="text-gray-400">
+                <p className="text-gray-300">
                   Vous avez déjà un compte ?{' '}
                   <Link
                     to="/login"
@@ -471,7 +471,7 @@ const RegisterPage = () => {
 
               {/* Security Info */}
               <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center justify-center space-x-2 text-xs text-gray-400">
+                <div className="flex items-center justify-center space-x-2 text-xs text-gray-300">
                   <Shield className="w-3 h-3" />
                   <span>Inscription sécurisée • Vos données sont protégées</span>
                 </div>
@@ -484,7 +484,7 @@ const RegisterPage = () => {
                 <h3 className="text-lg font-semibold text-white mb-4">Pourquoi s'inscrire ?</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-300">
+                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-200">
                       <benefit.icon className="w-4 h-4 text-gold-primary" />
                       <span className="text-sm">{benefit.text}</span>
                     </div>
