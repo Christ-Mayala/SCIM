@@ -200,11 +200,13 @@ export const favoritesAPI = {
 };
 
 export const reservationAPI = {
-  create: (propertyId, date) => api.post('/reservation', { propertyId, date }),
+  create: (propertyId, date, telephone = '') =>
+    api.post('/reservation', { propertyId, date, ...(telephone ? { telephone } : {}) }),
   my: () => api.get('/reservation/my'),
   owner: () => api.get('/reservation/owner'),
   cancel: (id) => api.patch(`/reservation/${id}/cancel`),
   confirm: (id) => api.patch(`/reservation/${id}/confirm`),
+  ack: (id) => api.patch(`/reservation/${id}/ack`),
   getById: (id) => api.get(`/reservation/${id}`),
 };
 

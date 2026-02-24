@@ -49,6 +49,7 @@ const PropertyDetailPage = () => {
 
   const [reservationDate, setReservationDate] = useState('');
   const [reservationLoading, setReservationLoading] = useState(false);
+  const [reservationAck, setReservationAck] = useState(null);
 
   const images = property?.images || [];
   const owner = property?.utilisateur || property?.proprietaire || null;
@@ -535,7 +536,10 @@ const PropertyDetailPage = () => {
                         value={reservationDate}
                         min={minDateTimeLocal}
                         step={900}
-                        onChange={(e) => setReservationDate(e.target.value)}
+                        onChange={(e) => {
+                          setReservationDate(e.target.value);
+                          if (reservationAck) setReservationAck(null);
+                        }}
                         className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all outline-none appearance-none"
                         style={{ colorScheme: 'light' }}
                       />
@@ -563,9 +567,27 @@ const PropertyDetailPage = () => {
                       }
                       try {
                         setReservationLoading(true);
-                        const res = await reservationAPI.create(property._id, reservationDate);
-                        if (res?.data) {
-                          toast.success('Demande de réservation envoyée');
+                        const reservationPhone = String(user?.telephone || contactForm.phone || '').trim();
+                        if (!reservationPhone) {
+                          toast.error('Ajoutez votre numero de telephone dans le profil avant de reserver.');
+                          return;
+                        }
+
+                        const res = await reservationAPI.create(property._id, reservationDate, reservationPhone);
+                        const payload = res?.data || {};
+                        const reservation = payload?.reservation || payload;
+                        const support = payload?.support || reservation?.support || {};
+
+                        if (reservation?._id) {
+                          const reference = reservation?.reference || support?.reference || '';
+                          setReservationAck({
+                            reservationId: reservation._id,
+                            reference,
+                            expectedResponseMinutes: support?.expectedResponseMinutes || 30,
+                            asyncNotice: support?.asyncNotice || 'Demande enregistree. Notre equipe vous repond rapidement.',
+                            whatsappUrl: support?.whatsappUrl || '',
+                          });
+                          toast.success(reference ? `Demande envoyee (${reference})` : 'Demande de reservation envoyee');
                           setReservationDate('');
                         }
                       } catch (err) {
@@ -577,7 +599,35 @@ const PropertyDetailPage = () => {
                   >
                     Confirmer la demande
                   </Button>
-                  <p className="text-xs text-gray-400 text-center">Aucun paiement requis pour la réservation.</p>
+                  <p className="text-xs text-gray-400 text-center">
+                    Flux web asynchrone: suivi dans votre espace client. Aucun paiement requis. Telephone requis pour la reservation.
+                  </p>
+
+                  {reservationAck && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
+                      <div className="text-sm font-semibold text-emerald-800">Demande enregistree avec succes</div>
+                      <div className="text-xs text-emerald-700">
+                        Reference: <span className="font-semibold">{reservationAck.reference || reservationAck.reservationId}</span>
+                      </div>
+                      <div className="text-xs text-emerald-700">
+                        {reservationAck.asyncNotice} (SLA cible: {reservationAck.expectedResponseMinutes} min)
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Link to="/dashboard" className="w-full sm:w-auto">
+                          <Button variant="outline" className="w-full">
+                            Suivre mes reservations
+                          </Button>
+                        </Link>
+                        {reservationAck.whatsappUrl ? (
+                          <a href={reservationAck.whatsappUrl} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+                            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                              Continuer sur WhatsApp
+                            </Button>
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : !isAuthenticated ? (

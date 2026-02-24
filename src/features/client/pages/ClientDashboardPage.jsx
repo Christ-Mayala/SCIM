@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, History, User, CalendarDays } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { favoritesAPI, formatDate, formatPrice, reservationAPI, userAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 
@@ -8,6 +9,7 @@ const ClientDashboardPage = () => {
   const [favoriteProperties, setFavoriteProperties] = useState([]);
   const [visited, setVisited] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [ackLoadingId, setAckLoadingId] = useState('');
 
   useEffect(() => {
     const fetchFavs = async () => {
@@ -65,6 +67,48 @@ const ClientDashboardPage = () => {
       .slice(0, 5);
   }, [reservations]);
 
+  const getReservationStatusMeta = (statusValue) => {
+    const s = String(statusValue || '').toLowerCase();
+    if (s.includes('confirm')) {
+      return { label: 'Confirmee', className: 'bg-emerald-100 text-emerald-700' };
+    }
+    if (s.includes('annul') || s.includes('cancel')) {
+      return { label: 'Annulee', className: 'bg-red-100 text-red-700' };
+    }
+    return { label: 'En attente', className: 'bg-amber-100 text-amber-700' };
+  };
+
+const getReservationReference = (reservation) => {
+    return reservation?.reference || reservation?.support?.reference || reservation?._id || '-';
+  };
+
+  const getReservationLastUpdate = (reservation) => {
+    const history = Array.isArray(reservation?.statusHistory) ? reservation.statusHistory : [];
+    const lastEvent = history.length ? history[history.length - 1] : null;
+    const dt = lastEvent?.at || reservation?.updatedAt || reservation?.createdAt || reservation?.date;
+    return dt ? formatDate(dt) : '-';
+  };
+
+  const isConfirmedReservation = (reservation) => String(reservation?.status || '').toLowerCase().includes('confirm');
+
+  const isAcknowledgedReservation = (reservation) => Boolean(reservation?.support?.acknowledgedAt);
+
+  const handleAckReservation = async (id) => {
+    try {
+      setAckLoadingId(id);
+      const res = await reservationAPI.ack(id);
+      const updated = res?.data || null;
+      if (updated?._id) {
+        setReservations((prev) => prev.map((r) => (r._id === id ? updated : r)));
+      }
+      toast.success('Accuse reception enregistre.');
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Impossible d'enregistrer l'accuse.");
+    } finally {
+      setAckLoadingId('');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,11 +150,15 @@ const ClientDashboardPage = () => {
               </div>
             </div>
 
+            <div className="mb-4 text-xs text-zinc-500">
+              Suivi web asynchrone: statut, reference et reprise rapide sur WhatsApp si necessaire.
+            </div>
+
             {recentReservations.length === 0 ? (
               <div className="text-sm text-zinc-600">Aucune réservation.</div>
             ) : (
               <div className="space-y-4">
-                {recentReservations.map((r) => (
+                {/* LEGACY_RESERVATION_LIST_START
                   <div key={r._id} className="flex items-center gap-4">
                     <img
                       src={r.property?.images?.[0]?.url || '/images/og/og-property.jpg'}
@@ -129,7 +177,67 @@ const ClientDashboardPage = () => {
                       {r.property?.prix != null ? formatPrice(r.property.prix) : '—'}
                     </div>
                   </div>
-                ))}
+                LEGACY_RESERVATION_LIST_END */}
+                {recentReservations.map((r) => {
+                  const statusMeta = getReservationStatusMeta(r.status);
+                  const reference = getReservationReference(r);
+                  const whatsappUrl = r?.support?.whatsappUrl || '';
+                  const acknowledgedAt = r?.support?.acknowledgedAt ? formatDate(r.support.acknowledgedAt) : '';
+                  const showAckAction = isConfirmedReservation(r) && !isAcknowledgedReservation(r);
+
+                  return (
+                    <div key={r._id} className="rounded-xl border border-zinc-200 p-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={r.property?.images?.[0]?.url || '/images/og/og-property.jpg'}
+                          alt={r.property?.titre || 'Bien'}
+                          className="w-14 h-14 rounded-xl object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <Link to={`/properties/${r.property?._id}`} className="font-medium text-zinc-900 hover:text-gold-primary truncate block">
+                            {r.property?.titre || 'Bien'}
+                          </Link>
+                          <div className="text-xs text-zinc-600">Visite: {r.date ? formatDate(r.date) : '-'}</div>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusMeta.className}`}>
+                          {statusMeta.label}
+                        </span>
+                      </div>
+                      <div className="text-xs text-zinc-600">
+                        Ref: <span className="font-medium text-zinc-800">{reference}</span> · Mise a jour: {getReservationLastUpdate(r)}
+                      </div>
+                      {acknowledgedAt ? (
+                        <div className="text-xs text-emerald-700">
+                          Accuse reception enregistre le {acknowledgedAt}.
+                        </div>
+                      ) : null}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="font-semibold text-zinc-900 whitespace-nowrap">
+                          {r.property?.prix != null ? formatPrice(r.property.prix) : '-'}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {showAckAction ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={ackLoadingId === r._id}
+                              onClick={() => handleAckReservation(r._id)}
+                            >
+                              {ackLoadingId === r._id ? '...' : "J'accuse reception"}
+                            </Button>
+                          ) : null}
+                          {whatsappUrl ? (
+                            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                WhatsApp
+                              </Button>
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
