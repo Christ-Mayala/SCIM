@@ -272,7 +272,7 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Nom complet *"
-                    labelClassName="text-gray-200"
+                    labelClassName="text-white"
                     type="text"
                     name="nom"
                     value={formData.nom}
@@ -290,7 +290,7 @@ const RegisterPage = () => {
                   <div>
                     <Input
                       label="Email *"
-                      labelClassName="text-gray-200"
+                      labelClassName="text-white"
                       type="email"
                       name="email"
                       value={formData.email}
@@ -307,7 +307,7 @@ const RegisterPage = () => {
                   <div>
                     <Input
                       label="Téléphone *"
-                      labelClassName="text-gray-200"
+                      labelClassName="text-white"
                       type="tel"
                       name="telephone"
                       value={formData.telephone}
@@ -325,7 +325,7 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Mot de passe *"
-                    labelClassName="text-gray-200"
+                    labelClassName="text-white"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
@@ -388,7 +388,7 @@ const RegisterPage = () => {
                 <div>
                   <Input
                     label="Confirmer le mot de passe *"
-                    labelClassName="text-gray-200"
+                    labelClassName="text-white"
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}

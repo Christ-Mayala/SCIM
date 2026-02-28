@@ -219,7 +219,7 @@ const LoginPage = () => {
                 <div>
                   <Input
                     label="Adresse email"
-                    labelClassName="text-gray-200"
+                    labelClassName="text-white"
                     type="email"
                     name="email"
                     value={formData.email}
@@ -236,7 +236,7 @@ const LoginPage = () => {
                 <div>
                   <Input
                     label="Mot de passe"
-                    labelClassName="text-gray-200"
+                    labelClassName="text-white"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
