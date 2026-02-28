@@ -24,7 +24,7 @@ const ClientHeader = () => {
 
     if (isAuthenticated) {
       items.push({ to: '/dashboard', label: 'Espace', icon: LayoutDashboard });
-      items.push({ to: '/messages', label: 'Messages', icon: MessageSquare, badge: unreadCount });
+      // items.push({ to: '/messages', label: 'Messages', icon: MessageSquare, badge: unreadCount });
       items.push({ to: '/favorites', label: 'Favoris', icon: Heart });
       items.push({ to: '/profile', label: 'Profil', icon: User });
     }
