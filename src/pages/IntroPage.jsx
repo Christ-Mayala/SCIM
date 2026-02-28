@@ -130,15 +130,16 @@ const IntroPage = () => {
             </div>
           </div>
           
-          <div className="inline-flex items-center space-x-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
-            <MapPin className="w-4 h-4" />
-            <span className="text-sm font-medium">Congo-Brazzaville</span>
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Bienvenue sur
-            <span className="text-gold-primary block mt-2">SCIM Immobilier</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">
+            <span className="text-gold-primary">SCIM Immobilier</span>
           </h1>
+
+          <div className="inline-flex items-center space-x-2 mb-6">
+            <MapPin className="w-5 h-5 text-gray-400" />
+            <span className="text-lg font-medium text-gray-300">Congo-Brazzaville</span>
+          </div>
+
+          <div className="mx-auto my-8 h-px w-32 bg-white/20"></div>
           
           <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             Votre passerelle vers l'immobilier d'exception au Congo-Brazzaville

@@ -15,4 +15,9 @@ export default defineConfig({
     strictPort: true,
     historyApiFallback: true,
   },
+  build: {
+    sourcemap: false,
+    minify: 'terser',
+    chunkSizeWarningLimit: 1000,
+  },
 });

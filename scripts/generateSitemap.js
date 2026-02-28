@@ -3,7 +3,7 @@ const path = require('path');
 
 // Configuration de base
 const config = {
-  baseUrl: process.env.SITE_URL || 'https://scim.app',
+  baseUrl: process.env.SITE_URL || 'https://scim.netlify.app',
   outputPath: path.join(__dirname, '../public/sitemap.xml'),
   currentDate: new Date().toISOString().split('T')[0]
 };

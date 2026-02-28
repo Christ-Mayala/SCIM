@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import SEO from '../components/layout/SEO';
 import { seoConfig } from '../utils/seoData';
+import '../animations.css';
 
 const AboutPage = () => {
   const stats = [
@@ -65,7 +66,7 @@ const AboutPage = () => {
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
       description: 'Expert en investissement immobilier',
       expertise: ['Investissement', 'Rentabilité', 'Analyse de marché']
-    },
+    }, 
   ];
 
   const values = [
@@ -380,51 +381,19 @@ const AboutPage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {team.map((member, index) => (
-                <div 
-                  key={index} 
-                  className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
-                >
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-xl font-bold text-white mb-1">{member.name}</h3>
-                      <p className="text-gold-primary font-semibold">{member.role}</p>
-                    </div>
+            <div className="mt-12 overflow-hidden scrolling-container">
+              <div className="scrolling-wrapper">
+                {[...team, ...team].map((member, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 text-center w-48 mx-4"
+                  >
+                    <img className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg" src={member.image} alt={member.name} />
+                    <h3 className="text-lg font-bold text-gray-900 truncate">{member.name}</h3>
+                    <p className="text-gold-primary font-semibold text-sm">{member.role}</p>
                   </div>
-                  
-                  <div className="p-6">
-                    <p className="text-gray-600 mb-6">{member.description}</p>
-                    
-                    <div className="space-y-3">
-                      <div className="text-sm font-medium text-gray-900">Expertises :</div>
-                      <div className="flex flex-wrap gap-2">
-                        {member.expertise.map((skill, idx) => (
-                          <span 
-                            key={idx} 
-                            className="px-3 py-1 bg-gold-light text-gold-dark rounded-full text-xs font-medium"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 pt-6 border-t border-gray-100">
-                      <Link to="/contact" className="inline-flex items-center text-gold-primary font-medium hover:text-gold-dark">
-                        Contacter {member.name.split(' ')[0]}
-                        <ChevronRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             
             <div className="text-center mt-16">
