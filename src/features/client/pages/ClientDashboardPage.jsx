@@ -132,9 +132,9 @@ const getReservationReference = (reservation) => {
                 <span>Profil</span>
               </Button>
             </Link>
-            <Link to="/messages">
+            {/* <Link to="/messages">
               <Button variant="outline" className="w-full">Messages</Button>
-            </Link>
+            </Link> */}
             <Link to="/properties">
               <Button className="w-full">Rechercher</Button>
             </Link>
