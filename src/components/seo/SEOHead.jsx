@@ -57,11 +57,11 @@ const SEOHead = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
-      <meta property="og:image:alt" content={fullTitle} />
+      <meta property="og:image:alt" content={`${title} - SCIM Immobilier`} />
       <meta property="og:image:secure_url" content={fullImageUrl} />
-      <meta property="og:url" content={url} />
-      <meta property="og:type" content={type} />
       <meta property="og:site_name" content={siteName} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:type" content={type} />
       <meta property="og:locale" content={locale} />
       <meta property="og:locale:alternate" content="en_US" />
 

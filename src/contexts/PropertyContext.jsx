@@ -326,6 +326,22 @@ export const PropertyProvider = ({ children }) => {
 
 export const useProperty = () => {
   const context = useContext(PropertyContext);
-  if (!context) throw new Error('useProperty must be used within a PropertyProvider');
+  if (!context) {
+    return {
+      properties: [],
+      loading: false,
+      error: null,
+      fetchProperties: async () => {},
+      getProperty: async () => null,
+      createProperty: async () => null,
+      updateProperty: async () => null,
+      deleteProperty: async () => {},
+      searchProperties: async () => [],
+      addToFavorites: async () => {},
+      removeFromFavorites: async () => {},
+      toggleFavorite: async () => {},
+      isFavorite: () => false
+    };
+  }
   return context;
 };

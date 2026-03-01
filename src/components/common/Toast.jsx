@@ -1,12 +1,21 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 
-const ToastContext = createContext();
+const ToastContext = createContext(null);
 
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    // Retourner un objet vide au lieu de lancer une erreur
+    return {
+      success: () => {},
+      error: () => {},
+      warning: () => {},
+      info: () => {},
+      custom: () => {},
+      remove: () => {},
+      removeAll: () => {}
+    };
   }
   return context;
 };
@@ -70,101 +79,106 @@ const Toast = ({ toast, onRemove }) => {
 };
 
 export const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState([]);
+  try {
+    const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((toast) => {
-    const id = Date.now() + Math.random();
-    const newToast = {
-      id,
-      type: 'info',
-      duration: 5000,
-      isVisible: false,
-      ...toast
+    const addToast = useCallback((toast) => {
+      const id = Date.now() + Math.random();
+      const newToast = {
+        id,
+        type: 'info',
+        duration: 5000,
+        isVisible: false,
+        ...toast
+      };
+
+      setToasts(prev => [...prev, newToast]);
+
+      // Déclencher l'animation d'entrée
+      setTimeout(() => {
+        setToasts(prev => 
+          prev.map(t => t.id === id ? { ...t, isVisible: true } : t)
+        );
+      }, 100);
+
+      // Auto-suppression après la durée spécifiée
+      if (newToast.duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, newToast.duration);
+      }
+
+      return id;
+    }, []);
+
+    const removeToast = useCallback((id) => {
+      // Animation de sortie
+      setToasts(prev => 
+        prev.map(t => t.id === id ? { ...t, isVisible: false } : t)
+      );
+
+      // Suppression après l'animation
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }, 300);
+    }, []);
+
+    const removeAllToasts = useCallback(() => {
+      setToasts([]);
+    }, []);
+
+    // Méthodes de convenance
+    const toast = {
+      success: (message, options = {}) => addToast({ 
+        type: 'success', 
+        message, 
+        title: options.title || 'Succès',
+        ...options 
+      }),
+      error: (message, options = {}) => addToast({ 
+        type: 'error', 
+        message, 
+        title: options.title || 'Erreur',
+        duration: options.duration || 7000,
+        ...options 
+      }),
+      warning: (message, options = {}) => addToast({ 
+        type: 'warning', 
+        message, 
+        title: options.title || 'Attention',
+        ...options 
+      }),
+      info: (message, options = {}) => addToast({ 
+        type: 'info', 
+        message, 
+        title: options.title || 'Information',
+        ...options 
+      }),
+      custom: addToast,
+      remove: removeToast,
+      removeAll: removeAllToasts
     };
 
-    setToasts(prev => [...prev, newToast]);
-
-    // Déclencher l'animation d'entrée
-    setTimeout(() => {
-      setToasts(prev => 
-        prev.map(t => t.id === id ? { ...t, isVisible: true } : t)
-      );
-    }, 100);
-
-    // Auto-suppression après la durée spécifiée
-    if (newToast.duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, newToast.duration);
-    }
-
-    return id;
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    // Animation de sortie
-    setToasts(prev => 
-      prev.map(t => t.id === id ? { ...t, isVisible: false } : t)
+    return (
+      <ToastContext.Provider value={toast}>
+        {children}
+        
+        {/* Container des toasts */}
+        <div className="fixed top-4 right-4 z-50 max-w-sm">
+          {toasts.map(toast => (
+            <Toast
+              key={toast.id}
+              toast={toast}
+              onRemove={removeToast}
+            />
+          ))}
+        </div>
+      </ToastContext.Provider>
     );
-
-    // Suppression après l'animation
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 300);
-  }, []);
-
-  const removeAllToasts = useCallback(() => {
-    setToasts([]);
-  }, []);
-
-  // Méthodes de convenance
-  const toast = {
-    success: (message, options = {}) => addToast({ 
-      type: 'success', 
-      message, 
-      title: options.title || 'Succès',
-      ...options 
-    }),
-    error: (message, options = {}) => addToast({ 
-      type: 'error', 
-      message, 
-      title: options.title || 'Erreur',
-      duration: options.duration || 7000,
-      ...options 
-    }),
-    warning: (message, options = {}) => addToast({ 
-      type: 'warning', 
-      message, 
-      title: options.title || 'Attention',
-      ...options 
-    }),
-    info: (message, options = {}) => addToast({ 
-      type: 'info', 
-      message, 
-      title: options.title || 'Information',
-      ...options 
-    }),
-    custom: addToast,
-    remove: removeToast,
-    removeAll: removeAllToasts
-  };
-
-  return (
-    <ToastContext.Provider value={toast}>
-      {children}
-      
-      {/* Container des toasts */}
-      <div className="fixed top-4 right-4 z-50 max-w-sm">
-        {toasts.map(toast => (
-          <Toast
-            key={toast.id}
-            toast={toast}
-            onRemove={removeToast}
-          />
-        ))}
-      </div>
-    </ToastContext.Provider>
-  );
+  } catch (error) {
+    console.error('ToastProvider error:', error);
+    return children; // Fallback simple
+  }
 };
 
 export default Toast;

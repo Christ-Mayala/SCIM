@@ -6,6 +6,7 @@ import EditPropertyPage from '../../pages/EditPropertyPage';
 
 import AdminDashboardPage from '../../features/admin/pages/AdminDashboardPage';
 import AdminPropertiesPage from '../../features/admin/pages/AdminPropertiesPage';
+import AdminReservationsPage from '../../features/admin/pages/AdminReservationsPage';
 import AdminUsersPage from '../../features/admin/pages/AdminUsersPage';
 import AdminMessagesPage from '../../features/admin/pages/AdminMessagesPage';
 import AdminAnalyticsPage from '../../features/admin/pages/AdminAnalyticsPage';

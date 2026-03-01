@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, 
   ArrowLeft, Share2, Calendar, Eye, Car, Waves, TreePine,
-  Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle
+  Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle, MessageCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -566,6 +566,23 @@ const PropertyDetailPage = () => {
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   {owner?.telephone || '+242 06 123 45 67'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-lg font-medium border-green-500 hover:border-green-600 hover:bg-green-50 text-green-600"
+                  onClick={() => {
+                    const message = encodeURIComponent(
+                      `🏠 Demande de visite - ${property.titre}\n\n` +
+                      `📍 ${property.ville || 'Lieu'}\n` +
+                      `💰 ${property.prix ? new Intl.NumberFormat('fr-FR').format(property.prix) + ' XAF' : 'Prix sur demande'}\n\n` +
+                      `Bonjour, je suis intéressé(e) par cette propriété. J'aimerais planifier une visite.\n\n` +
+                      `Lien: ${window.location.href}`
+                    );
+                    window.open(`https://wa.me/${(owner?.telephone || '+242061234567').replace(/[^\d]/g, '')}?text=${message}`, '_blank');
+                  }}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  WhatsApp Direct
                 </Button>
               </div>
 
