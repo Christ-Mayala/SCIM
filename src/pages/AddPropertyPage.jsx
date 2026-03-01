@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { UploadCloud, X, Plus, Save, Tag, CalendarClock, Banknote, Percent, Ruler, BedDouble, Bath, Sofa, MapPin, Building2, Home, Key, Eye, Coins } from 'lucide-react';
 import { useProperty } from '../contexts/PropertyContext';
 import { Button } from '../components/ui/Button';
@@ -108,7 +109,7 @@ const AddPropertyPage = () => {
       preview: URL.createObjectURL(file),
       id: makeImageId(),
     }));
-    setImages((prev) => [...prev, ...newImages].slice(0, 10));
+    setImages((prev) => [...prev, ...newImages].slice(0, 25));
   };
 
   const handleImageUpload = (e) => {
@@ -149,6 +150,7 @@ const AddPropertyPage = () => {
     if (!Number(formData.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
     if (!String(formData.ville || '').trim()) next.ville = 'La ville est requise';
     if (!String(formData.adresse || '').trim()) next.adresse = "L'adresse est requise";
+    if (images.length === 0) next.images = 'Au moins une image est requise';
 
     if (formData.isBonPlan) {
       if (!Number(formData.prixOriginal) || Number(formData.prixOriginal) <= 0) {
@@ -190,11 +192,14 @@ const AddPropertyPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast.error('Veuillez corriger les erreurs dans le formulaire.');
+      return;
+    }
 
     const result = await createProperty(normalizePayload());
     if (result.success) {
-      navigate(`/properties/${result.property._id}`);
+      navigate('/admin/properties');
     }
   };
 
@@ -218,329 +223,130 @@ const AddPropertyPage = () => {
           <p className="mt-1 text-zinc-600">Champs alignés au schéma API (transaction, bon plan, devises, etc.).</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Informations générales</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Titre et Catégorie */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Informations principales</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input label="Titre de l'annonce" name="titre" value={formData.titre} onChange={handleChange} error={errors.titre} placeholder="Ex: Appartement moderne au centre-ville" />
+                <Select label="Catégorie" name="categorie" value={formData.categorie} onChange={handleChange} options={categoryOptions} error={errors.categorie} />
+              </div>
+              <div className="mt-4">
+                <Textarea label="Description détaillée" name="description" value={formData.description} onChange={handleChange} error={errors.description} rows={5} placeholder="Décrivez le bien, ses atouts, le quartier..." />
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <Input
-                  label="Titre de l'annonce"
-                  name="titre"
-                  value={formData.titre}
-                  onChange={handleChange}
-                  error={errors.titre}
-                  placeholder="Ex: Villa moderne avec piscine"
-                  leftIcon={<Tag className="w-4 h-4" />}
-                />
+            {/* Localisation */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Localisation</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input label="Ville" name="ville" value={formData.ville} onChange={handleChange} error={errors.ville} placeholder="Ex: Brazzaville" />
+                <Input label="Adresse" name="adresse" value={formData.adresse} onChange={handleChange} error={errors.adresse} placeholder="Ex: 123, avenue de la République" />
+              </div>
+            </div>
+
+            {/* Prix et Transaction */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Prix et Transaction</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input label="Prix" name="prix" type="number" value={formData.prix} onChange={handleChange} error={errors.prix} icon={Banknote} />
+                {formData.isBonPlan && (
+                  <Input label="Prix Original (barré)" name="prixOriginal" type="number" value={formData.prixOriginal} onChange={handleChange} error={errors.prixOriginal} icon={Coins} />
+                )}
               </div>
 
-              <div className="md:col-span-2">
-                <Textarea
-                  label="Description (optionnel)"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  placeholder="Décrivez le bien, les avantages, les conditions..."
-                />
-              </div>
-
-              <Select
-                label="Type de transaction"
-                name="transactionType"
-                value={formData.transactionType}
-                onChange={handleChange}
-                options={transactionOptions}
-                leftIcon={<Key className="w-4 h-4" />}
-              />
-
-              <Select
-                label="Catégorie"
-                name="categorie"
-                value={formData.categorie}
-                onChange={handleChange}
-                options={categoryOptions}
-                leftIcon={<Home className="w-4 h-4" />}
-              />
-
-              <Select
-                label="Statut de publication"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                options={statusOptions}
-                leftIcon={<Eye className="w-4 h-4" />}
-              />
-
-              <Input
-                label="Prix"
-                type="number"
-                name="prix"
-                value={formData.prix}
-                onChange={handleChange}
-                error={errors.prix}
-                placeholder="250000"
-                leftIcon={<Banknote className="w-4 h-4" />}
-              />
-
-              <Select 
-                label="Devise" 
-                name="devise" 
-                value={formData.devise} 
-                onChange={handleChange} 
-                options={deviseOptions}
-                leftIcon={<Coins className="w-4 h-4" />}
-              />
-
-
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Localisation</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Ville"
-                name="ville"
-                value={formData.ville}
-                onChange={handleChange}
-                error={errors.ville}
-                placeholder="Brazzaville"
-                leftIcon={<MapPin className="w-4 h-4" />}
-              />
-
-              <Input
-                label="Adresse"
-                name="adresse"
-                value={formData.adresse}
-                onChange={handleChange}
-                error={errors.adresse}
-                placeholder="Quartier, rue, repères"
-                leftIcon={<MapPin className="w-4 h-4" />}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Détails</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Input
-                label="Superficie (m²)"
-                type="number"
-                name="superficie"
-                value={formData.superficie}
-                onChange={handleChange}
-                placeholder="120"
-                leftIcon={<Ruler className="w-4 h-4" />}
-              />
-
-              <Input
-                label="Chambres"
-                type="number"
-                name="nombre_chambres"
-                value={formData.nombre_chambres}
-                onChange={handleChange}
-                placeholder="3"
-                leftIcon={<BedDouble className="w-4 h-4" />}
-              />
-
-              <Input
-                label="Salles de bain"
-                type="number"
-                name="nombre_salles_bain"
-                value={formData.nombre_salles_bain}
-                onChange={handleChange}
-                placeholder="2"
-                leftIcon={<Bath className="w-4 h-4" />}
-              />
-
-              <Input
-                label="Salons"
-                type="number"
-                name="nombre_salons"
-                value={formData.nombre_salons}
-                onChange={handleChange}
-                placeholder="1"
-                leftIcon={<Sofa className="w-4 h-4" />}
-              />
-            </div>
-
-            <div className="mt-6">
-              <div className="text-sm font-medium text-zinc-900 mb-3">Équipements</div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[
-                  { key: 'garage', label: 'Garage' },
-                  { key: 'piscine', label: 'Piscine' },
-                  { key: 'jardin', label: 'Jardin' },
-                  { key: 'balcon', label: 'Balcon' },
-                  { key: 'gardien', label: 'Gardien' },
-                ].map(({ key, label }) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Checkbox
-                      id={key}
-                      checked={Boolean(formData[key])}
-                      onCheckedChange={(checked) =>
-                        handleChange({ target: { name: key, type: 'checkbox', checked } })
-                      }
-                      className="border-gray-300 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-                    />
-                    <label htmlFor={key} className="text-sm text-zinc-700 cursor-pointer select-none">
-                      {label}
-                    </label>
+              <div className="mt-4 rounded-xl bg-gold-light/30 p-4 ring-1 ring-gold-primary/25">
+                <label className="flex items-center gap-3">
+                  <Checkbox checked={formData.isBonPlan} onCheckedChange={(checked) => setFormData((p) => ({ ...p, isBonPlan: checked }))} id="isBonPlan" />
+                  <div>
+                    <div className="font-semibold text-zinc-900">Marquer comme "Bon Plan"</div>
+                    <div className="text-xs text-zinc-700">Affiche un badge spécial et un prix barré.</div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
+                </label>
 
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Bon plan</h2>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="isBonPlan"
-                checked={formData.isBonPlan}
-                onCheckedChange={(checked) =>
-                  handleChange({ target: { name: 'isBonPlan', type: 'checkbox', checked } })
-                }
-                className="mt-1 border-gray-300 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-              />
-              <label htmlFor="isBonPlan" className="cursor-pointer select-none">
-                <div className="text-sm font-medium text-zinc-900 inline-flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-gold-primary" />
-                  Marquer comme bon plan
-                </div>
-                <div className="text-xs text-zinc-600">Active une mise en avant + label + expiration.</div>
-              </label>
-            </div>
-
-            {formData.isBonPlan ? (
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-200 pt-4">
-                <Input
-                  label="Prix original"
-                  type="number"
-                  name="prixOriginal"
-                  value={formData.prixOriginal}
-                  onChange={handleChange}
-                  error={errors.prixOriginal}
-                  placeholder="300000"
-                  leftIcon={<Percent className="w-4 h-4" />}
-                />
-
-                <Input
-                  label="Libellé bon plan"
-                  name="bonPlanLabel"
-                  value={formData.bonPlanLabel}
-                  onChange={handleChange}
-                  error={errors.bonPlanLabel}
-                  placeholder="Ex: -20% cette semaine"
-                  leftIcon={<Tag className="w-4 h-4" />}
-                />
-
-                <Input
-                  label="Expiration"
-                  type="datetime-local"
-                  name="bonPlanExpiresAt"
-                  value={formData.bonPlanExpiresAt}
-                  onChange={handleChange}
-                  error={errors.bonPlanExpiresAt}
-                  leftIcon={<CalendarClock className="w-4 h-4" />}
-                />
-
-                {reduction && (
-                  <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
-                    <Percent className="w-4 h-4" />
-                    <span>Réduction calculée : {reduction}%</span>
+                {formData.isBonPlan && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gold-primary/25 pt-4">
+                    <Input label="Libellé (ex: Promo Flash)" name="bonPlanLabel" value={formData.bonPlanLabel} onChange={handleChange} error={errors.bonPlanLabel} icon={Tag} />
+                    <Input label="Date de fin" name="bonPlanExpiresAt" type="date" value={formData.bonPlanExpiresAt} onChange={handleChange} error={errors.bonPlanExpiresAt} icon={CalendarClock} />
+                    {reduction && (
+                      <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
+                        <Percent className="w-4 h-4" />
+                        <span>Réduction calculée : {reduction}%</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ) : null}
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Photos (max 10)</h2>
-
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={onPickFiles}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onPickFiles();
-                }
-              }}
-              onDragEnter={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(true);
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(false);
-              }}
-              onDrop={onDrop}
-              className={`rounded-2xl border-2 border-dashed p-6 text-center transition cursor-pointer ${
-                dragActive ? 'border-gold-primary bg-gold-light/20' : 'border-zinc-300'
-              }`}
-            >
-              <UploadCloud className="w-12 h-12 text-zinc-400 mx-auto mb-3" />
-              <div className="text-sm text-zinc-700">Glissez-déposez des images ici</div>
-              <div className="text-xs text-zinc-500 mt-1">ou cliquez sur le bouton ci-dessous</div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-
-              <div className="mt-4">
-                <Button type="button" variant="outline" onClick={onPickFiles} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Sélectionner des images
-                </Button>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select label="Type de transaction" name="transactionType" value={formData.transactionType} onChange={handleChange} options={transactionOptions} />
+                <Select label="Devise" name="devise" value={formData.devise} onChange={handleChange} options={deviseOptions} />
               </div>
             </div>
 
-            {images.length > 0 ? (
-              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                {images.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <img src={image.preview} alt="Aperçu" className="w-full h-32 object-cover rounded-xl" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(image.id)}
-                      className="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Retirer"
-                    >
-                      <X className="w-4 h-4" />
+            {/* Images */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Images (25 max)</h2>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={onDrop}
+                className={`relative grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl border-2 border-dashed p-4 transition-colors ${dragActive ? 'border-gold-primary bg-gold-light/30' : 'border-zinc-300'}`}
+              >
+                {images.map((img) => (
+                  <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden group">
+                    <img src={img.preview || img.url} alt="Aperçu" className="h-full w-full object-cover" />
+                    <button onClick={() => removeImage(img.id)} className="absolute top-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
+                {images.length < 25 && (
+                  <button
+                    type="button"
+                    onClick={onPickFiles}
+                    className="relative aspect-square rounded-xl bg-zinc-50 hover:bg-zinc-100 text-zinc-500 flex flex-col items-center justify-center gap-1 ring-1 ring-zinc-200"
+                  >
+                    <UploadCloud className="w-6 h-6" />
+                    <span className="text-xs text-center">Ajouter</span>
+                  </button>
+                )}
               </div>
-            ) : null}
-          </div>
+              {errors.images && <p className="mt-2 text-sm text-red-600">{errors.images}</p>}
+              <input type="file" ref={fileInputRef} onChange={handleImageUpload} multiple accept="image/*" className="hidden" />
+            </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button type="submit" loading={loading} className="gap-2">
-              <Save className="w-4 h-4" />
-              Publier
-            </Button>
-            <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>Annuler</Button>
-          </div>
-        </form>
+            {/* Caractéristiques */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Caractéristiques</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Input label="Superficie (m²)" name="superficie" type="number" value={formData.superficie} onChange={handleChange} error={errors.superficie} icon={Ruler} />
+                <Input label="Chambres" name="nombre_chambres" type="number" value={formData.nombre_chambres} onChange={handleChange} error={errors.nombre_chambres} icon={BedDouble} />
+                <Input label="Salles de bain" name="nombre_salles_bain" type="number" value={formData.nombre_salles_bain} onChange={handleChange} error={errors.nombre_salles_bain} icon={Bath} />
+                <Input label="Salons" name="nombre_salons" type="number" value={formData.nombre_salons} onChange={handleChange} error={errors.nombre_salons} icon={Sofa} />
+              </div>
+            </div>
+
+            {/* Commodités */}
+            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Commodités</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <label className="flex items-center gap-2"><Checkbox name="garage" checked={formData.garage} onCheckedChange={(checked) => handleChange({ target: { name: 'garage', type: 'checkbox', checked } })} /> Garage</label>
+                <label className="flex items-center gap-2"><Checkbox name="piscine" checked={formData.piscine} onCheckedChange={(checked) => handleChange({ target: { name: 'piscine', type: 'checkbox', checked } })} /> Piscine</label>
+                <label className="flex items-center gap-2"><Checkbox name="jardin" checked={formData.jardin} onCheckedChange={(checked) => handleChange({ target: { name: 'jardin', type: 'checkbox', checked } })} /> Jardin</label>
+                <label className="flex items-center gap-2"><Checkbox name="balcon" checked={formData.balcon} onCheckedChange={(checked) => handleChange({ target: { name: 'balcon', type: 'checkbox', checked } })} /> Balcon</label>
+                <label className="flex items-center gap-2"><Checkbox name="gardien" checked={formData.gardien} onCheckedChange={(checked) => handleChange({ target: { name: 'gardien', type: 'checkbox', checked } })} /> Gardien</label>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={() => navigate('/admin/properties')}>Annuler</Button>
+              <Button type="submit" loading={loading} className="gap-2">
+                <Save className="w-4 h-4" />
+                Enregistrer le bien
+              </Button>
+            </div>
+          </form>
       </div>
     </div>
   );
