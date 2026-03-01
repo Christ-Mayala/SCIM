@@ -148,11 +148,10 @@ const AddPropertyPage = () => {
 
     if (!String(formData.titre || '').trim()) next.titre = 'Le titre est requis';
     if (!Number(formData.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
-    // Ville et adresse sont maintenant optionnels
-    // if (!String(formData.ville || '').trim()) next.ville = 'La ville est requise';
-    // if (!String(formData.adresse || '').trim()) next.adresse = "L'adresse est requise";
-    // Images sont maintenant optionnelles
-    // if (images.length === 0) next.images = 'Au moins une image est requise';
+    // Ville et adresse sont optionnels mais images sont obligatoires
+    if (!String(formData.ville || '').trim()) next.ville = 'La ville est requise';
+    if (!String(formData.adresse || '').trim()) next.adresse = "L'adresse est requise";
+    if (images.length === 0) next.images = 'Au moins une image est requise';
 
     if (formData.isBonPlan) {
       if (!Number(formData.prixOriginal) || Number(formData.prixOriginal) <= 0) {

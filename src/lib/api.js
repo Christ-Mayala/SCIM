@@ -133,38 +133,12 @@ export const propertyAPI = {
   getAll: (params = {}) => api.get('/property', { params }),
   getById: (id) => api.get(`/property/${id}`),
   create: (propertyData) => {
-    const formData = new FormData();
-
-    Object.keys(propertyData).forEach((key) => {
-      if (key !== 'images') {
-        formData.append(key, propertyData[key]);
-      }
-    });
-
-    if (propertyData.images && propertyData.images.length > 0) {
-      propertyData.images.forEach((image) => {
-        formData.append('images', image);
-      });
-    }
-
-    return api.post('/property', formData);
+    // propertyData est déjà un FormData depuis PropertyContext
+    return api.post('/property', propertyData);
   },
   update: (id, propertyData) => {
-    const formData = new FormData();
-
-    Object.keys(propertyData).forEach((key) => {
-      if (key !== 'images') {
-        formData.append(key, propertyData[key]);
-      }
-    });
-
-    if (propertyData.images && propertyData.images.length > 0) {
-      propertyData.images.forEach((image) => {
-        formData.append('images', image);
-      });
-    }
-
-    return api.put(`/property/${id}`, formData);
+    // propertyData est déjà un FormData depuis PropertyContext
+    return api.put(`/property/${id}`, propertyData);
   },
   delete: (id) => api.delete(`/property/${id}`),
   toggleFavorite: (id) => api.post(`/favoris/${id}`),
