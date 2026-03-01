@@ -59,6 +59,17 @@ const StatCard = ({ title, value, icon: Icon, hint, variant = 'default' }) => {
   );
 };
 
+const QuickLinkCard = ({ title, icon: Icon, to }) => (
+  <Link to={to} className="group rounded-xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm hover:ring-gold-primary transition-all">
+    <div className="flex items-center gap-3">
+      <div className="grid h-9 w-9 place-items-center rounded-lg bg-gold-primary/10 text-gold-primary">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="font-medium text-zinc-900">{title}</div>
+    </div>
+  </Link>
+);
+
 const AdminDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -150,7 +161,7 @@ const AdminDashboardPage = () => {
       .slice(0, 5);
   }, [reservations]);
 
-  const quick = useMemo(
+  const quickLinks = useMemo(
     () => [
       { to: '/admin/properties', title: 'Gérer les annonces', icon: Building2 },
       { to: '/admin/users', title: 'Utilisateurs', icon: Users },
@@ -218,6 +229,15 @@ const AdminDashboardPage = () => {
           <StatCard title="Messages" value={stats.totalMessages ?? 0} icon={MessageSquare} hint={`${stats.unreadMessages ?? 0} non lus`} variant={(stats.unreadMessages || 0) > 0 ? 'danger' : 'default'} />
           <StatCard title="Réservations" value={reservationStats.total} icon={CalendarDays} hint={`${reservationStats.pending} en attente`} />
           <StatCard title="Confirmées" value={reservationStats.confirmed} icon={BarChart3} hint="Réservations confirmées" />
+        </div>
+
+        <div className="mt-8">
+          <h2 className="font-semibold text-zinc-900">Accès rapide</h2>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {quickLinks.map((link) => (
+              <QuickLinkCard key={link.to} {...link} />
+            ))}
+          </div>
         </div>
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
