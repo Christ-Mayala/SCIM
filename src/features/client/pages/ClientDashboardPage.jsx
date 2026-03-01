@@ -109,6 +109,20 @@ const getReservationReference = (reservation) => {
     }
   };
 
+  const handleCancelReservation = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
+    try {
+      const res = await reservationAPI.cancel(id);
+      const updated = res?.data || null;
+      if (updated?._id) {
+        setReservations((prev) => prev.map((r) => (r._id === id ? updated : r)));
+        toast.success('Réservation annulée.');
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Impossible d\'annuler la réservation.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,6 +247,15 @@ const getReservationReference = (reservation) => {
                               </Button>
                             </a>
                           ) : null}
+                          {r.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelReservation(r._id)}
+                            >
+                              Annuler
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>

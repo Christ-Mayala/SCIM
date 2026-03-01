@@ -174,8 +174,8 @@ export const favoritesAPI = {
 };
 
 export const reservationAPI = {
-  create: (propertyId, date, telephone = '') =>
-    api.post('/reservation', { propertyId, date, ...(telephone ? { telephone } : {}) }),
+  create: (propertyId, date, telephone = '', isWhatsapp = false) =>
+    api.post('/reservation', { propertyId, date, ...(telephone ? { telephone } : {}), isWhatsapp }),
   my: () => api.get('/reservation/my'),
   owner: () => api.get('/reservation/owner'),
   cancel: (id) => api.patch(`/reservation/${id}/cancel`),
@@ -186,7 +186,9 @@ export const reservationAPI = {
 
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  
   getReservations: (params = {}) => api.get('/admin/reservations', { params }),
+  updateReservationStatus: (id, status) => api.put(`/admin/reservations/${id}/status`, { status }),
 
   getProperties: (params = {}) => api.get('/admin/properties', { params }),
   getPropertyById: (id) => api.get(`/admin/properties/${id}`),

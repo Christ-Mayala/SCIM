@@ -211,7 +211,7 @@ const AdminDashboardPage = () => {
               Administration
             </div>
             <h1 className="mt-3 text-3xl font-semibold text-zinc-900">Dashboard</h1>
-            <div className="mt-1 text-sm text-zinc-600">Statistiques réelles + réservations.</div>
+            <div className="mt-1 text-sm text-zinc-600">Vue d'ensemble de votre activité immobilière.</div>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/admin/properties/new">
@@ -315,9 +315,32 @@ const AdminDashboardPage = () => {
                             </span>
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <a href={buildClientWhatsappUrl(r)} target="_blank" rel="noopener noreferrer" className="text-gold-primary hover:text-gold-dark">
-                              Contacter<span className="sr-only">, {r.user?.nom}</span>
-                            </a>
+                            <div className="flex items-center gap-2">
+                              {r.status !== 'confirmée' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateReservationStatus(r._id, 'confirm')}
+                                  loading={statusActionId === `confirm:${r._id}`}
+                                  className="text-xs"
+                                >
+                                  Confirmer
+                                </Button>
+                              )}
+                              {r.status !== 'annulee' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => updateReservationStatus(r._id, 'cancel')}
+                                  loading={statusActionId === `cancel:${r._id}`}
+                                  className="text-xs"
+                                >
+                                  Annuler
+                                </Button>
+                              )}
+                              <a href={buildClientWhatsappUrl(r)} target="_blank" rel="noopener noreferrer" className="text-gold-primary hover:text-gold-dark text-xs">
+                                WhatsApp
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       ))}

@@ -10,6 +10,8 @@ const AdminMessagesPage = () => {
   const [error, setError] = useState(null);
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const load = async () => {
     try {
@@ -55,6 +57,14 @@ const AdminMessagesPage = () => {
       setItems((prev) => prev.filter((m) => m._id !== id));
     } catch (e) {
       alert(e?.response?.data?.message || 'Suppression impossible');
+    }
+  };
+
+  const handleViewDetail = (message) => {
+    setSelectedMessage(message);
+    setShowDetailModal(true);
+    if (!message.lu) {
+      handleStatus(message._id, true);
     }
   };
 
@@ -117,9 +127,9 @@ const AdminMessagesPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link to={`/admin/messages/thread/${m.expediteur?._id}`}>
-                      <Button variant="outline" size="sm">Ouvrir</Button>
-                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(m)}>
+                      Voir
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => handleStatus(m._id, !m.lu)}>
                       {m.lu ? 'Marquer non lu' : 'Marquer lu'}
                     </Button>
@@ -138,6 +148,35 @@ const AdminMessagesPage = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de détail du message */}
+      {showDetailModal && selectedMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-zinc-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-zinc-900">{selectedMessage.sujet || 'Sans sujet'}</h2>
+                  <div className="mt-1 text-sm text-zinc-600">
+                    <span className="text-zinc-400">De:</span> {selectedMessage.expediteur?.email || '—'} <span className="text-zinc-300">•</span> <span className="text-zinc-400">À:</span> {selectedMessage.destinataire?.email || '—'}
+                  </div>
+                  <div className="text-xs text-zinc-400 mt-1">
+                    {new Date(selectedMessage.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowDetailModal(false)}>
+                  Fermer
+                </Button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="prose prose-sm max-w-none text-zinc-700 whitespace-pre-wrap">
+                {selectedMessage.contenu}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

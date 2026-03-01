@@ -235,7 +235,7 @@ const AddPropertyPage = () => {
             Publication
           </div>
           <h1 className="mt-4 text-3xl font-semibold text-zinc-900">Ajouter un bien</h1>
-          <p className="mt-1 text-zinc-600">Champs alignés au schéma API (transaction, bon plan, devises, etc.).</p>
+          <p className="mt-1 text-zinc-600">Remplissez les détails de votre propriété pour la mettre en valeur.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

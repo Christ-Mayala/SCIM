@@ -48,6 +48,7 @@ const PropertyDetailPage = () => {
   const [userRating, setUserRating] = useState(0);
 
   const [reservationDate, setReservationDate] = useState('');
+  const [isWhatsapp, setIsWhatsapp] = useState(true);
   const [reservationLoading, setReservationLoading] = useState(false);
   const [reservationAck, setReservationAck] = useState(null);
 
@@ -177,21 +178,35 @@ const PropertyDetailPage = () => {
       const content = lines.join('\n');
       const result = await contactScim(subject, content);
       if (result?.success) {
-        toast.success("Votre demande a été envoyée à l'administration");
+        toast.success('Message envoyé avec succès !');
         setShowContactModal(false);
       } else {
-        toast.error("Échec de l'envoi de la demande");
+        toast.error("Échec de l'envoi du message.");
       }
     } catch (err) {
-      toast.error("Échec de l'envoi de la demande");
+      toast.error("Échec de l'envoi du message.");
     }
   };
 
 
   const handleRating = async (rating) => {
     if (isAuthenticated) {
-      setUserRating(rating);
-      await rateProperty(id, rating);
+      try {
+        setUserRating(rating);
+        const result = await rateProperty(id, rating);
+        if (result?.data?.userNote) {
+          toast.success('Note enregistrée avec succès !');
+        }
+      } catch (error) {
+        const message = error?.response?.data?.message || error?.message || 'Erreur lors de la notation';
+        if (message.includes('déjà noté')) {
+          toast.error('Vous avez déjà noté cette propriété.');
+        } else {
+          toast.error(message);
+        }
+        // Réinitialiser la note actuelle
+        setUserRating(0);
+      }
     } else {
       navigate('/login');
     }
@@ -468,6 +483,48 @@ const PropertyDetailPage = () => {
                  ))}
               </div>
             </div>
+
+            {/* Rating Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
+                Noter ce bien
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {isAuthenticated ? 'Cliquez sur les étoiles pour noter cette propriété' : 'Connectez-vous pour noter cette propriété'}
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <StarRating 
+                        value={userRating} 
+                        interactive={isAuthenticated}
+                        onRate={handleRating}
+                        disabled={!isAuthenticated}
+                        className="text-lg"
+                      />
+                      {property.noteMoyenne && (
+                        <div className="text-sm text-gray-500">
+                          <span className="font-semibold">{property.noteMoyenne.toFixed(1)}</span>
+                          <span className="text-gray-400"> ({property.nombreAvis || 0} avis)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {isAuthenticated && userRating > 0 && (
+                  <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg border border-green-100">
+                    ✅ Merci pour votre note de {userRating}/5 !
+                  </div>
+                )}
+                {!isAuthenticated && (
+                  <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-lg border border-blue-100">
+                    ℹ️ Connectez-vous pour noter cette propriété
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Sidebar */}
@@ -547,6 +604,19 @@ const PropertyDetailPage = () => {
                     <p className="text-xs text-gray-400 mt-1">Sélectionnez une date et une heure (10h-17h)</p>
                   </div>
 
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="whatsapp"
+                      checked={isWhatsapp}
+                      onChange={(e) => setIsWhatsapp(e.target.checked)}
+                      className="w-4 h-4 text-gold-primary border-gray-300 rounded focus:ring-gold-primary focus:ring-2"
+                    />
+                    <label htmlFor="whatsapp" className="text-sm text-gray-700">
+                      Ce numéro est un numéro WhatsApp
+                    </label>
+                  </div>
+
                   {reservationValidationMessage && (
                     <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-start gap-3 border border-red-100 animate-fade-in">
                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -573,7 +643,7 @@ const PropertyDetailPage = () => {
                           return;
                         }
 
-                        const res = await reservationAPI.create(property._id, reservationDate, reservationPhone);
+                        const res = await reservationAPI.create(property._id, reservationDate, reservationPhone, isWhatsapp);
                         const payload = res?.data || {};
                         const reservation = payload?.reservation || payload;
                         const support = payload?.support || reservation?.support || {};

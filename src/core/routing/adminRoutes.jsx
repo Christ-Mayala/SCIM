@@ -27,6 +27,7 @@ export const adminRoutes = [
   { key: 'admin-properties', path: 'properties', element: <AdminPropertiesPage /> },
   { key: 'admin-properties-new', path: 'properties/new', element: <AddPropertyPage /> },
   { key: 'admin-properties-edit', path: 'properties/:id/edit', element: <EditPropertyPage /> },
+  { key: 'admin-reservations', path: 'reservations', element: <AdminReservationsPage /> },
   { key: 'admin-users', path: 'users', element: <AdminUsersPage /> },
   { key: 'admin-messages', path: 'messages', element: <AdminMessagesPage /> },
   { key: 'admin-analytics', path: 'analytics', element: <AdminAnalyticsPage /> },
