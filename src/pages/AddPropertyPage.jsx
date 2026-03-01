@@ -147,10 +147,19 @@ const AddPropertyPage = () => {
     const next = {};
 
     if (!String(formData.titre || '').trim()) next.titre = 'Le titre est requis';
+    if (!String(formData.description || '').trim()) {
+      next.description = 'La description est requise';
+    } else if (String(formData.description).trim().length < 20) {
+      next.description = 'La description doit faire au moins 20 caractères';
+    }
     if (!Number(formData.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
     // Ville et adresse sont optionnels mais images sont obligatoires
     if (!String(formData.ville || '').trim()) next.ville = 'La ville est requise';
-    if (!String(formData.adresse || '').trim()) next.adresse = "L'adresse est requise";
+    if (!String(formData.adresse || '').trim()) {
+      next.adresse = "L'adresse est requise";
+    } else if (String(formData.adresse).trim().length < 5) {
+      next.adresse = "L'adresse doit faire au moins 5 caractères";
+    }
     if (images.length === 0) next.images = 'Au moins une image est requise';
 
     if (formData.isBonPlan) {
