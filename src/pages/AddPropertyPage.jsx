@@ -176,17 +176,22 @@ const AddPropertyPage = () => {
   };
 
   const normalizePayload = () => {
-    const toNumberOrEmpty = (v) => (String(v ?? '').trim() === '' ? '' : Number(v));
+    const toNumberOrNull = (v) => {
+      const trimmed = String(v ?? '').trim();
+      if (trimmed === '') return null;
+      const num = Number(trimmed);
+      return isNaN(num) ? null : num;
+    };
 
     return {
       ...formData,
-      prix: toNumberOrEmpty(formData.prix),
-      prixOriginal: toNumberOrEmpty(formData.prixOriginal),
-      superficie: toNumberOrEmpty(formData.superficie),
-      nombre_chambres: toNumberOrEmpty(formData.nombre_chambres),
-      nombre_salles_bain: toNumberOrEmpty(formData.nombre_salles_bain),
-      nombre_salons: toNumberOrEmpty(formData.nombre_salons),
-      bonPlanExpiresAt: formData.bonPlanExpiresAt ? new Date(formData.bonPlanExpiresAt).toISOString() : '',
+      prix: toNumberOrNull(formData.prix),
+      prixOriginal: toNumberOrNull(formData.prixOriginal),
+      superficie: toNumberOrNull(formData.superficie),
+      nombre_chambres: toNumberOrNull(formData.nombre_chambres),
+      nombre_salles_bain: toNumberOrNull(formData.nombre_salles_bain),
+      nombre_salons: toNumberOrNull(formData.nombre_salons),
+      bonPlanExpiresAt: formData.bonPlanExpiresAt ? new Date(formData.bonPlanExpiresAt).toISOString() : null,
       images: images.map((img) => img.file),
     };
   };
