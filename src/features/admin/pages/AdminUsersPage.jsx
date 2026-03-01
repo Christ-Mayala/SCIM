@@ -23,18 +23,30 @@ const AdminUsersPage = () => {
   const [error, setError] = useState(null);
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 15,
+    totalPages: 1,
+    totalItems: 0,
+  });
 
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [draft, setDraft] = useState({ name: '', nom: '', email: '', telephone: '', status: 'active' });
+  const [draft, setDraft] = useState({ nom: '', email: '', telephone: '', status: 'active' });
 
-  const load = async () => {
+  const load = async (page = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await adminAPI.getUsers({ page: 1, limit: 100 });
+      const res = await adminAPI.getUsers({ page, limit: pagination.limit, search: search || undefined });
       setItems(Array.isArray(res.data?.users) ? res.data.users : []);
+      setPagination({
+        page: res.data?.page || 1,
+        limit: res.data?.limit || 15,
+        totalPages: res.data?.totalPages || 1,
+        totalItems: res.data?.totalUsers || 0,
+      });
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || 'Erreur');
       setItems([]);
@@ -44,8 +56,8 @@ const AdminUsersPage = () => {
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    load(1);
+  }, [search]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -56,8 +68,7 @@ const AdminUsersPage = () => {
   const openEdit = (u) => {
     setSelected(u);
     setDraft({
-      name: u?.name || '',
-      nom: u?.nom || '',
+      nom: u?.nom || u?.name || '',
       email: u?.email || '',
       telephone: u?.telephone || '',
       status: u?.status || 'active',
@@ -95,7 +106,6 @@ const AdminUsersPage = () => {
     try {
       setSaving(true);
       const res = await adminAPI.updateUser(selected._id, {
-        name: draft.name,
         nom: draft.nom,
         email: draft.email,
         telephone: draft.telephone,
@@ -132,19 +142,20 @@ const AdminUsersPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm">
+        <form onSubmit={(e) => { e.preventDefault(); load(1); }} className="mt-6 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gold-primary/10 text-gold-primary">
-              <Search className="h-4 w-4" />
-            </div>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher (nom, email, téléphone)"
               className="h-10 w-full rounded-xl border border-zinc-200 px-4 text-sm outline-none focus:border-gold-primary"
             />
+            <Button type="submit" className="gap-2">
+              <Search className="h-4 w-4" />
+              Rechercher
+            </Button>
           </div>
-        </div>
+        </form>
 
         {error ? (
           <div className="mt-6 rounded-2xl bg-white p-6 ring-1 ring-red-500/20 text-sm text-red-700">{error}</div>
@@ -230,6 +241,20 @@ const AdminUsersPage = () => {
               </tbody>
             </table>
           </div>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-3 sm:px-4 py-3 bg-zinc-50 border-t border-zinc-200">
+            <div className="text-xs text-zinc-600">
+              Page <span className="font-semibold">{pagination.page}</span> sur <span className="font-semibold">{pagination.totalPages}</span> ({pagination.totalItems} utilisateurs)
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => load(pagination.page - 1)} disabled={pagination.page <= 1}>
+                Précédent
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => load(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages}>
+                Suivant
+              </Button>
+            </div>
+          </div>
         </div>
 
         {editOpen ? (
@@ -247,8 +272,7 @@ const AdminUsersPage = () => {
               </div>
 
               <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto">
-                <Input label="Name" value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} />
-                <Input label="Nom" value={draft.nom} onChange={(e) => setDraft((d) => ({ ...d, nom: e.target.value }))} />
+                <Input label="Nom" value={draft.nom} onChange={(e) => setDraft((d) => ({ ...d, nom: e.target.value }))} className="md:col-span-2" />
                 <Input label="Email" type="email" value={draft.email} onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))} />
                 <Input label="Téléphone" value={draft.telephone} onChange={(e) => setDraft((d) => ({ ...d, telephone: e.target.value }))} />
 

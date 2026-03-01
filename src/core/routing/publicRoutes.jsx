@@ -13,6 +13,7 @@ import AboutPage from '../../pages/AboutPage';
 import PrivacyPage from '../../pages/PrivacyPage';
 import TermsPage from '../../pages/TermsPage';
 import CookiesPage from '../../pages/CookiesPage';
+import AuthCallbackPage from '../../pages/AuthCallbackPage';
 
 export const publicRoutes = [
   { path: '/home', element: <HomePage /> },
@@ -20,6 +21,7 @@ export const publicRoutes = [
   { path: '/properties/:id', element: <PropertyDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/auth/callback', element: <AuthCallbackPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/verify-code', element: <VerifyCodePage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },

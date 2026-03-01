@@ -82,15 +82,48 @@ const AdminAnalyticsPage = () => {
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
             <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
               <div className="font-medium text-zinc-900">Propriétés</div>
-              <pre className="mt-2 text-xs text-zinc-700 overflow-x-auto whitespace-pre">{JSON.stringify(propertyAnalytics, null, 2)}</pre>
+              <div className="mt-2 space-y-1">
+                {propertyAnalytics ? (
+                  Object.entries(propertyAnalytics).map(([key, value]) => (
+                    <div key={key} className="flex justify-between text-xs">
+                      <span className="text-zinc-600">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</span>
+                      <span className="font-medium text-zinc-800">{String(value)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-zinc-500">Aucune donnée</div>
+                )}
+              </div>
             </div>
             <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
               <div className="font-medium text-zinc-900">Utilisateurs</div>
-              <pre className="mt-2 text-xs text-zinc-700 overflow-x-auto whitespace-pre">{JSON.stringify(userAnalytics, null, 2)}</pre>
+              <div className="mt-2 space-y-1">
+                {userAnalytics ? (
+                  Object.entries(userAnalytics).map(([key, value]) => (
+                    <div key={key} className="flex justify-between text-xs">
+                      <span className="text-zinc-600">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</span>
+                      <span className="font-medium text-zinc-800">{String(value)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-zinc-500">Aucune donnée</div>
+                )}
+              </div>
             </div>
             <div className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
               <div className="font-medium text-zinc-900">Revenus</div>
-              <pre className="mt-2 text-xs text-zinc-700 overflow-x-auto whitespace-pre">{JSON.stringify(revenueAnalytics, null, 2)}</pre>
+              <div className="mt-2 space-y-1">
+                {revenueAnalytics ? (
+                  Object.entries(revenueAnalytics).map(([key, value]) => (
+                    <div key={key} className="flex justify-between text-xs">
+                      <span className="text-zinc-600">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</span>
+                      <span className="font-medium text-zinc-800">{String(value)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-zinc-500">Aucune donnée</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

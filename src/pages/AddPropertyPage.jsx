@@ -134,19 +134,37 @@ const AddPropertyPage = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
+  const reduction = useMemo(() => {
+    if (!formData.isBonPlan || !Number(formData.prixOriginal) || !Number(formData.prix)) return null;
+    const p = Number(formData.prix);
+    const o = Number(formData.prixOriginal);
+    if (o <= p) return null;
+    return Math.round(((o - p) / o) * 100);
+  }, [formData.isBonPlan, formData.prix, formData.prixOriginal]);
+
   const validateForm = () => {
     const next = {};
 
-    if (!String(formData.titre || '').trim()) next.titre = "Le titre est requis";
-    if (!String(formData.prix || '').trim()) next.prix = 'Le prix est requis';
+    if (!String(formData.titre || '').trim()) next.titre = 'Le titre est requis';
+    if (!Number(formData.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
     if (!String(formData.ville || '').trim()) next.ville = 'La ville est requise';
     if (!String(formData.adresse || '').trim()) next.adresse = "L'adresse est requise";
 
     if (formData.isBonPlan) {
-      if (!String(formData.bonPlanLabel || '').trim()) next.bonPlanLabel = 'Le libellé bon plan est requis';
-      if (!String(formData.bonPlanExpiresAt || '').trim()) next.bonPlanExpiresAt = 'La date de fin est requise';
-      if (String(formData.prixOriginal || '').trim() && Number(formData.prixOriginal) <= Number(formData.prix || 0)) {
+      if (!Number(formData.prixOriginal) || Number(formData.prixOriginal) <= 0) {
+        next.prixOriginal = 'Le prix original est requis pour un bon plan';
+      } else if (Number(formData.prixOriginal) <= Number(formData.prix || 0)) {
         next.prixOriginal = 'Le prix original doit être supérieur au prix actuel';
+      }
+      
+      if (!String(formData.bonPlanLabel || '').trim()) {
+        next.bonPlanLabel = 'Le libellé est requis (ex: -20%)';
+      }
+
+      if (!formData.bonPlanExpiresAt) {
+        next.bonPlanExpiresAt = 'La date de fin est requise';
+      } else if (new Date(formData.bonPlanExpiresAt) <= new Date()) {
+        next.bonPlanExpiresAt = 'La date de fin doit être dans le futur';
       }
     }
 
@@ -275,16 +293,7 @@ const AddPropertyPage = () => {
                 leftIcon={<Coins className="w-4 h-4" />}
               />
 
-              <Input
-                label="Prix original (optionnel)"
-                type="number"
-                name="prixOriginal"
-                value={formData.prixOriginal}
-                onChange={handleChange}
-                error={errors.prixOriginal}
-                placeholder="300000"
-                leftIcon={<Percent className="w-4 h-4" />}
-              />
+
             </div>
           </div>
 
@@ -409,7 +418,18 @@ const AddPropertyPage = () => {
             </div>
 
             {formData.isBonPlan ? (
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-200 pt-4">
+                <Input
+                  label="Prix original"
+                  type="number"
+                  name="prixOriginal"
+                  value={formData.prixOriginal}
+                  onChange={handleChange}
+                  error={errors.prixOriginal}
+                  placeholder="300000"
+                  leftIcon={<Percent className="w-4 h-4" />}
+                />
+
                 <Input
                   label="Libellé bon plan"
                   name="bonPlanLabel"
@@ -429,6 +449,13 @@ const AddPropertyPage = () => {
                   error={errors.bonPlanExpiresAt}
                   leftIcon={<CalendarClock className="w-4 h-4" />}
                 />
+
+                {reduction && (
+                  <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
+                    <Percent className="w-4 h-4" />
+                    <span>Réduction calculée : {reduction}%</span>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>

@@ -1,10 +1,32 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Building2, MessageSquare, Users, AlertCircle, Settings, ArrowRight, Star, CalendarDays, PhoneCall, MessageCircle } from 'lucide-react';
+import { BarChart3, Building2, MessageSquare, Users, AlertCircle, Settings, ArrowRight, Star, CalendarDays, PhoneCall, MessageCircle, Eye } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { adminAPI, formatDate, formatPrice, reservationAPI } from '../../../lib/api';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
+
+const COLORS = ['#FFB703', '#FB8500', '#8ECAE6', '#219EBC', '#023047', '#FF0000'];
+
+const PropertyTypeChart = ({ data }) => {
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie data={data} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="count" nameKey="_id">
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value, name) => [value, name]} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
 
 const StatCard = ({ title, value, icon: Icon, hint, variant = 'default' }) => {
   const ring =
@@ -130,11 +152,11 @@ const AdminDashboardPage = () => {
 
   const quick = useMemo(
     () => [
-      { to: '/admin/properties', title: 'GÃ©rer les annonces', icon: Building2 },
+      { to: '/admin/properties', title: 'Gérer les annonces', icon: Building2 },
       { to: '/admin/users', title: 'Utilisateurs', icon: Users },
       { to: '/admin/messages', title: 'Messages', icon: MessageSquare },
       { to: '/admin/analytics', title: 'Analytics', icon: BarChart3 },
-      { to: '/admin/settings', title: 'ParamÃ¨tres', icon: Settings },
+      { to: '/admin/settings', title: 'Paramètres', icon: Settings },
     ],
     [],
   );
@@ -159,7 +181,7 @@ const AdminDashboardPage = () => {
               <div className="text-lg font-semibold text-zinc-900">Dashboard indisponible</div>
               <div className="mt-1 text-sm text-zinc-600">{error}</div>
               <div className="mt-4">
-                <Button onClick={() => window.location.reload()}>RÃ©essayer</Button>
+                <Button onClick={() => window.location.reload()}>Réessayer</Button>
               </div>
             </div>
           </div>
@@ -178,7 +200,7 @@ const AdminDashboardPage = () => {
               Administration
             </div>
             <h1 className="mt-3 text-3xl font-semibold text-zinc-900">Dashboard</h1>
-            <div className="mt-1 text-sm text-zinc-600">Statistiques rÃ©elles + rÃ©servations.</div>
+            <div className="mt-1 text-sm text-zinc-600">Statistiques réelles + réservations.</div>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/admin/properties/new">
@@ -194,171 +216,93 @@ const AdminDashboardPage = () => {
           <StatCard title="Biens" value={stats.totalProperties ?? 0} icon={Building2} hint={`${stats.activeProperties ?? 0} actifs`} variant="gold" />
           <StatCard title="Utilisateurs" value={stats.totalUsers ?? 0} icon={Users} hint={`${stats.newUsersThisMonth ?? 0} ce mois`} />
           <StatCard title="Messages" value={stats.totalMessages ?? 0} icon={MessageSquare} hint={`${stats.unreadMessages ?? 0} non lus`} variant={(stats.unreadMessages || 0) > 0 ? 'danger' : 'default'} />
-          <StatCard title="RÃ©servations" value={reservationStats.total} icon={CalendarDays} hint={`${reservationStats.pending} en attente`} />
-          <StatCard title="ConfirmÃ©es" value={reservationStats.confirmed} icon={BarChart3} hint="RÃ©servations confirmÃ©es" />
+          <StatCard title="Réservations" value={reservationStats.total} icon={CalendarDays} hint={`${reservationStats.pending} en attente`} />
+          <StatCard title="Confirmées" value={reservationStats.confirmed} icon={BarChart3} hint="Réservations confirmées" />
         </div>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-2xl bg-white p-6 ring-1 ring-zinc-200 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-lg font-semibold text-zinc-900">Derniers biens</div>
-                  <div className="mt-1 text-sm text-zinc-600">Top 5 rÃ©cents</div>
-                </div>
-                <Link to="/admin/properties" className="text-sm text-gold-primary hover:underline inline-flex items-center gap-1">
-                  Tout voir <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              <div className="mt-5 divide-y divide-zinc-100">
-                {topProperties.length === 0 ? (
-                  <div className="py-10 text-center text-sm text-zinc-600">Aucun bien.</div>
-                ) : (
-                  topProperties.map((p) => (
-                    <div key={p._id} className="py-4 flex items-center justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="font-medium text-zinc-900 truncate">{p.titre}</div>
-                        <div className="mt-1 text-xs text-zinc-600 flex flex-wrap gap-x-3 gap-y-1">
-                          <span className="inline-flex items-center gap-1"><span className="text-zinc-400">Ville:</span> {p.ville}</span>
-                          <span className="inline-flex items-center gap-1"><span className="text-zinc-400">CatÃ©gorie:</span> {p.categorie}</span>
-                          <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 text-gold-primary" /><span className="text-zinc-400">Bon plan:</span> {p.isBonPlan ? 'Oui' : 'Non'}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-sm font-semibold text-zinc-900 whitespace-nowrap">{formatPrice(p.prix)}</div>
-                        <Link to={`/properties/${p._id}`}>
-                          <Button variant="outline" size="sm">Voir</Button>
-                        </Link>
-                      </div>
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 rounded-2xl bg-white p-6 ring-1 ring-zinc-200 shadow-sm">
+            <h2 className="font-semibold text-zinc-900">Annonces populaires</h2>
+            <div className="mt-4 space-y-4">
+              {topProperties.map((p) => (
+                <div key={p._id} className="flex items-center gap-4">
+                  <img src={p.images?.[0]?.url || '/images/scim-logo.jpg'} alt={p.titre} className="h-16 w-16 rounded-lg object-cover" />
+                  <div className="flex-1">
+                    <Link to={`/properties/${p._id}`} className="font-medium text-zinc-800 hover:text-gold-primary transition-colors">{p.titre}</Link>
+                    <div className="mt-1 text-xs text-zinc-500 flex items-center gap-4">
+                      <span className="inline-flex items-center gap-1.5"><Eye className="w-3 h-3" /> {p.views || 0} vues</span>
+                      <span className="inline-flex items-center gap-1.5"><Star className="w-3 h-3" /> {p.favoritedBy?.length || 0} favoris</span>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white p-6 ring-1 ring-zinc-200 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-lg font-semibold text-zinc-900">RÃ©servations reÃ§ues</div>
-                  <div className="mt-1 text-sm text-zinc-600">DonnÃ©es via /admin/reservations</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-zinc-900">{formatPrice(p.prix)}</div>
+                    <div className="text-xs text-zinc-500">{p.ville}</div>
+                  </div>
                 </div>
-              </div>
-
-              <div className="mt-5 divide-y divide-zinc-100">
-                {recentReservations.length === 0 ? (
-                  <div className="py-10 text-center text-sm text-zinc-600">Aucune rÃ©servation.</div>
-                ) : (
-                  recentReservations.map((r) => {
-                    const clientPhone = getReservationClientPhone(r);
-                    const whatsappHref = buildClientWhatsappUrl(r);
-                    const statusRaw = String(r.status || '').toLowerCase();
-                    const canConfirm = !statusRaw.includes('confirm') && !statusRaw.includes('annul') && !statusRaw.includes('cancel');
-                    const canCancel = !statusRaw.includes('annul') && !statusRaw.includes('cancel');
-
-                    return (
-                      <div key={r._id} className="py-4 flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="font-medium text-zinc-900 truncate">{r.property?.titre || 'Bien'}</div>
-                          <div className="mt-1 text-xs text-zinc-600 flex flex-wrap gap-x-3 gap-y-1">
-                            <span><span className="text-zinc-400">Client:</span> {r.user?.email || r.user?.nom || '—'}</span>
-                            <span><span className="text-zinc-400">Telephone:</span> {clientPhone || '—'}</span>
-                            <span><span className="text-zinc-400">Date:</span> {r.date ? formatDate(r.date) : '—'}</span>
-                            <span><span className="text-zinc-400">Statut:</span> {r.status}</span>
-                          </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            {clientPhone ? (
-                              <a href={`tel:${clientPhone}`}>
-                                <Button size="sm" variant="outline" className="h-8 px-3">
-                                  <PhoneCall className="h-3.5 w-3.5 mr-1" />
-                                  Appeler
-                                </Button>
-                              </a>
-                            ) : null}
-                            {whatsappHref ? (
-                              <a href={whatsappHref} target="_blank" rel="noreferrer">
-                                <Button size="sm" className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white">
-                                  <MessageCircle className="h-3.5 w-3.5 mr-1" />
-                                  WhatsApp
-                                </Button>
-                              </a>
-                            ) : null}
-                            {canConfirm ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-3"
-                                disabled={statusActionId === `confirm:${r._id}`}
-                                onClick={() => updateReservationStatus(r._id, 'confirm')}
-                              >
-                                {statusActionId === `confirm:${r._id}` ? '...' : 'Confirmer'}
-                              </Button>
-                            ) : null}
-                            {canCancel ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-3 text-red-600 border-red-200 hover:border-red-300 hover:text-red-700"
-                                disabled={statusActionId === `cancel:${r._id}`}
-                                onClick={() => updateReservationStatus(r._id, 'cancel')}
-                              >
-                                {statusActionId === `cancel:${r._id}` ? '...' : 'Annuler'}
-                              </Button>
-                            ) : null}
-                          </div>
-                        </div>
-                        <div className="text-sm font-semibold text-zinc-900 whitespace-nowrap">{r.property?.prix != null ? formatPrice(r.property.prix) : '—'}</div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+              ))}
             </div>
           </div>
 
           <div className="rounded-2xl bg-white p-6 ring-1 ring-zinc-200 shadow-sm">
-            <div className="text-lg font-semibold text-zinc-900">AccÃ¨s rapide</div>
-            <div className="mt-1 text-sm text-zinc-600">Navigation Admin</div>
-            <div className="mt-5 grid gap-3">
-              {quick.map((q) => (
-                <Link key={q.to} to={q.to} className="group rounded-xl px-4 py-3 ring-1 ring-zinc-200 hover:ring-gold-primary/30 hover:bg-zinc-50 transition">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 place-items-center rounded-lg bg-gold-primary/10 text-gold-primary">
-                        <q.icon className="h-5 w-5" />
-                      </div>
-                      <div className="font-medium text-zinc-900">{q.title}</div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-gold-primary" />
-                  </div>
-                </Link>
+            <h2 className="font-semibold text-zinc-900">Répartition par type</h2>
+            <PropertyTypeChart data={propertyTypes} />
+            <div className="mt-4 space-y-2">
+              {propertyTypes.map((pt, index) => (
+                <div key={pt._id} className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                    {pt._id}
+                  </span>
+                  <span className="font-medium">{pt.count}</span>
+                </div>
               ))}
             </div>
+          </div>
+        </div>
 
-            <div className="mt-6">
-              <div className="text-sm font-medium text-zinc-900">RÃ©partition par catÃ©gorie</div>
-              <div className="mt-3 space-y-2">
-                {propertyTypes.length === 0 ? (
-                  <div className="text-sm text-zinc-600">â€”</div>
-                ) : (
-                  propertyTypes.map((t) => (
-                    <div key={t.name} className="flex items-center justify-between text-sm">
-                      <div className="text-zinc-700">{t.name || 'Autre'}</div>
-                      <div className="font-semibold text-zinc-900">{t.value}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-xl bg-gradient-to-r from-gold-primary/15 to-gold-primary/5 p-4 ring-1 ring-gold-primary/20">
-              <div className="flex items-start gap-3">
-                <div className="grid h-9 w-9 place-items-center rounded-lg bg-white text-gold-primary">
-                  <AlertCircle className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-zinc-900">Info</div>
-                  <div className="mt-1 text-xs text-zinc-700">Les rÃ©servations affichÃ©es viennent de lâ€™endpoint admin.</div>
+        <div className="mt-8">
+          <h2 className="font-semibold text-zinc-900">Réservations récentes</h2>
+          <div className="mt-4 flow-root">
+            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                  <table className="min-w-full divide-y divide-zinc-300">
+                    <thead className="bg-zinc-50">
+                      <tr>
+                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-zinc-900 sm:pl-6">Propriété</th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">Client</th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">Date / Statut</th>
+                        <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                          <span className="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-200 bg-white">
+                      {recentReservations.map((r) => (
+                        <tr key={r._id}>
+                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                            <div className="font-medium text-zinc-900">{r.property?.titre || 'Annonce supprimée'}</div>
+                            <div className="text-zinc-500">{r.property?.ville}</div>
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
+                            <div className="font-medium text-zinc-900">{r.user?.nom || r.user?.name || 'Utilisateur supprimé'}</div>
+                            <div className="text-zinc-500">{r.user?.email}</div>
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
+                            <div>{formatDate(r.date)}</div>
+                            <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${r.status === 'confirmée' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                              {r.status}
+                            </span>
+                          </td>
+                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                            <a href={buildClientWhatsappUrl(r)} target="_blank" rel="noopener noreferrer" className="text-gold-primary hover:text-gold-dark">
+                              Contacter<span className="sr-only">, {r.user?.nom}</span>
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

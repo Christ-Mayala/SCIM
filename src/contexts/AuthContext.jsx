@@ -191,6 +191,38 @@ export const AuthProvider = ({ children }) => {
     [persistSession],
   );
 
+  const socialLogin = useCallback(
+    async (token) => {
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
+        // Le token est déjà dans l'URL, on le sauvegarde temporairement
+        // pour que l'appel à getProfile puisse l'utiliser
+        localStorage.setItem('token', token);
+
+        const me = await authAPI.getProfile();
+        const profileUser = me.data;
+
+        if (!profileUser) {
+          throw new Error("Impossible de récupérer le profil utilisateur.");
+        }
+
+        persistSession(token, profileUser);
+        dispatch({ type: 'SET_USER', payload: { user: profileUser, token } });
+        toast.success('Connexion réussie !');
+        return { success: true };
+
+      } catch (error) {
+        clearSession();
+        const message = error.response?.data?.message || "L'authentification a échoué.";
+        dispatch({ type: 'SET_ERROR', payload: message });
+        toast.error(message);
+        return { success: false, message };
+      }
+    },
+    [persistSession, clearSession]
+  );
+
   const register = useCallback(
     async (userData) => {
       try {
@@ -286,12 +318,13 @@ export const AuthProvider = ({ children }) => {
     () => ({
       ...state,
       login,
+      socialLogin,
       register,
       logout,
       updateProfile,
       clearError,
     }),
-    [state, login, register, logout, updateProfile, clearError],
+    [state, login, socialLogin, register, logout, updateProfile, clearError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

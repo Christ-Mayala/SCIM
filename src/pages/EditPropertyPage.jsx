@@ -165,19 +165,37 @@ const EditPropertyPage = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
+  const reduction = useMemo(() => {
+    if (!formData?.isBonPlan || !Number(formData?.prixOriginal) || !Number(formData?.prix)) return null;
+    const p = Number(formData.prix);
+    const o = Number(formData.prixOriginal);
+    if (o <= p) return null;
+    return Math.round(((o - p) / o) * 100);
+  }, [formData?.isBonPlan, formData?.prix, formData?.prixOriginal]);
+
   const validateForm = () => {
     const next = {};
 
-    if (!String(formData?.titre || '').trim()) next.titre = "Le titre est requis";
-    if (!String(formData?.prix || '').trim()) next.prix = 'Le prix est requis';
+    if (!String(formData?.titre || '').trim()) next.titre = 'Le titre est requis';
+    if (!Number(formData?.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
     if (!String(formData?.ville || '').trim()) next.ville = 'La ville est requise';
     if (!String(formData?.adresse || '').trim()) next.adresse = "L'adresse est requise";
 
     if (formData?.isBonPlan) {
-      if (!String(formData?.bonPlanLabel || '').trim()) next.bonPlanLabel = 'Le libellé bon plan est requis';
-      if (!String(formData?.bonPlanExpiresAt || '').trim()) next.bonPlanExpiresAt = 'La date de fin est requise';
-      if (String(formData?.prixOriginal || '').trim() && Number(formData.prixOriginal) <= Number(formData.prix || 0)) {
+      if (!Number(formData.prixOriginal) || Number(formData.prixOriginal) <= 0) {
+        next.prixOriginal = 'Le prix original est requis pour un bon plan';
+      } else if (Number(formData.prixOriginal) <= Number(formData.prix || 0)) {
         next.prixOriginal = 'Le prix original doit être supérieur au prix actuel';
+      }
+      
+      if (!String(formData.bonPlanLabel || '').trim()) {
+        next.bonPlanLabel = 'Le libellé est requis (ex: -20%)';
+      }
+
+      if (!formData.bonPlanExpiresAt) {
+        next.bonPlanExpiresAt = 'La date de fin est requise';
+      } else if (new Date(formData.bonPlanExpiresAt) <= new Date()) {
+        next.bonPlanExpiresAt = 'La date de fin doit être dans le futur';
       }
     }
 
@@ -307,24 +325,28 @@ const EditPropertyPage = () => {
                 leftIcon={<Banknote className="w-4 h-4" />}
               />
 
-              <Select 
-                label="Devise" 
-                name="devise" 
-                value={formData.devise} 
-                onChange={handleChange} 
+              <Select
+                label="Devise"
+                name="devise"
+                value={formData.devise}
+                onChange={handleChange}
                 options={deviseOptions}
                 leftIcon={<Coins className="w-4 h-4" />}
               />
 
-              <Input
-                label="Prix original (optionnel)"
-                type="number"
-                name="prixOriginal"
-                value={formData.prixOriginal}
-                onChange={handleChange}
-                error={errors.prixOriginal}
-                leftIcon={<Percent className="w-4 h-4" />}
-              />
+              {formData.isBonPlan ? (
+                <Input
+                  label="Prix original (barré)"
+                  type="number"
+                  name="prixOriginal"
+                  value={formData.prixOriginal}
+                  onChange={handleChange}
+                  error={errors.prixOriginal}
+                  leftIcon={<Percent className="w-4 h-4" />}
+                />
+              ) : (
+                <div />
+              )}
             </div>
           </div>
 
@@ -424,46 +446,54 @@ const EditPropertyPage = () => {
           <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
             <h2 className="text-lg font-semibold text-zinc-900 mb-4">Bon plan</h2>
 
-            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4">
-              <Checkbox
-                id="isBonPlan"
-                checked={Boolean(formData.isBonPlan)}
-                onCheckedChange={(checked) =>
-                  handleChange({ target: { name: 'isBonPlan', type: 'checkbox', checked } })
-                }
-                className="border-gold-primary data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-              />
-              <label htmlFor="isBonPlan" className="flex-1 cursor-pointer select-none">
-                <div className="text-sm font-medium text-zinc-900 inline-flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-gold-primary" />
-                  Marquer comme bon plan
+            <div className="rounded-xl bg-gold-light/30 p-4 ring-1 ring-gold-primary/25">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <Checkbox
+                  id="isBonPlan"
+                  checked={Boolean(formData.isBonPlan)}
+                  onCheckedChange={(checked) =>
+                    handleChange({ target: { name: 'isBonPlan', type: 'checkbox', checked } })
+                  }
+                  className="border-gold-primary data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
+                />
+                <div className="flex-1">
+                  <div className="font-semibold text-zinc-900 inline-flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-gold-primary" />
+                    Marquer comme "Bon Plan"
+                  </div>
+                  <div className="text-xs text-zinc-700">Affiche un badge spécial et un prix barré.</div>
                 </div>
-                <div className="text-xs text-zinc-600">Label + expiration</div>
               </label>
+
+              {formData.isBonPlan ? (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gold-primary/25 pt-4">
+                  <Input
+                    label="Libellé (ex: Promo Flash)"
+                    name="bonPlanLabel"
+                    value={formData.bonPlanLabel}
+                    onChange={handleChange}
+                    error={errors.bonPlanLabel}
+                    leftIcon={<Tag className="w-4 h-4" />}
+                  />
+
+                  <Input
+                    label="Date de fin"
+                    type="datetime-local"
+                    name="bonPlanExpiresAt"
+                    value={formData.bonPlanExpiresAt}
+                    onChange={handleChange}
+                    error={errors.bonPlanExpiresAt}
+                    leftIcon={<CalendarClock className="w-4 h-4" />}
+                  />
+                  {reduction && (
+                    <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
+                      <Percent className="w-4 h-4" />
+                      <span>Réduction calculée : {reduction}%</span>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
-
-            {formData.isBonPlan ? (
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Libellé bon plan"
-                  name="bonPlanLabel"
-                  value={formData.bonPlanLabel}
-                  onChange={handleChange}
-                  error={errors.bonPlanLabel}
-                  leftIcon={<Tag className="w-4 h-4" />}
-                />
-
-                <Input
-                  label="Expiration"
-                  type="datetime-local"
-                  name="bonPlanExpiresAt"
-                  value={formData.bonPlanExpiresAt}
-                  onChange={handleChange}
-                  error={errors.bonPlanExpiresAt}
-                  leftIcon={<CalendarClock className="w-4 h-4" />}
-                />
-              </div>
-            ) : null}
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">

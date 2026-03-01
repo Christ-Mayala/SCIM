@@ -108,6 +108,7 @@ const AdminMessagesPage = () => {
                     <div className="flex items-center gap-2">
                       <div className={m.lu ? 'text-zinc-400' : 'text-gold-primary'}>{m.lu ? <MailOpen className="h-4 w-4" /> : <Mail className="h-4 w-4" />}</div>
                       <div className="font-semibold text-zinc-900 truncate">{m.sujet || 'Sans sujet'}</div>
+                      <div className="text-xs text-zinc-400">{new Date(m.createdAt).toLocaleDateString()}</div>
                     </div>
                     <div className="mt-1 text-xs text-zinc-600">
                       <span className="text-zinc-400">De:</span> {m.expediteur?.email || '—'} <span className="text-zinc-300">•</span> <span className="text-zinc-400">À:</span> {m.destinataire?.email || '—'}
@@ -116,7 +117,7 @@ const AdminMessagesPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link to="/messages">
+                    <Link to={`/admin/messages/thread/${m.expediteur?._id}`}>
                       <Button variant="outline" size="sm">Ouvrir</Button>
                     </Link>
                     <Button variant="outline" size="sm" onClick={() => handleStatus(m._id, !m.lu)}>

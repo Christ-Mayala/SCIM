@@ -10,13 +10,25 @@ const AdminPropertiesPage = () => {
   const [error, setError] = useState(null);
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+    totalItems: 0,
+  });
 
-  const load = async () => {
+  const load = async (page = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await adminAPI.getProperties({ search: search || undefined, page: 1, limit: 50 });
+      const res = await adminAPI.getProperties({ page, limit: pagination.limit, search: search || undefined });
       setItems(Array.isArray(res.data?.properties) ? res.data.properties : []);
+      setPagination({
+        page: res.data?.page || 1,
+        limit: res.data?.limit || 10,
+        totalPages: res.data?.totalPages || 1,
+        totalItems: res.data?.totalProperties || 0,
+      });
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || 'Erreur');
       setItems([]);
@@ -26,7 +38,7 @@ const AdminPropertiesPage = () => {
   };
 
   useEffect(() => {
-    load();
+    load(1);
   }, []);
 
   const filtered = useMemo(() => {
@@ -82,19 +94,20 @@ const AdminPropertiesPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm">
+        <form onSubmit={(e) => { e.preventDefault(); load(1); }} className="mt-6 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gold-primary/10 text-gold-primary">
-              <Search className="h-4 w-4" />
-            </div>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher (titre, ville, catégorie)"
               className="h-10 w-full rounded-xl border border-zinc-200 px-4 text-sm outline-none focus:border-gold-primary"
             />
+            <Button type="submit" className="gap-2">
+              <Search className="h-4 w-4" />
+              Rechercher
+            </Button>
           </div>
-        </div>
+        </form>
 
         {error ? (
           <div className="mt-6 rounded-2xl bg-white p-6 ring-1 ring-red-500/20 text-sm text-red-700">{error}</div>
@@ -147,6 +160,20 @@ const AdminPropertiesPage = () => {
               </div>
             ))
           )}
+        </div>
+
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs text-zinc-600">
+            Page <span className="font-semibold">{pagination.page}</span> sur <span className="font-semibold">{pagination.totalPages}</span> ({pagination.totalItems} annonces)
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => load(pagination.page - 1)} disabled={pagination.page <= 1}>
+              Précédent
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => load(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages}>
+              Suivant
+            </Button>
+          </div>
         </div>
       </div>
     </div>
