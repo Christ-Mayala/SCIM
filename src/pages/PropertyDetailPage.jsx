@@ -126,6 +126,18 @@ const PropertyDetailPage = () => {
   useEffect(() => {
     if (!property?._id) return;
 
+    // Récupérer la note de l'utilisateur pour cette propriété
+    (async () => {
+      try {
+        if (isAuthenticated) {
+          const userNoteResponse = await propertyAPI.getUserNote(property._id);
+          if (userNoteResponse?.data?.note) {
+            setUserRating(userNoteResponse.data.note);
+          }
+        }
+      } catch (_) {}
+    })();
+
     try {
       const key = 'visitedProperties';
       const existing = JSON.parse(localStorage.getItem(key) || '[]');

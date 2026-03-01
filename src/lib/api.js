@@ -143,6 +143,7 @@ export const propertyAPI = {
   delete: (id) => api.delete(`/property/${id}`),
   toggleFavorite: (id) => api.post(`/favoris/${id}`),
   rate: (id, rating) => api.post(`/property/${id}/rate`, { rating }),
+  getUserNote: (id) => api.get(`/property/${id}/user-note`),
   getWithRating: (id) => api.get(`/property/${id}/rating`),
   recordVisit: (id) => api.post(`/property/${id}/visit`),
 };
