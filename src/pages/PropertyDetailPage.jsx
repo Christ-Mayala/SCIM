@@ -195,14 +195,14 @@ const PropertyDetailPage = () => {
         setUserRating(rating);
         const result = await rateProperty(id, rating);
         if (result?.data?.userNote) {
-          toast.success('Note enregistrée avec succès !');
+          toast.success('✓ Note enregistrée avec succès !');
         }
       } catch (error) {
         const message = error?.response?.data?.message || error?.message || 'Erreur lors de la notation';
         if (message.includes('déjà noté')) {
-          toast.error('Vous avez déjà noté cette propriété.');
+          toast.error('✗ Vous avez déjà noté cette propriété.');
         } else {
-          toast.error(message);
+          toast.error(`✗ ${message}`);
         }
         // Réinitialiser la note actuelle
         setUserRating(0);
@@ -572,11 +572,13 @@ const PropertyDetailPage = () => {
                   className="w-full h-12 text-lg font-medium border-green-500 hover:border-green-600 hover:bg-green-50 text-green-600"
                   onClick={() => {
                     const message = encodeURIComponent(
-                      `🏠 Demande de visite - ${property.titre}\n\n` +
-                      `📍 ${property.ville || 'Lieu'}\n` +
-                      `💰 ${property.prix ? new Intl.NumberFormat('fr-FR').format(property.prix) + ' XAF' : 'Prix sur demande'}\n\n` +
-                      `Bonjour, je suis intéressé(e) par cette propriété. J'aimerais planifier une visite.\n\n` +
-                      `Lien: ${window.location.href}`
+                      `🏠 *Demande de visite - SCIM Immobilier*\n\n` +
+                      `*Bien:* ${property.titre}\n` +
+                      `*Localisation:* ${property.ville || 'Lieu non spécifié'}\n` +
+                      `*Prix:* ${property.prix ? new Intl.NumberFormat('fr-FR').format(property.prix) + ' XAF' : 'Prix sur demande'}\n\n` +
+                      `Bonjour, je suis intéressé(e) par cette propriété et j'aimerais planifier une visite.\n\n` +
+                      `*Lien direct vers le bien:* ${window.location.href}\n\n` +
+                      `Merci de me contacter pour plus d'informations.`
                     );
                     window.open(`https://wa.me/${(owner?.telephone || '+242061234567').replace(/[^\d]/g, '')}?text=${message}`, '_blank');
                   }}

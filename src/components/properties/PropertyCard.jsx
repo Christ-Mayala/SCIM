@@ -121,17 +121,22 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
                         {property.titre}
                     </h3>
                  </Link>
-                 {property.noteMoyenne > 0 && (
-                     <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                         <StarRating value={property.noteMoyenne} readOnly count={1} className="text-xs" />
-                         <span className="text-xs font-bold text-gray-700">{property.noteMoyenne}</span>
-                     </div>
-                 )}
             </div>
 
             <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">
             {property.description}
             </p>
+
+            {/* Rating - moved below description */}
+            {property.noteMoyenne > 0 && (
+                <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 mb-4">
+                    <div className="flex items-center gap-2">
+                        <StarRating value={property.noteMoyenne} readOnly count={5} className="text-xs" />
+                        <span className="text-sm font-bold text-gray-700">{property.noteMoyenne.toFixed(1)}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">{property.nombreAvis || 0} avis</span>
+                </div>
+            )}
 
             {/* Features Grid */}
             <div className="grid grid-cols-3 gap-2 mb-6">

@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -310,7 +311,7 @@ const LoginPage = () => {
 
                 {/* Social Login Buttons */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
-                  <a href={`${import.meta.env.VITE_API_BASE_URL}/api/auth/google`} className="w-full inline-flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl text-sm font-medium text-gray-200 bg-white/5 hover:bg-white/10 transition-colors">
+                  <a href={`${API_BASE_URL}/api/auth/google`} className="w-full inline-flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl text-sm font-medium text-gray-200 bg-white/5 hover:bg-white/10 transition-colors">
                     <svg className="w-5 h-5 mr-3" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.8 0-5.18-1.88-6.04-4.42H2.34v2.84C4.13 20.98 7.79 23 12 23z" />

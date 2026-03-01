@@ -238,4 +238,7 @@ export const put = (url, data, config) => api.put(url, data, config);
 export const patch = (url, data, config) => api.patch(url, data, config);
 export const del = (url, config) => api.delete(url, config);
 
+// Export API_BASE_URL pour l'utiliser dans d'autres composants
+export { API_BASE_URL };
+
 export default api;

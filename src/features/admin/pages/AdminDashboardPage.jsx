@@ -164,6 +164,7 @@ const AdminDashboardPage = () => {
   const quickLinks = useMemo(
     () => [
       { to: '/admin/properties', title: 'Gérer les annonces', icon: Building2 },
+      { to: '/admin/reservations', title: 'Réservations', icon: CalendarDays },
       { to: '/admin/users', title: 'Utilisateurs', icon: Users },
       { to: '/admin/messages', title: 'Messages', icon: MessageSquare },
       { to: '/admin/analytics', title: 'Analytics', icon: BarChart3 },

@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 // Configuration de base
 const config = {
   baseUrl: process.env.SITE_URL || 'https://scim.netlify.app',
+  apiBaseUrl: process.env.API_URL || 'http://localhost:5000/api/v1/scim',
   outputPath: path.join(__dirname, '../public/sitemap.xml'),
   currentDate: new Date().toISOString().split('T')[0]
 };
@@ -15,12 +17,6 @@ const staticRoutes = [
     lastmod: config.currentDate,
     changefreq: 'daily',
     priority: '1.0'
-  },
-  {
-    url: '/home',
-    lastmod: config.currentDate,
-    changefreq: 'daily',
-    priority: '0.9'
   },
   {
     url: '/properties',
@@ -39,6 +35,30 @@ const staticRoutes = [
     lastmod: config.currentDate,
     changefreq: 'monthly',
     priority: '0.8'
+  },
+  {
+    url: '/login',
+    lastmod: config.currentDate,
+    changefreq: 'monthly',
+    priority: '0.6'
+  },
+  {
+    url: '/register',
+    lastmod: config.currentDate,
+    changefreq: 'monthly',
+    priority: '0.6'
+  },
+  {
+    url: '/dashboard',
+    lastmod: config.currentDate,
+    changefreq: 'weekly',
+    priority: '0.5'
+  },
+  {
+    url: '/admin',
+    lastmod: config.currentDate,
+    changefreq: 'weekly',
+    priority: '0.4'
   }
 ];
 
@@ -63,11 +83,25 @@ function generateSitemapXML(routes) {
   return xmlHeader + xmlUrls + '\n' + xmlFooter;
 }
 
+// Fonction pour récupérer les propriétés depuis l'API
+async function fetchProperties() {
+  try {
+    console.log('📡 Récupération des propriétés depuis l\'API...');
+    const response = await axios.get(`${config.apiBaseUrl}/property?limit=1000`);
+    const properties = response.data?.data || response.data || [];
+    console.log(`✅ ${properties.length} propriétés récupérées`);
+    return properties;
+  } catch (error) {
+    console.warn('⚠️  Impossible de récupérer les propriétés, utilisation des routes statiques uniquement');
+    return [];
+  }
+}
+
 // Fonction pour ajouter des routes dynamiques (propriétés)
 function addDynamicRoutes(staticRoutes, properties = []) {
   const propertyRoutes = properties.map(property => ({
-    url: `/properties/${property.id}`,
-    lastmod: property.updated_at || config.currentDate,
+    url: `/properties/${property._id || property.id}`,
+    lastmod: property.updatedAt || property.updated_at || property.creeLe || config.currentDate,
     changefreq: 'weekly',
     priority: '0.8'
   }));
@@ -76,40 +110,40 @@ function addDynamicRoutes(staticRoutes, properties = []) {
 }
 
 // Fonction principale
-function generateSitemap() {
+async function generateSitemap() {
   try {
-    // Pour l'instant, on utilise seulement les routes statiques
-    // Dans un vrai projet, on récupérerait les propriétés depuis l'API
-    const allRoutes = staticRoutes;
+    console.log('🗺️  Génération du sitemap SCIM...');
     
-    // Ajouter quelques exemples de propriétés
-    const exampleProperties = [
-      { id: 1, updated_at: config.currentDate },
-      { id: 2, updated_at: config.currentDate },
-      { id: 3, updated_at: config.currentDate }
-    ];
+    // Récupérer les propriétés depuis l'API
+    const properties = await fetchProperties();
     
-    const routesWithProperties = addDynamicRoutes(allRoutes, exampleProperties);
+    // Combiner routes statiques et dynamiques
+    const allRoutes = addDynamicRoutes(staticRoutes, properties);
     
     // Générer le XML
-    const sitemapXML = generateSitemapXML(routesWithProperties);
+    const sitemapXML = generateSitemapXML(allRoutes);
     
     // Écrire le fichier
     fs.writeFileSync(config.outputPath, sitemapXML, 'utf8');
     
-    console.log(`Sitemap généré: ${config.outputPath}`);
-    console.log(`Nombre d'URLs: ${routesWithProperties.length}`);
+    console.log(`✅ Sitemap généré: ${config.outputPath}`);
+    console.log(`📊 Nombre d'URLs: ${allRoutes.length}`);
+    console.log(`🌐 URL de base: ${config.baseUrl}`);
+    console.log(`🏠 Propriétés incluses: ${properties.length}`);
     
   } catch (error) {
-    console.error('Erreur lors de la génération du sitemap:', error);
+    console.error('❌ Erreur lors de la génération du sitemap:', error);
     process.exit(1);
   }
 }
 
 // Exécuter le script si appelé directement
 if (require.main === module) {
-  generateSitemap();
+  generateSitemap().catch(error => {
+    console.error('❌ Erreur fatale:', error);
+    process.exit(1);
+  });
 }
 
-module.exports = { generateSitemap, addDynamicRoutes, generateSitemapXML };
+module.exports = { generateSitemap, addDynamicRoutes, generateSitemapXML, fetchProperties };
 

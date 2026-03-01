@@ -296,11 +296,11 @@ const HomePage = () => {
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Nos <span className="text-gold-primary">Coup de Cœur</span>
+              Nos <span className="text-gold-primary">Coup de Cœur</span> - Les Mieux Notés
             </h2>
             
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Une sélection de propriétés exceptionnelles choisies pour leur caractère unique et leur potentiel.
+              Les propriétés les mieux notées par nos clients, sélectionnées pour leur qualité exceptionnelle.
             </p>
           </div>
 
