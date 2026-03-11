@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { User, Mail, Phone, Lock, Save } from 'lucide-react';
+import { User, Mail, Phone, Lock, Save, Star, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { validateEmail, validatePhone } from '../lib/utils';
+import { cn, validateEmail, validatePhone } from '../lib/utils';
 
 const ProfilePage = () => {
   const { user, updateProfile, loading } = useAuth();
@@ -110,181 +111,220 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-zinc-900 mb-2">Mon profil</h1>
-          <p className="text-zinc-600">Gérez vos informations personnelles.</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-gold-primary to-gold-dark px-6 py-8">
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-full bg-white/15 ring-1 ring-white/20 flex items-center justify-center text-white text-3xl font-semibold">
-                {initials}
-              </div>
-              <div className="text-white">
-                <h2 className="text-2xl font-semibold">{user?.nom || user?.name || 'Utilisateur'}</h2>
-                <p className="text-white/80">{user?.email}</p>
-                {user?.createdAt ? (
-                  <p className="text-white/80 text-sm">
-                    Membre depuis{' '}
-                    {new Date(user.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+    <div className="min-h-screen bg-zinc-950 pb-32">
+       {/* Premium Hero Header */}
+       <div className="relative h-80 overflow-hidden">
+          <div className="absolute inset-0 bg-zinc-900">
+             <div className="absolute inset-0 opacity-20" style={{
+                backgroundImage: `radial-gradient(circle at 2px 2px, rgba(201,162,39,0.2) 1px, transparent 0)`,
+                backgroundSize: '32px 32px'
+             }} />
+             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
           </div>
-
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-zinc-900">Informations personnelles</h3>
-              {!isEditing ? (
-                <Button onClick={() => setIsEditing(true)} variant="outline">
-                  Modifier
-                </Button>
-              ) : null}
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Nom complet"
-                type="text"
-                name="nom"
-                value={formData.nom}
-                onChange={handleChange}
-                error={errors.nom}
-                disabled={!isEditing}
-                leftIcon={<User className="w-5 h-5" />}
-              />
-
-              <Input
-                label="Adresse email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                disabled={!isEditing}
-                leftIcon={<Mail className="w-5 h-5" />}
-              />
-
-              <Input
-                label="Numéro de téléphone"
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleChange}
-                error={errors.telephone}
-                disabled={!isEditing}
-                leftIcon={<Phone className="w-5 h-5" />}
-              />
-
-              {isEditing ? (
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <Button type="submit" loading={loading} className="gap-2">
-                    <Save className="w-4 h-4" />
-                    Sauvegarder
-                  </Button>
-                  <Button type="button" variant="outline" onClick={handleCancel}>
-                    Annuler
-                  </Button>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12">
+             <div className="flex flex-col md:flex-row items-end gap-8">
+                <div className="relative group">
+                   <div className="w-32 h-32 rounded-[40px] bg-zinc-800 border-4 border-zinc-950 overflow-hidden shadow-2xl flex items-center justify-center text-4xl font-black text-gold-primary transition-all duration-500 group-hover:scale-105">
+                      {initials}
+                   </div>
+                   <div className="absolute -bottom-2 -right-2 p-3 bg-gold-primary rounded-2xl shadow-xl text-zinc-950 group-hover:rotate-12 transition-all">
+                      <Save className="w-5 h-5" />
+                   </div>
                 </div>
-              ) : null}
-            </form>
-          </div>
-
-          <div className="border-t border-zinc-200 p-6">
-            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Sécurité</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
-                <div className="flex items-center gap-3">
-                  <Lock className="w-5 h-5 text-zinc-500" />
-                  <div>
-                    <p className="font-medium text-zinc-900">Mot de passe</p>
-                    <p className="text-sm text-zinc-600">Changez votre mot de passe</p>
-                  </div>
+                
+                <div className="flex-1 space-y-2">
+                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black text-gold-primary uppercase tracking-widest">
+                      Profil Prestige
+                   </div>
+                   <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                      {user?.nom || user?.name || 'Utilisateur'}
+                   </h1>
+                   <p className="text-zinc-400 font-medium flex items-center gap-4">
+                      <span>{user?.email}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                      <span>Membre depuis {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : 'récemment'}</span>
+                   </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setPwdOpen((v) => !v)}>
-                  {pwdOpen ? 'Fermer' : 'Modifier'}
-                </Button>
-              </div>
 
-              {pwdOpen ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
-                    <Input
-                      type="password"
-                      placeholder="Mot de passe actuel"
-                      value={pwdData.currentPassword}
-                      onChange={(e) => {
-                        setPwdData({ ...pwdData, currentPassword: e.target.value });
-                        if (pwdErrors.currentPassword) setPwdErrors({ ...pwdErrors, currentPassword: '' });
-                      }}
-                      error={pwdErrors.currentPassword}
-                      leftIcon={<Lock className="w-5 h-5" />}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="password"
-                      placeholder="Nouveau mot de passe"
-                      value={pwdData.newPassword}
-                      onChange={(e) => {
-                        setPwdData({ ...pwdData, newPassword: e.target.value });
-                        if (pwdErrors.newPassword) setPwdErrors({ ...pwdErrors, newPassword: '' });
-                      }}
-                      error={pwdErrors.newPassword}
-                      leftIcon={<Lock className="w-5 h-5" />}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="password"
-                      placeholder="Confirmer"
-                      value={pwdData.confirm}
-                      onChange={(e) => {
-                        setPwdData({ ...pwdData, confirm: e.target.value });
-                        if (pwdErrors.confirm) setPwdErrors({ ...pwdErrors, confirm: '' });
-                      }}
-                      error={pwdErrors.confirm}
-                      leftIcon={<Lock className="w-5 h-5" />}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 md:col-span-3 flex flex-col sm:flex-row justify-end gap-3">
-                    <Button variant="outline" onClick={() => setPwdOpen(false)}>
-                      Annuler
-                    </Button>
-                    <Button onClick={handlePwdSave}>Enregistrer</Button>
-                  </div>
+                <div className="flex gap-4">
+                   {!isEditing ? (
+                      <Button 
+                        onClick={() => setIsEditing(true)} 
+                        className="h-14 px-8 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl text-xs font-black uppercase tracking-widest transition-all"
+                      >
+                        Paramètres
+                      </Button>
+                   ) : (
+                      <Button 
+                        onClick={handleCancel} 
+                        variant="outline"
+                        className="h-14 px-8 bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800 rounded-2xl text-xs font-black uppercase tracking-widest"
+                      >
+                        Annuler
+                      </Button>
+                   )}
                 </div>
-              ) : null}
-            </div>
+             </div>
           </div>
+       </div>
 
-          <div className="border-t border-zinc-200 p-6">
-            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Statistiques</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
-                <div className="text-2xl font-semibold text-zinc-900">{stats.favoritesCount ?? 0}</div>
-                <div className="text-sm text-zinc-600">Favoris</div>
-              </div>
-              {/* <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
-                <div className="text-2xl font-semibold text-zinc-900">{stats.visitedCount ?? 0}</div>
-                <div className="text-sm text-zinc-600">Visites</div>
-              </div> */}
-              <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
-                <div className="text-2xl font-semibold text-zinc-900">{stats.ratingsCount ?? 0}</div>
-                <div className="text-sm text-zinc-600">Notes données</div>
-              </div>
-              {/* <div className="text-center p-4 bg-zinc-50 rounded-xl ring-1 ring-zinc-200">
-                <div className="text-2xl font-semibold text-zinc-900">{Number(stats.avgGiven || 0).toFixed(1)}</div>
-                <div className="text-sm text-zinc-600">Moyenne</div>
-              </div> */}
-            </div>
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+             {/* Left Column: Form & Security */}
+             <div className="lg:col-span-2 space-y-8">
+                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[40px] border border-white/5 p-10 shadow-2xl">
+                   <div className="flex items-center justify-between mb-12">
+                      <h3 className="text-xl font-black text-white tracking-tight">Identité Numérique</h3>
+                      <div className="w-12 h-1 bg-gold-primary/20 rounded-full" />
+                   </div>
+
+                   <form onSubmit={handleSubmit} className="space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Nom Patronyme</label>
+                            <Input
+                              type="text"
+                              name="nom"
+                              value={formData.nom}
+                              onChange={handleChange}
+                              error={errors.nom}
+                              disabled={!isEditing}
+                              className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
+                              leftIcon={<User className="w-5 h-5 text-gold-primary/40" />}
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Communication Professionnelle</label>
+                            <Input
+                              type="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleChange}
+                              error={errors.email}
+                              disabled={!isEditing}
+                              className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
+                              leftIcon={<Mail className="w-5 h-5 text-gold-primary/40" />}
+                            />
+                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Ligne Directe</label>
+                         <Input
+                           type="tel"
+                           name="telephone"
+                           value={formData.telephone}
+                           onChange={handleChange}
+                           error={errors.telephone}
+                           disabled={!isEditing}
+                           className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
+                           leftIcon={<Phone className="w-5 h-5 text-gold-primary/40" />}
+                         />
+                      </div>
+
+                      {isEditing && (
+                        <Button 
+                          type="submit" 
+                          loading={loading} 
+                          className="w-full h-18 bg-gold-primary hover:bg-gold-dark text-zinc-950 rounded-[28px] font-black uppercase tracking-[0.25em] text-xs shadow-2xl transition-all duration-500 hover:-translate-y-1"
+                        >
+                          Enregistrer les Modifications
+                        </Button>
+                      )}
+                   </form>
+                </div>
+
+                {/* Security Section */}
+                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[40px] border border-white/5 p-10 shadow-2xl">
+                   <div className="flex items-center justify-between mb-8">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-zinc-950 rounded-2xl text-gold-primary">
+                            <Lock className="w-6 h-6" />
+                         </div>
+                         <h3 className="text-xl font-black text-white tracking-tight">Sécurisation du Compte</h3>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setPwdOpen(!pwdOpen)}
+                        className="text-gold-primary font-black uppercase tracking-widest text-[10px] hover:bg-gold-primary/10"
+                      >
+                         {pwdOpen ? 'Annuler' : 'Changer le Pass'}
+                      </Button>
+                   </div>
+
+                   {pwdOpen && (
+                     <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <Input
+                             type="password"
+                             placeholder="Pass actuel"
+                             value={pwdData.currentPassword}
+                             onChange={(e) => setPwdData({ ...pwdData, currentPassword: e.target.value })}
+                             error={pwdErrors.currentPassword}
+                             className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white font-mono"
+                           />
+                           <Input
+                             type="password"
+                             placeholder="Nouveau Pass"
+                             value={pwdData.newPassword}
+                             onChange={(e) => setPwdData({ ...pwdData, newPassword: e.target.value })}
+                             error={pwdErrors.newPassword}
+                             className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white font-mono"
+                           />
+                        </div>
+                        <Button 
+                          onClick={handlePwdSave}
+                          className="w-full h-16 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-[24px] font-black uppercase tracking-[0.2em] text-[10px]"
+                        >
+                           Mettre à jour la Sécurité
+                        </Button>
+                     </div>
+                   )}
+                </div>
+             </div>
+
+             {/* Right Column: Stats & Meta */}
+             <div className="space-y-8">
+                <div className="bg-gradient-to-br from-gold-primary to-gold-dark rounded-[40px] p-10 shadow-2xl shadow-gold-primary/20 text-zinc-950">
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-60">Volume d'Activité</h4>
+                   <div className="space-y-10">
+                      <div className="flex items-end justify-between">
+                         <div>
+                            <div className="text-5xl font-black tracking-tighter leading-none">{stats.favoritesCount ?? 0}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest mt-2">Favoris Sélectionnés</div>
+                         </div>
+                         <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center text-gold-primary">
+                            <Star className="w-6 h-6" />
+                         </div>
+                      </div>
+                      
+                      <div className="h-px bg-zinc-950/10" />
+
+                      <div className="flex items-end justify-between">
+                         <div>
+                            <div className="text-5xl font-black tracking-tighter leading-none">{stats.ratingsCount ?? 0}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest mt-2">Critiques Émises</div>
+                         </div>
+                         <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center text-gold-primary">
+                            <Save className="w-6 h-6" />
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="bg-zinc-900 border border-white/5 rounded-[40px] p-8">
+                   <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-6">Assistance Premium</h4>
+                   <p className="text-zinc-400 text-sm font-medium leading-relaxed mb-8">
+                      Bénéficiez d'une assistance prioritaire 24/7 pour toutes vos transactions et recherches exclusives.
+                   </p>
+                   <Button className="w-full h-14 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                      Contacter le Concierge
+                   </Button>
+                </div>
+             </div>
           </div>
-        </div>
-      </div>
+       </div>
     </div>
   );
 };

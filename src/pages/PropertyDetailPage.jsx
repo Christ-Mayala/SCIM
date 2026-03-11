@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, 
   ArrowLeft, Share2, Calendar, Eye, Car, Waves, TreePine,
-  Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle, MessageCircle
+  Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle, MessageCircle, Sparkles, CheckCircle2, X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -299,36 +299,38 @@ const PropertyDetailPage = () => {
         type={seoData.type}
         structuredData={structuredData}
       />
-      {/* Header */}
-      <div className="bg-white shadow-sm">
+      {/* Header / Breadcrumb */}
+      <div className="bg-zinc-950/80 backdrop-blur-xl sticky top-20 z-30 border-b border-white/10 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate(-1)}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Retour</span>
-            </button>
+               onClick={() => navigate(-1)}
+               className="group flex items-center gap-3 text-zinc-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
+             >
+               <div className="p-2 rounded-xl bg-white/5 group-hover:bg-white/10 group-hover:-translate-x-1 transition-all border border-white/5">
+                 <ArrowLeft className="w-3.5 h-3.5 text-gold-primary" />
+               </div>
+               <span>Retour</span>
+             </button>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-6">
               <button
                 onClick={handleShare}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center gap-2 text-zinc-500 hover:text-zinc-950 transition-colors font-bold text-xs uppercase tracking-[0.2em]"
               >
-                <Share2 className="w-5 h-5" />
-                <span>Partager</span>
+                <Share2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Partager</span>
               </button>
               
               <button
                 onClick={handleFavoriteClick}
                 className={cn(
-                  'flex items-center space-x-2 transition-colors',
-                  isFavorite ? 'text-red-600' : 'text-gray-600 hover:text-red-600'
+                  'flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-[0.2em]',
+                  isFavorite ? 'text-red-500' : 'text-zinc-500 hover:text-red-500'
                 )}
               >
-                <Heart className={cn('w-5 h-5', isFavorite && 'fill-current')} />
-                <span>{isFavorite ? 'Retiré des favoris' : 'Ajouter aux favoris'}</span>
+                <Heart className={cn('w-4 h-4', isFavorite && 'fill-current')} />
+                <span className="hidden sm:inline">{isFavorite ? 'Sauvegardé' : 'Favoris'}</span>
               </button>
             </div>
           </div>
@@ -340,84 +342,100 @@ const PropertyDetailPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Header Section */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                 <span className="px-3 py-1 bg-gold-primary/10 text-gold-primary text-sm font-semibold rounded-full uppercase tracking-wider">
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center gap-4">
+                 <div className="px-4 py-1.5 bg-zinc-950 text-gold-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full ring-1 ring-gold-primary/20">
                     {property.categorie}
-                 </span>
-                 <span className={cn(
-                   "px-3 py-1 text-sm font-semibold rounded-full uppercase tracking-wider",
-                   property.transactionType === 'vente' ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
+                 </div>
+                 <div className={cn(
+                   "px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-full",
+                   property.transactionType === 'vente' ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20" : "bg-blue-50 text-blue-600 ring-1 ring-blue-500/20"
                  )}>
-                    {property.transactionType === 'vente' ? 'Vente' : 'Location'}
-                 </span>
+                    {property.transactionType === 'vente' ? 'En Vente' : 'En Location'}
+                 </div>
                  {property.isBonPlan && (
-                    <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full uppercase tracking-wider animate-pulse">
-                      Bon Plan
-                    </span>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full ring-1 ring-amber-500/20">
+                      <Sparkles className="w-3 h-3" />
+                      Opportunité
+                    </div>
                  )}
               </div>
               
-              <div className="flex justify-between items-start gap-4">
-                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-                   {property.titre}
-                 </h1>
-                 <div className="text-right shrink-0">
-                    <div className="text-3xl md:text-4xl font-bold text-gold-primary">
-                      {formatPrice(property.prix)}
+              <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+                <div className="space-y-3">
+                  <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight italic uppercase">
+                    {property.titre}
+                  </h1>
+                  <div className="flex items-center gap-2 text-zinc-400 font-medium">
+                    <div className="p-1.5 bg-white/5 rounded-lg text-gold-primary border border-white/10">
+                      <MapPin className="w-4 h-4 text-gold-primary" />
                     </div>
-                    {property.prixOriginal && property.prixOriginal > property.prix && (
-                      <div className="text-sm text-gray-500 line-through mt-1">
-                        {formatPrice(property.prixOriginal)}
-                      </div>
-                    )}
-                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-gray-600 text-lg">
-                <MapPin className="w-5 h-5 text-gold-primary" />
-                <span>{property.adresse}, {property.ville}</span>
+                    <span className="text-base">{property.adresse}, {property.ville}</span>
+                  </div>
+                </div>
+                
+                <div className="md:text-right w-full md:w-auto p-6 rounded-3xl bg-zinc-900 border border-white/10 flex flex-col justify-center shadow-xl">
+                  <div className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Prix de présentation</div>
+                  <div className="text-2xl font-black text-gold-primary">
+                    {formatPrice(property.prix)}
+                  </div>
+                  {property.prixOriginal && property.prixOriginal > property.prix && (
+                    <div className="text-xs text-zinc-500 font-bold line-through mt-1 decoration-red-500/50">
+                      {formatPrice(property.prixOriginal)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Image Gallery */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-100">
+            <div className="group relative rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-white/5">
               {images.length > 0 ? (
                 <>
                   <div 
-                    className="relative aspect-[16/10] bg-gray-100 cursor-zoom-in group"
+                    className="relative aspect-[16/9] cursor-zoom-in overflow-hidden"
                     onClick={() => setShowImageModal(true)}
                   >
                     <img
                       src={getImageUrl(images[selectedImageIndex]?.url)}
                       alt={property.titre}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-all duration-1000 scale-100 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                       <span className="bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
-                         Voir les photos
-                       </span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-12">
+                       <div className="bg-white/20 backdrop-blur-md text-white px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-widest border border-white/30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                         Explorer la galerie
+                       </div>
                     </div>
-                    <button 
-                      className="absolute bottom-4 right-4 bg-white/90 text-gray-900 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-lg backdrop-blur-md"
-                      onClick={(e) => { e.stopPropagation(); setShowImageModal(true); }}
-                    >
-                      {selectedImageIndex + 1} / {images.length}
-                    </button>
+                    
+                    {/* Navigation Overlays */}
+                    <div className="absolute inset-y-0 left-0 w-24 flex items-center justify-center translate-x-[-100%] group-hover:translate-x-0 transition-transform">
+                       <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="p-3 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors">
+                          <ChevronLeft className="w-6 h-6" />
+                       </button>
+                    </div>
+                    <div className="absolute inset-y-0 right-0 w-24 flex items-center justify-center translate-x-[100%] group-hover:translate-x-0 transition-transform">
+                       <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="p-3 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors">
+                          <ChevronRight className="w-6 h-6" />
+                       </button>
+                    </div>
+
+                    <div className="absolute top-6 left-6 px-4 py-2 bg-zinc-950/80 backdrop-blur-md rounded-xl text-white text-[10px] font-black uppercase tracking-widest border border-white/10">
+                       Image {selectedImageIndex + 1} / {images.length}
+                    </div>
                   </div>
                   
                   {images.length > 1 && (
-                    <div className="p-4 bg-white border-t border-gray-100">
-                      <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <div className="p-6 bg-white border-t border-zinc-50 overflow-hidden">
+                      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-2">
                         {images.map((image, index) => (
                           <button
                             key={index}
                             onClick={() => setSelectedImageIndex(index)}
                             className={cn(
-                              'relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden transition-all duration-200',
+                              'relative flex-shrink-0 w-28 h-20 rounded-2xl overflow-hidden transition-all duration-500',
                               selectedImageIndex === index 
-                                ? 'ring-2 ring-gold-primary ring-offset-2 opacity-100 scale-105' 
-                                : 'opacity-70 hover:opacity-100 hover:scale-105'
+                                ? 'ring-4 ring-gold-primary ring-offset-4 opacity-100 scale-105 shadow-xl' 
+                                : 'opacity-40 hover:opacity-100 hover:scale-105'
                             )}
                           >
                             <img
@@ -432,192 +450,229 @@ const PropertyDetailPage = () => {
                   )}
                 </>
               ) : (
-                <div className="aspect-[16/10] bg-gray-100 flex items-center justify-center">
-                  <div className="text-gray-400 text-center">
-                    <Home className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">Aucune image disponible</p>
+                <div className="aspect-[16/9] bg-zinc-50 flex flex-col items-center justify-center gap-6">
+                  <div className="w-20 h-20 bg-zinc-100 rounded-3xl flex items-center justify-center text-zinc-300">
+                    <Home className="w-10 h-10" />
                   </div>
+                  <p className="font-black text-zinc-400 uppercase tracking-widest text-sm">Visualisation indisponible</p>
                 </div>
               )}
             </div>
 
             {/* Key Features Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {features.map((feature, index) => (
-                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-2 hover:shadow-md transition-shadow">
-                  <div className="w-10 h-10 rounded-full bg-gold-primary/10 flex items-center justify-center text-gold-primary">
-                    <feature.icon className="w-5 h-5" />
+                <div key={index} className="group bg-white p-6 rounded-3xl border border-zinc-100 hover:border-gold-primary/30 transition-all hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)]">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-50 group-hover:bg-zinc-950 flex items-center justify-center text-zinc-500 group-hover:text-gold-primary transition-all duration-300 mb-4 shadow-sm group-hover:shadow-xl">
+                    <feature.icon className="w-6 h-6" />
                   </div>
-                  <span className="font-semibold text-gray-900 text-sm">{feature.label}</span>
+                  <div className="space-y-1">
+                    <span className="block text-xl font-black text-zinc-950 tracking-tight">{feature.label.split(' ')[0]}</span>
+                    <span className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest">{feature.label.split(' ').slice(1).join(' ')}</span>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Description */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
-                Description
-              </h3>
-              <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed">
-                {property.description ? (
-                  property.description.split('\n').map((paragraph, idx) => (
-                    <p key={idx} className="mb-4">{paragraph}</p>
-                  ))
-                ) : (
-                  <p className="italic text-gray-400">Aucune description fournie pour ce bien.</p>
-                )}
-              </div>
-            </div>
+            {/* Content Sections with cleaner layout */}
+            <div className="grid grid-cols-1 gap-8">
+              <section className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-[32px] border border-white/10 shadow-xl">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-1 h-6 bg-gold-primary rounded-full shadow-[0_0_15px_rgba(201,162,39,0.5)]" />
+                  <h3 className="text-xl font-black text-white tracking-tight uppercase italic">Présentation<span className="text-gold-primary">.</span></h3>
+                </div>
+                <div className="prose prose-zinc prose-lg max-w-none text-zinc-500 font-medium leading-[1.8]">
+                  {property.description ? (
+                    property.description.split('\n').map((paragraph, idx) => (
+                      <p key={idx} className="mb-6">{paragraph}</p>
+                    ))
+                  ) : (
+                    <p className="italic text-zinc-400">Ce bien attend votre visite pour révéler tous ses secrets.</p>
+                  )}
+                </div>
+              </section>
 
-            {/* Additional Details */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-               <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
-                Caractéristiques détaillées
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {[
-                   { label: 'Type de bien', value: property.categorie },
-                   { label: 'Statut', value: property.status || 'Actif' },
-                   { label: 'Surface', value: property.superficie ? `${property.superficie} m²` : null },
-                   { label: 'Chambres', value: property.nombre_chambres },
-                   { label: 'Salles de bain', value: property.nombre_salles_bain },
-                   { label: 'Salons', value: property.nombre_salons },
-                   { label: 'Garage', value: property.garage ? 'Oui' : 'Non' },
-                   { label: 'Piscine', value: property.piscine ? 'Oui' : 'Non' },
-                   { label: 'Jardin', value: property.jardin ? 'Oui' : 'Non' },
-                 ].map((item, i) => item.value != null && (
-                   <div key={i} className="flex justify-between items-center py-3 border-b border-gray-50 last:border-0">
-                      <span className="text-gray-500 font-medium">{item.label}</span>
-                      <span className="text-gray-900 font-semibold">{item.value}</span>
-                   </div>
-                 ))}
-              </div>
-            </div>
+              <section className="bg-zinc-950 p-8 rounded-[32px] shadow-2xl relative overflow-hidden border border-white/5">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-primary/10 blur-[100px] -z-0" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-1 h-6 bg-gold-primary rounded-full" />
+                    <h3 className="text-xl font-black text-white tracking-tight uppercase italic">Détails Techniques</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-1 gap-x-12">
+                     {[
+                       { label: 'Catégorie', value: property.categorie },
+                       { label: 'Statut Actuel', value: property.status || 'Disponible' },
+                       { label: 'Surface Totale', value: property.superficie ? `${property.superficie} m²` : null },
+                       { label: 'Suite Parentale', value: property.nombre_chambres },
+                       { label: 'Espace Bains', value: property.nombre_salles_bain },
+                       { label: 'Espace Réception', value: property.nombre_salons },
+                       { label: 'Espace Véhicule', value: property.garage ? 'Équipé' : 'Non' },
+                       { label: 'Sécurisation', value: property.gardien ? 'Assurée' : 'Individuelle' },
+                       { label: 'Détente', value: property.piscine ? 'Privative' : 'Non' },
+                     ].map((item, i) => item.value != null && (
+                       <div key={i} className="flex justify-between items-center py-5 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors px-4 rounded-xl">
+                          <span className="text-zinc-400 text-xs font-black uppercase tracking-widest">{item.label}</span>
+                          <span className="text-zinc-100 font-bold">{item.value}</span>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              </section>
 
-            {/* Rating Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span className="w-1 h-6 bg-gold-primary rounded-full"></span>
-                Noter ce bien
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {isAuthenticated ? 'Cliquez sur les étoiles pour noter cette propriété' : 'Connectez-vous pour noter cette propriété'}
-                    </p>
-                    <div className="flex items-center gap-4">
+              {/* Rating Section refined */}
+              <section className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-[32px] border border-white/10 shadow-xl">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-1 h-6 bg-gold-primary rounded-full" />
+                    <h3 className="text-xl font-black text-white tracking-tight uppercase italic">Évaluation & Avis</h3>
+                  </div>
+                  {property.noteMoyenne && (
+                    <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/10">
+                      <Star className="w-4 h-4 text-gold-primary fill-current" />
+                      <span className="text-lg font-black text-white">{property.noteMoyenne.toFixed(1)}</span>
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">({property.nombreAvis || 0} avis)</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5 text-center md:text-left flex flex-col md:flex-row items-center gap-8">
+                   <div className="space-y-2 flex-1">
+                      <p className="text-zinc-400 font-medium text-base leading-relaxed">
+                        {isAuthenticated 
+                          ? 'Votre avis est précieux pour nous et pour la communauté.' 
+                          : 'Rejoignez-nous pour partager votre expérience sur ce bien.'}
+                      </p>
                       <StarRating 
                         value={userRating} 
                         interactive={isAuthenticated}
                         onRate={handleRating}
                         disabled={!isAuthenticated}
-                        className="text-lg"
+                        className="text-2xl"
                       />
-                      {property.noteMoyenne && (
-                        <div className="text-sm text-gray-500">
-                          <span className="font-semibold">{property.noteMoyenne.toFixed(1)}</span>
-                          <span className="text-gray-400"> ({property.nombreAvis || 0} avis)</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                   </div>
+                   
+                   {!isAuthenticated && (
+                     <Link to="/login">
+                       <Button className="bg-zinc-950 text-white hover:bg-black px-8 py-6 rounded-2xl font-black uppercase tracking-widest">
+                         Se Connecter
+                       </Button>
+                     </Link>
+                   )}
+                   {isAuthenticated && userRating > 0 && (
+                     <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">
+                       <CheckCircle2 className="w-5 h-5" />
+                       Votre note : {userRating}/5
+                     </div>
+                   )}
                 </div>
-                {isAuthenticated && userRating > 0 && (
-                  <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg border border-green-100">
-                    ✅ Merci pour votre note de {userRating}/5 !
-                  </div>
-                )}
-                {!isAuthenticated && (
-                  <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-lg border border-blue-100">
-                    ℹ️ Connectez-vous pour noter cette propriété
-                  </div>
-                )}
-              </div>
+              </section>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Contact Card */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
-              <div className="flex items-center gap-4 mb-6">
-                 <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
-                   {owner?.avatar ? (
-                     <img src={getImageUrl(owner.avatar)} alt={owner.nom} className="w-full h-full object-cover" />
-                   ) : (
-                     <div className="w-full h-full bg-gold-primary flex items-center justify-center text-white text-xl font-bold">
-                       {owner?.nom?.charAt(0) || 'A'}
-                     </div>
-                   )}
-                 </div>
-                 <div>
-                   <h3 className="text-lg font-bold text-gray-900">{owner?.nom || 'Agence SCIM'}</h3>
-                   <p className="text-sm text-gray-500">Agent immobilier certifié</p>
-                   <div className="flex items-center gap-1 text-gold-primary text-sm mt-1">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="font-semibold">4.9</span>
-                      <span className="text-gray-400 font-normal">(12 avis)</span>
+          {/* Sidebar with premium cards */}
+          <div className="space-y-8">
+            {/* Contact Card refined */}
+            <div className="bg-zinc-900 border border-white/10 rounded-[40px] shadow-2xl p-6 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gold-primary/20 blur-[60px] transform group-hover:scale-150 transition-transform duration-700" />
+              
+              <div className="relative z-10">
+                <div className="flex flex-col items-center text-center mb-10">
+                   <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-gold-primary rounded-full blur-md opacity-20 scale-125" />
+                      <div className="relative w-24 h-24 rounded-[32px] bg-zinc-900 overflow-hidden border-2 border-white/20 shadow-2xl transition-transform duration-500 group-hover:-rotate-3 group-hover:scale-105">
+                        {owner?.avatar ? (
+                          <img src={getImageUrl(owner.avatar)} alt={owner.nom} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-gold-primary to-gold-dark flex items-center justify-center text-zinc-950 text-2xl font-black">
+                            {owner?.nom?.charAt(0) || 'S'}
+                          </div>
+                        )}
+                      </div>
                    </div>
-                 </div>
-              </div>
+                   <h3 className="text-xl font-black text-white leading-tight mb-2">{owner?.nom || 'Excellence SCIM'}</h3>
+                   <div className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-gold-primary uppercase tracking-[0.2em] mb-4">Conseiller Privé</div>
+                   <div className="flex items-center gap-1.5 text-gold-primary">
+                      {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}
+                      <span className="text-xs font-black text-white ml-2">4.9/5</span>
+                   </div>
+                </div>
 
-              <div className="space-y-3 mb-6">
-                <Button 
-                  className="w-full bg-gray-900 hover:bg-black text-white h-12 text-lg font-medium shadow-md transition-all hover:shadow-lg"
-                  onClick={() => setShowContactModal(true)}
-                >
-                  Contacter l'agent
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 text-lg font-medium border-gray-300 hover:border-gray-900 hover:bg-gray-50"
-                  onClick={() => window.location.href = `tel:${owner?.telephone || '+242061234567'}`}
-                >
-                  <Phone className="w-5 h-5 mr-2" />
-                  {owner?.telephone || '+242 06 123 45 67'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 text-lg font-medium border-green-500 hover:border-green-600 hover:bg-green-50 text-green-600"
-                  onClick={() => {
-                    const message = encodeURIComponent(
-                      `🏠 *Demande de visite - SCIM Immobilier*\n\n` +
-                      `*Bien:* ${property.titre}\n` +
-                      `*Localisation:* ${property.ville || 'Lieu non spécifié'}\n` +
-                      `*Prix:* ${property.prix ? new Intl.NumberFormat('fr-FR').format(property.prix) + ' XAF' : 'Prix sur demande'}\n\n` +
-                      `Bonjour, je suis intéressé(e) par cette propriété et j'aimerais planifier une visite.\n\n` +
-                      `*Lien direct vers le bien:* ${window.location.href}\n\n` +
-                      `Merci de me contacter pour plus d'informations.`
-                    );
-                    window.open(`https://wa.me/${(owner?.telephone || '+242061234567').replace(/[^\d]/g, '')}?text=${message}`, '_blank');
-                  }}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  WhatsApp Direct
-                </Button>
-              </div>
-
-              <div className="text-center">
-                 <p className="text-xs text-gray-400">Réponse moyenne: &lt; 1h</p>
+                <div className="space-y-4">
+                  <Button 
+                    className="w-full bg-gold-primary text-zinc-950 hover:bg-amber-300 h-16 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl transition-all hover:-translate-y-1 active:scale-[0.98]"
+                    onClick={() => setShowContactModal(true)}
+                  >
+                    Demande de Renseignement
+                  </Button>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="h-14 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all"
+                      onClick={() => window.location.href = `tel:${owner?.telephone || '+242061234567'}`}
+                    >
+                      <Phone className="w-4 h-4 mr-2 text-gold-primary" />
+                      Appeler
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="h-14 bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all"
+                      onClick={() => {
+                        const phone = (owner?.telephone || '+242061234567').replace(/[^\d+]/g, '');
+                        const price = property.prix 
+                          ? new Intl.NumberFormat('fr-CG').format(property.prix) + ' XAF' 
+                          : 'sur demande';
+                        const typeLabel = property.transactionType === 'vente' ? 'Vente' : 'Location';
+                        const message = encodeURIComponent(
+                          `🏡 *SCIM Immobilier — Demande d'Information*\n` +
+                          `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                          `Bonjour, je souhaite obtenir plus d'informations concernant le bien suivant :\n\n` +
+                          `📌 *${property.titre}*\n` +
+                          `📍 ${property.adresse ? property.adresse + ', ' : ''}${property.ville}\n` +
+                          `🏷️ Type : ${property.categorie} — ${typeLabel}\n` +
+                          `💰 Prix : ${price}\n\n` +
+                          `🔗 Voir l'annonce : ${window.location.href}\n\n` +
+                          `Merci de me revenir dans les plus brefs délais.`
+                        );
+                        window.open(`https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone}?text=${message}`, '_blank');
+                      }}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      WhatsApp
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="mt-8 flex items-center justify-center gap-4 py-4 border-t border-white/5 opacity-50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gold-primary shadow-[0_0_8px_rgba(201,162,39,0.5)]" />
+                      <span className="text-[9px] font-black text-white uppercase tracking-widest">SLA &lt; 30min</span>
+                    </div>
+                </div>
               </div>
             </div>
 
+            {/* Response Avg Info */}
+            <div className="text-center">
+               <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest opacity-50">Réponse moyenne &lt; 30min</p>
+            </div>
+            
             {isAuthenticated && user?.role !== 'admin' ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                   <Calendar className="w-5 h-5 text-gold-primary" />
-                   Réserver une visite
-                </h3>
+              <div className="bg-zinc-900 border border-white/10 rounded-[32px] shadow-xl p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="p-2.5 bg-gold-primary/10 rounded-xl text-gold-primary border border-gold-primary/20">
+                      <Calendar className="w-5 h-5" />
+                   </div>
+                   <h3 className="text-lg font-black text-white tracking-tight uppercase italic">Planifier une Visite</h3>
+                </div>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Date et heure souhaitées</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Date et heure souhaitées</label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <Clock className="w-5 h-5" />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gold-primary">
+                        <Clock className="w-4 h-4" />
                       </div>
                       <input
                         type="datetime-local"
@@ -628,23 +683,23 @@ const PropertyDetailPage = () => {
                           setReservationDate(e.target.value);
                           if (reservationAck) setReservationAck(null);
                         }}
-                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all outline-none appearance-none"
-                        style={{ colorScheme: 'light' }}
+                        className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent transition-all outline-none appearance-none text-white"
+                        style={{ colorScheme: 'dark' }}
                       />
                     </div>
                     <p className="text-xs text-gray-400 mt-1">Sélectionnez une date et une heure (10h-17h)</p>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <input
                       type="checkbox"
                       id="whatsapp"
                       checked={isWhatsapp}
                       onChange={(e) => setIsWhatsapp(e.target.checked)}
-                      className="w-4 h-4 text-gold-primary border-gray-300 rounded focus:ring-gold-primary focus:ring-2"
+                      className="w-4 h-4 text-gold-primary border-white/20 rounded focus:ring-gold-primary focus:ring-2 bg-white/5 accent-gold-primary"
                     />
-                    <label htmlFor="whatsapp" className="text-sm text-gray-700">
-                      Ce numéro est un numéro WhatsApp
+                    <label htmlFor="whatsapp" className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                      Ce numéro est un WhatsApp
                     </label>
                   </div>
 
@@ -656,7 +711,7 @@ const PropertyDetailPage = () => {
                   )}
 
                   <Button
-                    className="w-full bg-gold-primary hover:bg-gold-dark text-white font-semibold h-12 rounded-xl shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
+                    className="w-full bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black h-14 rounded-2xl shadow-xl transition-all hover:-translate-y-0.5 uppercase tracking-widest text-xs"
                     loading={reservationLoading}
                     disabled={!reservationDate || Boolean(reservationValidationMessage)}
                     onClick={async () => {
@@ -777,70 +832,82 @@ const PropertyDetailPage = () => {
       <Modal
         isOpen={showContactModal}
         onClose={() => setShowContactModal(false)}
-        title="Demander des informations"
+        title="Demande de Renseignements Exclusive"
         size="md"
+        variant="glass"
       >
-        <form className="space-y-4" onSubmit={handleContactSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Votre nom
-            </label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              placeholder="Votre nom complet"
-              value={contactForm.name}
-              onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-              required
-            />
+        <form className="space-y-6" onSubmit={handleContactSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
+                Identité Complète
+              </label>
+              <input
+                type="text"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                placeholder="Votre nom complet"
+                value={contactForm.name}
+                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
+                  Email Privé
+                </label>
+                <input
+                  type="email"
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                  placeholder="votre@email.com"
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
+                  Ligne Directe
+                </label>
+                <input
+                  type="tel"
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                  placeholder="+242 06 123 45 67"
+                  value={contactForm.phone}
+                  onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
+                Message d'Intérêt
+              </label>
+              <textarea
+                rows={4}
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all resize-none"
+                placeholder="Décrivez votre projet immobilier..."
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              placeholder="votre@email.com"
-              value={contactForm.email}
-              onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Téléphone
-            </label>
-            <input
-              type="tel"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              placeholder="+242 06 123 45 67"
-              value={contactForm.phone}
-              onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message
-            </label>
-            <textarea
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-primary focus:border-transparent"
-              placeholder="Je suis intéressé(e) par cette propriété..."
-              value={contactForm.message}
-              onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-              required
-            />
-          </div>
-          <div className="flex space-x-3">
-            <Button type="submit" className="flex-1">
-              Envoyer la demande
+
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <Button 
+              type="submit" 
+              className="flex-1 bg-gold-primary text-zinc-950 hover:bg-amber-300 h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all hover:-translate-y-1"
+            >
+              Envoyer la Demande
             </Button>
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => setShowContactModal(false)}
+              className="sm:w-32 h-16 rounded-2xl bg-white/5 border-white/10 text-white hover:bg-white/10 font-bold uppercase tracking-widest text-[10px]"
             >
               Annuler
             </Button>
@@ -853,42 +920,51 @@ const PropertyDetailPage = () => {
         isOpen={showImageModal}
         onClose={() => setShowImageModal(false)}
         size="full"
-        className="p-0"
+        variant="glass"
+        className="!bg-transparent border-none shadow-none"
       >
-        <div className="relative bg-black">
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
           <button
             onClick={() => setShowImageModal(false)}
-            className="absolute top-4 right-4 z-20 bg-black/60 text-white p-2 rounded-full hover:bg-black/80"
+            className="absolute top-4 right-4 z-50 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all hover:rotate-90"
           >
-            ×
+            <X className="w-6 h-6" />
           </button>
-          <button
-            onClick={prevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 text-white p-2 rounded-full hover:bg-black/80"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 text-white p-2 rounded-full hover:bg-black/80"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-          <div className="w-full h-[80vh] flex items-center justify-center">
+          
+          <div className="relative w-full flex-1 flex items-center justify-center p-4">
+            <button
+              onClick={prevImage}
+              className="absolute left-8 z-30 p-5 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white rounded-full transition-all hover:-translate-x-1"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-8 z-30 p-5 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white rounded-full transition-all hover:translate-x-1"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+
             <img
               src={getImageUrl(images[selectedImageIndex]?.url)}
               alt={property.titre}
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-500"
             />
           </div>
+
           {images.length > 1 && (
-            <div className="p-4 bg-black/90">
-              <div className="flex gap-2 overflow-x-auto">
+            <div className="w-full p-8 bg-zinc-950/40 backdrop-blur-2xl border-t border-white/5">
+              <div className="max-w-4xl mx-auto flex gap-4 overflow-x-auto pb-2 px-4 scrollbar-hide justify-center">
                 {images.map((image, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImageIndex(idx)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border ${selectedImageIndex === idx ? 'border-gold-primary' : 'border-transparent'}`}
+                    className={cn(
+                      'relative flex-shrink-0 w-24 h-20 rounded-2xl overflow-hidden transition-all duration-300',
+                      selectedImageIndex === idx 
+                        ? 'ring-4 ring-gold-primary ring-offset-4 ring-offset-zinc-950 scale-110 opacity-100 shadow-2xl' 
+                        : 'opacity-40 hover:opacity-100'
+                    )}
                   >
                     <img src={getImageUrl(image.url)} alt={`${property.titre} ${idx+1}`} className="w-full h-full object-cover" />
                   </button>

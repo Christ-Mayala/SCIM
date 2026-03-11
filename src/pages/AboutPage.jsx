@@ -108,7 +108,7 @@ const AboutPage = () => {
   return (
     <>
       <SEO title={seoConfig.about.title} description={seoConfig.about.description} />
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-zinc-950">
         {/* Hero Section améliorée */}
         <PageHero
           badgeIcon={Building}
@@ -119,7 +119,7 @@ const AboutPage = () => {
             </>
           }
           description="Leader dans l'accompagnement immobilier depuis 2018, nous transformons vos ambitions en realites tangibles avec expertise et passion."
-          backgroundImage="/images/og/og-about.jpg"
+          backgroundImage="https://images.unsplash.com/photo-1560185007-5f0bb1866cab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
           className="pb-10"
           actions={(
             <>
@@ -140,37 +140,31 @@ const AboutPage = () => {
         />
 
 
-        {/* Stats Section améliorée - Avec -mt-1 comme sur Home */}
-        <section className="py-20 bg-white -mt-1">
+        {/* Stats Section - Overlapping Hero */}
+        <section className="relative z-30 -mt-12 lg:-mt-20 pb-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Chiffres Clés
-              </h2>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Une croissance constante et une satisfaction client exceptionnelle
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="group relative bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                  className="group relative bg-white/80 backdrop-blur-xl p-8 rounded-[32px] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(201,162,39,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
                 >
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gold-primary to-gold-dark rounded-2xl shadow-lg group-hover:scale-110 transition-transform">
-                      <stat.icon className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
+                  <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gold-primary/5 rounded-full blur-2xl group-hover:bg-gold-primary/10 transition-colors" />
                   
-                  <div className="pt-8 text-center">
-                    <div className="flex items-baseline justify-center mb-2">
-                      <span className="text-4xl lg:text-5xl font-bold text-gray-900">{stat.value}</span>
-                      <span className="text-2xl text-gold-primary font-bold">{stat.suffix}</span>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-zinc-950 rounded-2xl shadow-lg mb-6 group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/10">
+                      {(() => {
+                        const Icon = stat.icon;
+                        return <Icon className="w-7 h-7 text-gold-primary" />;
+                      })()}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{stat.label}</h3>
-                    <p className="text-gray-500 text-sm">{stat.description}</p>
+                    
+                    <div className="flex items-baseline justify-center mb-1">
+                      <span className="text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">{stat.value}</span>
+                      <span className="text-lg text-gold-primary font-bold ml-0.5">{stat.suffix}</span>
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-3">{stat.label}</h3>
+                    <p className="text-sm text-zinc-400 font-medium">{stat.description}</p>
                   </div>
                 </div>
               ))}
@@ -178,117 +172,102 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Story Section avec timeline améliorée */}
+        {/* Story Section */}
         <section className="py-24 bg-white overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-gold-primary/5 rounded-full blur-3xl opacity-60"></div>
-            <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-gray-100 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-gold-primary/5 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-zinc-100 rounded-full blur-[100px]" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               
               {/* Image Composition (Left) */}
-              <div className="relative order-2 lg:order-1">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white z-10 aspect-[4/5] group">
+              <div className="relative">
+                <div className="relative rounded-[40px] overflow-hidden shadow-2xl z-10 aspect-[4/5] group bg-zinc-900">
                   <img 
                     src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                     alt="Bureau SCIM" 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover transform scale-105 group-hover:scale-110 transition-transform duration-[2s] opacity-80 group-hover:opacity-100"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
                   
-                  <div className="absolute bottom-0 left-0 w-full p-8 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                    <p className="text-gold-primary font-bold tracking-widest uppercase text-xs mb-2">Depuis 2018</p>
-                    <h3 className="text-3xl font-bold mb-2">L'excellence immobilière</h3>
-                    <p className="text-gray-300 text-sm max-w-sm">Une expertise reconnue et une passion inébranlable pour chaque projet.</p>
+                  <div className="absolute bottom-0 left-0 w-full p-10 text-white">
+                    <div className="inline-block px-3 py-1 rounded-full bg-gold-primary/20 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
+                      Depuis 2018
+                    </div>
+                    <h3 className="text-3xl font-bold mb-3 tracking-tight">L'excellence au quotidien</h3>
+                    <p className="text-zinc-300 text-sm max-w-xs leading-relaxed">Une expertise reconnue pour chaque projet d'envergure.</p>
                   </div>
                 </div>
                 
-                {/* Floating Badge/Card */}
-                <div className="absolute -bottom-12 -right-12 w-64 bg-white p-6 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 z-20 hidden md:block animate-bounce-slow">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center justify-center w-12 h-12 bg-gold-primary/10 rounded-full text-gold-primary">
-                      <TrendingUp className="w-6 h-6" />
+                {/* Floating Stats Card */}
+                <div className="absolute -bottom-10 -right-6 w-72 bg-white p-8 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.12)] border border-zinc-100 z-20 hidden md:block">
+                  <div className="flex items-center gap-5 mb-5">
+                    <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 bg-gold-primary rounded-2xl text-zinc-950 shadow-lg shadow-gold-primary/20">
+                      <TrendingUp className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Croissance</p>
-                      <p className="text-xs text-green-500 font-bold">+125% cette année</p>
+                      <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Croissance</p>
+                      <p className="text-xl text-zinc-950 font-black">+125% <span className="text-xs font-bold text-green-500">↑</span></p>
                     </div>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-gold-primary w-3/4 rounded-full"></div>
+                  <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-gold-primary to-amber-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(201,162,39,0.3)] animate-pulse" />
                   </div>
                 </div>
 
-                {/* Decorative dots */}
-                <div className="absolute -top-12 -left-12 opacity-30 z-0">
-                    <svg width="100" height="100" fill="none" viewBox="0 0 100 100">
-                        <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                            <circle cx="2" cy="2" r="2" className="text-gold-primary" fill="currentColor" />
-                        </pattern>
-                        <rect width="100" height="100" fill="url(#dots)" />
-                    </svg>
+                {/* Decorative Pattern */}
+                <div className="absolute -top-10 -left-10 opacity-10 z-0">
+                  <div className="w-40 h-40 grid grid-cols-6 gap-4">
+                    {[...Array(36)].map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold-primary" />
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Content (Right) */}
-              <div className="space-y-8 order-1 lg:order-2">
+              <div className="space-y-12">
                 <div>
-                    <div className="inline-flex items-center space-x-2 mb-6 px-4 py-1.5 bg-gold-primary/10 rounded-full border border-gold-primary/20">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-primary opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-primary"></span>
-                      </span>
-                      <span className="text-gold-primary font-bold uppercase tracking-wider text-xs">Notre Histoire</span>
+                  <div className="inline-flex items-center gap-3 mb-8">
+                    <div className="h-[1px] w-12 bg-gold-primary/30" />
+                    <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">Notre Histoire</span>
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-zinc-950 tracking-tighter leading-[0.9] mb-8">
+                    Une vision <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">
+                      sans limites.
+                    </span>
+                  </h2>
+                  
+                  <blockquote className="relative p-8 rounded-[32px] bg-zinc-50 border border-zinc-100 italic">
+                    <div className="absolute -top-4 -left-2 text-6xl text-gold-primary/20 font-serif leading-none">"</div>
+                    <p className="text-lg text-zinc-600 leading-relaxed font-semibold">
+                      Nous ne vendons pas seulement des biens immobiliers, nous bâtissons des futurs et concrétisons des rêves durables.
+                    </p>
+                  </blockquote>
+                </div>
+
+                <p className="text-lg text-zinc-500 leading-relaxed">
+                  Fondée sur la conviction que l'immobilier est avant tout une aventure humaine, SCIM a su s'imposer par son <span className="text-zinc-950 font-bold">intégrité</span> et sa <span className="text-gold-primary font-bold">maîtrise technique</span> unique sur le marché.
+                </p>
+
+                {/* Timeline Stylisée */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                  {milestones.map((item, idx) => (
+                    <div key={idx} className="group relative flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex flex-col items-center justify-center group-hover:bg-gold-primary group-hover:border-gold-primary transition-all duration-300">
+                        <span className="text-[10px] font-black text-zinc-400 group-hover:text-zinc-950 leading-none mb-0.5">Year</span>
+                        <span className="text-xs font-black text-zinc-950 leading-none">{item.year}</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-zinc-950 uppercase tracking-tight mb-1 group-hover:text-gold-primary transition-colors">{item.title}</h4>
+                        <p className="text-xs text-zinc-500 leading-snug">{item.description}</p>
+                      </div>
                     </div>
-                    
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                        Une vision <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-gold-dark">
-                            audacieuse
-                        </span>
-                    </h2>
-                    
-                    <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-gold-primary pl-6 italic">
-                        "Nous ne vendons pas seulement des biens immobiliers, nous créons des lieux de vie et d'avenir pour nos clients."
-                    </p>
-                </div>
-
-                <div className="space-y-6">
-                    <p className="text-gray-600 leading-relaxed">
-                        Fondée sur la conviction que l'immobilier est avant tout une aventure humaine, SCIM a su s'imposer comme un acteur incontournable. Notre approche combine <span className="font-bold text-gray-900">expertise technique</span> et <span className="font-bold text-gray-900">écoute active</span>.
-                    </p>
-                </div>
-
-                {/* Milestones / Timeline Stylisée */}
-                <div className="space-y-0 relative">
-                    {milestones.map((item, idx) => (
-                        <div key={idx} className="flex gap-6 group relative pb-8 last:pb-0">
-                             {idx !== milestones.length - 1 && (
-                                <div className="absolute left-[19px] top-8 bottom-0 w-0.5 bg-gray-100 group-hover:bg-gold-primary/30 transition-colors"></div>
-                            )}
-                            <div className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full bg-white border-2 border-gray-200 group-hover:border-gold-primary group-hover:scale-110 transition-all flex items-center justify-center shadow-sm">
-                                <div className="w-3 h-3 rounded-full bg-gray-300 group-hover:bg-gold-primary transition-colors"></div>
-                            </div>
-                            <div className="pt-1">
-                                <div className="flex items-center gap-3 mb-1">
-                                    <span className="text-2xl font-bold text-gray-300 group-hover:text-gold-primary transition-colors">{item.year}</span>
-                                    <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
-                                </div>
-                                <p className="text-gray-500 text-sm">{item.description}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="pt-6 flex gap-4">
-                    <Link to="/contact">
-                        <Button className="bg-gray-900 hover:bg-black text-white px-8 py-6 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all group">
-                            Commencer votre projet
-                            <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </Button>
-                    </Link>
+                  ))}
                 </div>
               </div>
 
@@ -296,22 +275,22 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Values Section améliorée */}
-        <section className="py-20 bg-white">
+        {/* Values Section */}
+        <section className="py-32 bg-zinc-50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gold-primary/5 blur-[120px] -z-10" />
+          
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center space-x-2 mb-6">
-                <div className="w-12 h-px bg-gold-primary"></div>
-                <span className="text-gold-primary font-semibold uppercase tracking-wider text-sm">Notre ADN</span>
-                <div className="w-12 h-px bg-gold-primary"></div>
+            <div className="text-center mb-24">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-[1px] w-12 bg-gold-primary/30" />
+                <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">Notre ADN</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Les Valeurs qui <span className="text-gold-primary">Nous Guident</span>
+              <h2 className="text-3xl md:text-4xl font-black text-zinc-950 tracking-tighter mb-6">
+                Les Valeurs qui <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">Nous Guident</span>
               </h2>
-              <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-                Notre succès repose sur des principes fondamentaux qui définissent 
-                notre approche et notre engagement envers chaque client.
+              <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed">
+                Notre succès repose sur des principes fondamentaux qui définissent notre approche et notre engagement.
               </p>
             </div>
 
@@ -319,24 +298,26 @@ const AboutPage = () => {
               {values.map((value, index) => (
                 <div 
                   key={index} 
-                  className="group bg-white border border-gray-100 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 hover:border-gold-primary/30"
+                  className="group relative bg-white border border-zinc-100 rounded-[32px] p-10 hover:shadow-[0_30px_60px_rgba(0,0,0,0.06)] transition-all duration-500 hover:border-gold-primary/30 overflow-hidden"
                 >
-                  <div className="flex items-start space-x-6">
+                  <div className="absolute top-0 left-0 w-2 h-full bg-gold-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                  
+                  <div className="flex flex-col sm:flex-row items-start gap-8">
                     <div className="flex-shrink-0">
-                      <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-gold-primary to-gold-dark rounded-xl group-hover:scale-110 transition-transform">
-                        <value.icon className="w-7 h-7 text-white" />
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-zinc-950 rounded-2xl group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/5 shadow-xl">
+                        <value.icon className="w-8 h-8 text-gold-primary" />
                       </div>
                     </div>
                     
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
-                      <p className="text-gray-600 mb-6 leading-relaxed">{value.description}</p>
+                      <h3 className="text-2xl font-black text-zinc-950 tracking-tight mb-4">{value.title}</h3>
+                      <p className="text-zinc-500 mb-8 leading-relaxed font-medium">{value.description}</p>
                       
-                      <div className="space-y-2">
+                      <div className="flex flex-wrap gap-3">
                         {value.features.map((feature, idx) => (
-                          <div key={idx} className="flex items-center">
-                            <div className="w-2 h-2 bg-gold-primary rounded-full mr-3"></div>
-                            <span className="text-gray-700">{feature}</span>
+                          <div key={idx} className="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-xs font-bold text-zinc-600 group-hover:bg-gold-primary/5 group-hover:border-gold-primary/10 transition-colors">
+                            <div className="w-1.5 h-1.5 bg-gold-primary rounded-full mr-2.5 shadow-[0_0_5px_rgba(201,162,39,0.5)]" />
+                            {feature}
                           </div>
                         ))}
                       </div>
@@ -348,158 +329,147 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Team Section améliorée */}
-        <section className="py-20 bg-gray-50">
+        {/* Team Section */}
+        <section className="py-32 bg-white relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Rencontrez <span className="text-gold-primary">Notre Équipe</span>
+            <div className="text-center mb-20">
+               <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-[1px] w-12 bg-gold-primary/30" />
+                <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">L'ÉQUIPE</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-zinc-950 tracking-tighter mb-4">
+                Rencontrez <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">Nos Experts</span>
               </h2>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Des professionnels passionnés, experts dans leur domaine, 
-                dédiés à la réussite de votre projet.
-              </p>
+              <p className="text-zinc-500 font-medium">Des professionnels passionnés au service de votre patrimoine.</p>
             </div>
 
-            <div className="mt-12 overflow-hidden scrolling-container">
+            <div className="scrolling-container overflow-hidden">
               <div className="scrolling-wrapper">
                 {[...team, ...team].map((member, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 text-center w-48 mx-4"
+                    className="flex-shrink-0 w-64 mx-6 group"
                   >
-                    <img className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg" src={member.image} alt={member.name} />
-                    <h3 className="text-lg font-bold text-gray-900 truncate">{member.name}</h3>
-                    <p className="text-gold-primary font-semibold text-sm">{member.role}</p>
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-gold-primary rounded-[32px] rotate-6 scale-95 opacity-0 group-hover:opacity-20 transition-all duration-500" />
+                      <div className="relative aspect-square rounded-[32px] overflow-hidden border-4 border-white shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
+                        <img className="w-full h-full object-cover" src={member.image} alt={member.name} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-lg font-black text-zinc-950 tracking-tight leading-none mb-1">{member.name}</h3>
+                      <p className="text-gold-primary font-black uppercase tracking-widest text-[10px]">{member.role}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div className="text-center mt-16">
+            <div className="text-center mt-20">
               <Link to="/contact">
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="border-gold-primary text-gold-primary hover:bg-gold-primary hover:text-white px-8"
+                  className="bg-zinc-950 text-white hover:bg-black px-10 py-7 rounded-[20px] text-base font-black uppercase tracking-widest shadow-2xl hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] group"
                 >
                   Réserver une consultation
+                  <ChevronRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Mission Section améliorée */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <Target className="w-16 h-16 text-gold-primary mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        {/* Mission Section */}
+        <section className="py-32 bg-zinc-950 relative overflow-hidden">
+          {/* Background visuals */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px]" />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-24">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gold-primary/10 rounded-3xl mb-8 ring-1 ring-gold-primary/20">
+                <Target className="w-10 h-10 text-gold-primary" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-6">
                 Notre Mission & <span className="text-gold-primary">Engagement</span>
               </h2>
-              <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-                Transformer votre vision immobilière en réalité tangible, 
-                avec une approche stratégique et personnalisée.
+              <p className="text-zinc-400 text-lg max-w-2xl mx-auto leading-relaxed font-medium">
+                Transformer votre vision stratégique en une réalité immobilière concrète et valorisante.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-100 shadow-lg">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold-primary rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl">1</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              {[
+                {
+                  title: "Accompagner l'Excellence",
+                  content: "Nous guidons nos clients avec une précision chirurgicale, transformant chaque défi en une opportunité de croissance patrimoniale.",
+                  items: ['Analyse de besoins', 'Stratégie personnalisée', 'Suivi de prestige']
+                },
+                {
+                  title: "Conseiller la Précision",
+                  content: "Nos décisions sont le fruit d'une analyse rigoureuse des données du marché et d'une intuition forgée par l'expertise.",
+                  items: ['Intelligence marché', 'Analyse financière', 'Ingénierie fiscale']
+                },
+                {
+                  title: "Garantir le Succès",
+                  content: "Votre réussite est notre unique mesure de performance. Nous déployons tous nos actifs pour sécuriser vos investissements.",
+                  items: ['Négociation de haut vol', 'Gestion de processus', 'Suivi long terme']
+                }
+              ].map((box, idx) => (
+                <div key={idx} className="relative group p-10 rounded-[40px] bg-zinc-900/50 border border-white/5 backdrop-blur-xl hover:border-gold-primary/30 transition-all duration-500">
+                  <div className="absolute -top-5 -left-5 w-14 h-14 bg-zinc-950 border border-gold-primary/20 rounded-2xl flex items-center justify-center shadow-2xl">
+                    <span className="text-gold-primary font-black text-2xl">{idx + 1}</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-6 mt-4 tracking-tight">{box.title}</h3>
+                  <p className="text-zinc-400 mb-10 leading-relaxed font-medium">
+                    {box.content}
+                  </p>
+                  <ul className="space-y-4">
+                    {box.items.map((item, id) => (
+                      <li key={id} className="flex items-center text-sm font-bold text-zinc-300">
+                        <CheckCircle className="w-5 h-5 text-gold-primary mr-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-6 mt-4">Accompagner avec Expertise</h3>
-                <p className="text-gray-700 mb-8">
-                  Nous accompagnons chaque client dans son parcours immobilier,
-                  de la définition stratégique de ses besoins à la concrétisation 
-                  optimale de son projet, grâce à notre expertise approfondie.
-                </p>
-                <ul className="space-y-3">
-                  {['Analyse de besoins', 'Stratégie personnalisée', 'Suivi dédié'].map((item, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-gold-primary mr-3" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-100 shadow-lg">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold-primary rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl">2</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-6 mt-4">Conseiller avec Précision</h3>
-                <p className="text-gray-700 mb-8">
-                  Notre expertise nous permet de fournir des conseils avisés,
-                  basés sur une analyse rigoureuse du marché et une compréhension 
-                  approfondie des enjeux immobiliers.
-                </p>
-                <ul className="space-y-3">
-                  {['Étude de marché', 'Analyse financière', 'Optimisation fiscale'].map((item, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-gold-primary mr-3" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-100 shadow-lg">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold-primary rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl">3</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-6 mt-4">Garantir la Réussite</h3>
-                <p className="text-gray-700 mb-8">
-                  Votre réussite est notre priorité absolue. Nous mettons tout 
-                  en œuvre pour transformer votre projet immobilier en un succès 
-                  durable et valorisant.
-                </p>
-                <ul className="space-y-3">
-                  {['Négociation experte', 'Gestion du processus', 'Suivi post-transaction'].map((item, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-gold-primary mr-3" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section améliorée */}
-        <section className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gold-primary via-gold-primary to-gold-dark"></div>
+        {/* CTA Section */}
+        <section className="relative py-32 overflow-hidden bg-zinc-950">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#C9A227_0%,#000000_100%)] opacity-10" />
           
           {/* Pattern overlay */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px'
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M30 0l15 30-15 30L15 30z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+              backgroundSize: '40px 40px'
             }}></div>
           </div>
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Prêt à concrétiser votre projet immobilier 
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter leading-tight">
+              Prêt à redéfinir votre <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">avenir immobilier ?</span>
             </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Notre équipe d'experts vous attend pour une consultation personnalisée 
-              et sans engagement. Transformons ensemble vos ambitions en réalité.
+            <p className="text-lg text-zinc-400 mb-14 max-w-2xl mx-auto leading-relaxed font-medium">
+              Nos conseillers sont prêts à transformer vos ambitions en succès tangibles. L'excellence n'attend pas.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/contact">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link to="/contact" className="group">
                 <Button
-                  variant="secondary"
                   size="lg"
-                  className="bg-white text-gold-primary hover:bg-gray-50 px-10 py-6 text-lg font-semibold rounded-xl shadow-2xl hover:shadow-3xl transition-all"
+                  className="w-full sm:w-auto bg-gold-primary text-zinc-950 hover:bg-amber-300 px-12 py-8 rounded-2xl text-lg font-black uppercase tracking-widest shadow-[0_20px_40px_rgba(201,162,39,0.2)] transition-all group-hover:-translate-y-1"
                 >
-                  <div className="flex items-center">
-                    <span>Démarrer mon projet</span>
-                    <ChevronRight className="ml-3 w-5 h-5" />
-                  </div>
+                  Démarrer maintenant
+                  <ChevronRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               
@@ -507,16 +477,23 @@ const AboutPage = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-transparent border-2 border-white text-white hover:bg-white/10 px-10 py-6 text-lg font-semibold rounded-xl backdrop-blur-sm"
+                  className="w-full sm:w-auto bg-transparent border-2 border-white/20 text-white hover:bg-white/5 hover:border-white px-12 py-8 rounded-2xl text-lg font-black uppercase tracking-widest backdrop-blur-md transition-all"
                 >
-                  Explorer nos propriétés
+                  Nos Propriétés
                 </Button>
               </Link>
             </div>
             
-            <p className="text-white/70 mt-10 text-sm">
-              Consultation gratuite ⬢ Réponse sous 24h ⬢ Expertise garantie
-            </p>
+            <div className="flex items-center justify-center gap-6 mt-16 text-zinc-500">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gold-primary shadow-[0_0_8px_rgba(201,162,39,0.6)]" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Réponse sous 24h</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gold-primary shadow-[0_0_8px_rgba(201,162,39,0.6)]" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Expertise Garantie</span>
+              </div>
+            </div>
           </div>
         </section>
       </div>

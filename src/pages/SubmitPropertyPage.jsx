@@ -215,7 +215,7 @@ const SubmitPropertyPage = () => {
         title={seoConfig.contact.title || 'Soumettre un bien - SCIM'}
         description="Soumettez votre bien a SCIM. Le dossier est recu et traite par l administration avant publication."
       />
-      <div className="min-h-screen bg-zinc-50 transition-colors duration-300">
+      <div className="min-h-screen bg-zinc-950 transition-colors duration-300">
       <PageHero
         badgeIcon={Sparkles}
         badgeText="Service Premium SCIM"
@@ -243,24 +243,26 @@ const SubmitPropertyPage = () => {
         }
       />
 
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 -mt-16 relative z-20">
-          <section className="mb-8 rounded-3xl border border-white/20 bg-white/80 backdrop-blur-xl p-8 shadow-xl">
-            <div className="mb-6 flex items-center gap-2 text-zinc-900">
-              <ClipboardList className="h-6 w-6 text-gold-primary" />
-              <h2 className="text-2xl font-bold">Guide de soumission</h2>
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 -mt-16 relative z-20">
+          <section className="mb-6 rounded-3xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl p-6 shadow-xl">
+            <div className="mb-4 flex items-center gap-3 text-white">
+              <div className="p-2 bg-gold-primary/10 rounded-xl border border-gold-primary/20">
+                <ClipboardList className="h-5 w-5 text-gold-primary" />
+              </div>
+              <h2 className="text-base font-black text-white uppercase tracking-widest italic">Guide de Soumission</h2>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {submissionGuide.map((item) => (
-                <article key={item.title} className="rounded-2xl border border-zinc-100 bg-white/50 p-5 transition-all hover:shadow-md">
-                  <h3 className="text-base font-bold text-zinc-900">{item.title}</h3>
-                  <p className="mt-2 text-sm text-zinc-600 leading-relaxed">{item.description}</p>
+                <article key={item.title} className="rounded-2xl border border-white/5 bg-zinc-950/50 p-4 transition-all hover:border-gold-primary/20">
+                  <h3 className="text-sm font-black text-white italic">{item.title}</h3>
+                  <p className="mt-1 text-xs text-zinc-400 leading-relaxed">{item.description}</p>
                 </article>
               ))}
             </div>
           </section>
 
-          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-zinc-700">
-            Besoin d'assistance  Vous pouvez aussi passer par la page <Link to="/contact" className="font-semibold text-gold-primary hover:text-gold-dark">Contact</Link>.
+          <div className="mb-5 rounded-2xl border border-gold-primary/20 bg-gold-primary/5 p-4 text-sm text-zinc-400">
+            Besoin d'assistance ? Vous pouvez aussi passer par la page <Link to="/contact" className="font-black text-gold-primary hover:text-amber-300">Contact</Link>.
           </div>
 
           {success ? (
@@ -273,12 +275,15 @@ const SubmitPropertyPage = () => {
             </div>
           ) : null}
 
-          {apiError ? <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{apiError}</div> : null}
+          {apiError ? <div className="mb-5 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400 backdrop-blur-xl">{apiError}</div> : null}
 
-          <form onSubmit={onSubmit} className="space-y-10 rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl md:p-12 mb-20 animate-fade-in-up">
+          <form onSubmit={onSubmit} className="space-y-5 rounded-3xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl p-6 shadow-xl md:p-8 mb-12 animate-fade-in-up">
             <section>
-              <h2 className="text-lg font-semibold text-zinc-900">Informations personnelles</h2>
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Vos Coordonnées
+              </h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <Input label="Nom complet *" name="nomComplet" value={form.nomComplet} onChange={onChange} error={errors.nomComplet} leftIcon={<User className="h-4 w-4" />} />
                 <Input label="Email *" name="email" type="email" value={form.email} onChange={onChange} error={errors.email} leftIcon={<Mail className="h-4 w-4" />} />
                 <Input label="Telephone *" name="telephone" value={form.telephone} onChange={onChange} onBlur={onPhoneBlur} error={errors.telephone} leftIcon={<Phone className="h-4 w-4" />} />
@@ -286,8 +291,11 @@ const SubmitPropertyPage = () => {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-zinc-900">Informations du bien</h2>
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Informations du Bien
+              </h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Input label="Titre du bien *" name="titre" value={form.titre} onChange={onChange} error={errors.titre} leftIcon={<Home className="h-4 w-4" />} />
                 <Select label="Categorie *" name="categorie" value={form.categorie} onChange={onChange} options={categoryOptions} placeholder="Choisir une categorie" error={errors.categorie} />
                 <Select label="Transaction *" name="transactionType" value={form.transactionType} onChange={onChange} options={transactionOptions} placeholder="Choisir une transaction" error={errors.transactionType} />
@@ -299,10 +307,10 @@ const SubmitPropertyPage = () => {
                 <Input label="Salles de bain" name="nombre_salles_bain" type="number" value={form.nombre_salles_bain} onChange={onChange} />
                 <Input label="Salons" name="nombre_salons" type="number" value={form.nombre_salons} onChange={onChange} />
               </div>
-              <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
                 {checkboxes.map((f) => (
-                  <label key={f.key} className="inline-flex cursor-pointer items-center justify-between gap-2 rounded-xl border border-zinc-100 bg-zinc-50/50 px-4 py-3 text-sm font-medium transition-all hover:bg-zinc-100 group">
-                    <span className="text-zinc-700 group-hover:text-zinc-900">{f.label}</span>
+                  <label key={f.key} className="inline-flex cursor-pointer items-center justify-between gap-2 rounded-xl border border-white/10 bg-zinc-900/60 px-4 py-3 text-sm font-medium transition-all hover:border-gold-primary/30 hover:bg-white/5 group">
+                    <span className="text-zinc-400 group-hover:text-white transition-colors">{f.label}</span>
                     <input type="checkbox" name={f.key} checked={Boolean(form[f.key])} onChange={onChange} className="h-4 w-4 accent-gold-primary" />
                   </label>
                 ))}
@@ -321,10 +329,13 @@ const SubmitPropertyPage = () => {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-zinc-900">Images du bien</h2>
-              <p className="mt-1 text-xs text-zinc-500">Selectionnez des fichiers image (max 10).</p>
-              <div className="mt-4 space-y-3">
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-6 text-sm text-zinc-700 hover:border-gold-primary/60 hover:bg-zinc-100">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-3 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Visuels du Bien
+              </h2>
+              <p className="mb-4 text-xs text-zinc-500">Sélectionnez des fichiers image (max 10).</p>
+              <div className="space-y-3">
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 p-6 text-sm text-zinc-400 hover:border-gold-primary/50 hover:bg-white/10 transition-all">
                   <ImagePlus className="h-4 w-4" />
                   Choisir des images
                   <input
@@ -336,8 +347,8 @@ const SubmitPropertyPage = () => {
                   />
                 </label>
                 {imageFiles.length > 0 ? (
-                  <div className="rounded-xl border border-zinc-200 bg-white p-3 text-xs text-zinc-700">
-                    <div className="mb-2 font-medium">{imageFiles.length} image(s) selectionnee(s)</div>
+                  <div className="rounded-2xl border border-white/10 bg-zinc-950/50 p-3 text-xs text-zinc-400">
+                    <div className="mb-2 font-black text-white uppercase tracking-widest text-[10px]">{imageFiles.length} image(s) sélectionnée(s)</div>
                     <ul className="space-y-1">
                       {imageFiles.map((f) => (
                         <li key={`${f.name}-${f.size}`}>{f.name}</li>
@@ -349,8 +360,8 @@ const SubmitPropertyPage = () => {
               {errors.images ? <div className="mt-2 text-xs text-rose-600">{errors.images}</div> : null}
             </section>
 
-            <div className="pt-6 border-t border-zinc-100 flex items-center justify-center">
-              <Button type="submit" loading={loading} className="h-14 px-12 text-lg font-bold gap-3 rounded-2xl bg-gradient-to-r from-gold-primary to-amber-500 hover:from-amber-600 hover:to-gold-primary shadow-lg shadow-gold-primary/20 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+            <div className="pt-5 border-t border-white/10 flex items-center justify-center">
+              <Button type="submit" loading={loading} className="h-14 px-12 font-black gap-3 rounded-2xl bg-gold-primary hover:bg-amber-300 text-zinc-950 shadow-xl transition-all transform hover:scale-[1.02] uppercase tracking-widest text-xs">
                 <Send className="h-5 w-5" />
                 {loading ? 'Soumission en cours...' : 'Envoyer à l\'administration'}
               </Button>

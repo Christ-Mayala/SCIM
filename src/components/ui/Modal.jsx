@@ -11,6 +11,7 @@ const Modal = ({
   children,
   size = 'md',
   className,
+  variant = 'default',
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -54,14 +55,17 @@ const Modal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="absolute inset-0 bg-zinc-950/80 backdrop-blur-xl transition-opacity"
         onClick={onClose}
       />
       
       {/* Modal */}
       <div
         className={cn(
-          'relative bg-white rounded-xl shadow-2xl w-full animate-scale-in max-h-[90vh] overflow-hidden flex flex-col',
+          'relative w-full animate-scale-in max-h-[90vh] flex flex-col',
+          variant === 'glass' 
+            ? 'bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[40px] shadow-2xl overflow-hidden' 
+            : 'bg-white rounded-xl shadow-2xl overflow-hidden',
           sizeClasses[size],
           className
         )}

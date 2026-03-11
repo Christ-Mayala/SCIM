@@ -227,33 +227,40 @@ const AddPropertyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
+    <div className="min-h-screen bg-zinc-950 py-6">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gold-light/30 px-3 py-1 text-xs text-zinc-800 ring-1 ring-gold-primary/25">
-            <Building2 className="w-4 h-4" />
-            Publication
+        <div className="mb-6 flex items-center gap-4">
+          <div className="p-2 bg-gold-primary/10 rounded-xl border border-gold-primary/20">
+            <Building2 className="w-5 h-5 text-gold-primary" />
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-zinc-900">Ajouter un bien</h1>
-          <p className="mt-1 text-zinc-600">Remplissez les détails de votre propriété pour la mettre en valeur.</p>
+          <div>
+            <div className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-0.5">Administration</div>
+            <h1 className="text-xl font-black text-white italic uppercase tracking-tight">Ajouter un Bien</h1>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
             {/* Titre et Catégorie */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Informations principales</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Informations Principales
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Titre de l'annonce" name="titre" value={formData.titre} onChange={handleChange} error={errors.titre} placeholder="Ex: Appartement moderne au centre-ville" />
                 <Select label="Catégorie" name="categorie" value={formData.categorie} onChange={handleChange} options={categoryOptions} error={errors.categorie} />
               </div>
               <div className="mt-4">
-                <Textarea label="Description détaillée" name="description" value={formData.description} onChange={handleChange} error={errors.description} rows={5} placeholder="Décrivez le bien, ses atouts, le quartier..." />
+                <Textarea label="Description détaillée" name="description" value={formData.description} onChange={handleChange} error={errors.description} rows={4} placeholder="Décrivez le bien, ses atouts, le quartier..." />
               </div>
             </div>
 
             {/* Localisation */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Localisation</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Localisation
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Ville" name="ville" value={formData.ville} onChange={handleChange} error={errors.ville} placeholder="Ex: Brazzaville" />
                 <Input label="Adresse" name="adresse" value={formData.adresse} onChange={handleChange} error={errors.adresse} placeholder="Ex: 123, avenue de la République" />
@@ -261,8 +268,11 @@ const AddPropertyPage = () => {
             </div>
 
             {/* Prix et Transaction */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Prix et Transaction</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Prix &amp; Transaction
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Prix" name="prix" type="number" value={formData.prix} onChange={handleChange} error={errors.prix} icon={Banknote} />
                 {formData.isBonPlan && (
@@ -270,21 +280,21 @@ const AddPropertyPage = () => {
                 )}
               </div>
 
-              <div className="mt-4 rounded-xl bg-gold-light/30 p-4 ring-1 ring-gold-primary/25">
+              <div className="mt-4 rounded-2xl bg-gold-primary/5 p-4 ring-1 ring-gold-primary/20">
                 <label className="flex items-center gap-3">
                   <Checkbox checked={formData.isBonPlan} onCheckedChange={(checked) => setFormData((p) => ({ ...p, isBonPlan: checked }))} id="isBonPlan" />
                   <div>
-                    <div className="font-semibold text-zinc-900">Marquer comme "Bon Plan"</div>
-                    <div className="text-xs text-zinc-700">Affiche un badge spécial et un prix barré.</div>
+                    <div className="font-black text-white text-sm">Marquer comme "Bon Plan"</div>
+                    <div className="text-xs text-zinc-400">Affiche un badge spécial et un prix barré.</div>
                   </div>
                 </label>
 
                 {formData.isBonPlan && (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gold-primary/25 pt-4">
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gold-primary/20 pt-4">
                     <Input label="Libellé (ex: Promo Flash)" name="bonPlanLabel" value={formData.bonPlanLabel} onChange={handleChange} error={errors.bonPlanLabel} icon={Tag} />
                     <Input label="Date de fin" name="bonPlanExpiresAt" type="date" value={formData.bonPlanExpiresAt} onChange={handleChange} error={errors.bonPlanExpiresAt} icon={CalendarClock} />
                     {reduction && (
-                      <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
+                      <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/10 border border-gold-primary/20 text-gold-primary font-black text-sm p-3">
                         <Percent className="w-4 h-4" />
                         <span>Réduction calculée : {reduction}%</span>
                       </div>
@@ -300,18 +310,21 @@ const AddPropertyPage = () => {
             </div>
 
             {/* Images */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Images (25 max)</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Images (25 max)
+              </h2>
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                 onDragLeave={() => setDragActive(false)}
                 onDrop={onDrop}
-                className={`relative grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl border-2 border-dashed p-4 transition-colors ${dragActive ? 'border-gold-primary bg-gold-light/30' : 'border-zinc-300'}`}
+                className={`relative grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl border-2 border-dashed p-4 transition-colors ${dragActive ? 'border-gold-primary bg-gold-primary/5' : 'border-white/10'}`}
               >
                 {images.map((img) => (
                   <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden group">
                     <img src={img.preview || img.url} alt="Aperçu" className="h-full w-full object-cover" />
-                    <button onClick={() => removeImage(img.id)} className="absolute top-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => removeImage(img.id)} className="absolute top-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
@@ -320,20 +333,23 @@ const AddPropertyPage = () => {
                   <button
                     type="button"
                     onClick={onPickFiles}
-                    className="relative aspect-square rounded-xl bg-zinc-50 hover:bg-zinc-100 text-zinc-500 flex flex-col items-center justify-center gap-1 ring-1 ring-zinc-200"
+                    className="relative aspect-square rounded-xl bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-gold-primary flex flex-col items-center justify-center gap-1 ring-1 ring-white/10 transition-all"
                   >
                     <UploadCloud className="w-6 h-6" />
                     <span className="text-xs text-center">Ajouter</span>
                   </button>
                 )}
               </div>
-              {errors.images && <p className="mt-2 text-sm text-red-600">{errors.images}</p>}
+              {errors.images && <p className="mt-2 text-sm text-red-500">{errors.images}</p>}
               <input type="file" ref={fileInputRef} onChange={handleImageUpload} multiple accept="image/*" className="hidden" />
             </div>
 
             {/* Caractéristiques */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Caractéristiques</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Caractéristiques
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Input label="Superficie (m²)" name="superficie" type="number" value={formData.superficie} onChange={handleChange} error={errors.superficie} icon={Ruler} />
                 <Input label="Chambres" name="nombre_chambres" type="number" value={formData.nombre_chambres} onChange={handleChange} error={errors.nombre_chambres} icon={BedDouble} />
@@ -343,22 +359,25 @@ const AddPropertyPage = () => {
             </div>
 
             {/* Commodités */}
-            <div className="p-6 rounded-2xl bg-white ring-1 ring-zinc-200 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Commodités</h2>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl ring-1 ring-white/10 shadow-xl">
+              <h2 className="text-sm font-black text-white uppercase tracking-widest italic mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-gold-primary rounded-full"></span>
+                Commodités
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <label className="flex items-center gap-2"><Checkbox name="garage" checked={formData.garage} onCheckedChange={(checked) => handleChange({ target: { name: 'garage', type: 'checkbox', checked } })} /> Garage</label>
-                <label className="flex items-center gap-2"><Checkbox name="piscine" checked={formData.piscine} onCheckedChange={(checked) => handleChange({ target: { name: 'piscine', type: 'checkbox', checked } })} /> Piscine</label>
-                <label className="flex items-center gap-2"><Checkbox name="jardin" checked={formData.jardin} onCheckedChange={(checked) => handleChange({ target: { name: 'jardin', type: 'checkbox', checked } })} /> Jardin</label>
-                <label className="flex items-center gap-2"><Checkbox name="balcon" checked={formData.balcon} onCheckedChange={(checked) => handleChange({ target: { name: 'balcon', type: 'checkbox', checked } })} /> Balcon</label>
-                <label className="flex items-center gap-2"><Checkbox name="gardien" checked={formData.gardien} onCheckedChange={(checked) => handleChange({ target: { name: 'gardien', type: 'checkbox', checked } })} /> Gardien</label>
+                <label className="flex items-center gap-2 text-zinc-300 text-sm"><Checkbox name="garage" checked={formData.garage} onCheckedChange={(checked) => handleChange({ target: { name: 'garage', type: 'checkbox', checked } })} /> Garage</label>
+                <label className="flex items-center gap-2 text-zinc-300 text-sm"><Checkbox name="piscine" checked={formData.piscine} onCheckedChange={(checked) => handleChange({ target: { name: 'piscine', type: 'checkbox', checked } })} /> Piscine</label>
+                <label className="flex items-center gap-2 text-zinc-300 text-sm"><Checkbox name="jardin" checked={formData.jardin} onCheckedChange={(checked) => handleChange({ target: { name: 'jardin', type: 'checkbox', checked } })} /> Jardin</label>
+                <label className="flex items-center gap-2 text-zinc-300 text-sm"><Checkbox name="balcon" checked={formData.balcon} onCheckedChange={(checked) => handleChange({ target: { name: 'balcon', type: 'checkbox', checked } })} /> Balcon</label>
+                <label className="flex items-center gap-2 text-zinc-300 text-sm"><Checkbox name="gardien" checked={formData.gardien} onCheckedChange={(checked) => handleChange({ target: { name: 'gardien', type: 'checkbox', checked } })} /> Gardien</label>
               </div>
             </div>
 
-            <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={() => navigate('/admin/properties')}>Annuler</Button>
-              <Button type="submit" loading={loading} className="gap-2">
+            <div className="flex justify-end gap-4 pb-4">
+              <Button type="button" variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl" onClick={() => navigate('/admin/properties')}>Annuler</Button>
+              <Button type="submit" loading={loading} className="bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black rounded-2xl gap-2">
                 <Save className="w-4 h-4" />
-                Enregistrer le bien
+                Enregistrer
               </Button>
             </div>
           </form>

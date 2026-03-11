@@ -46,7 +46,7 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
 
   return (
     <div className={cn(
-      'property-card group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden', 
+      'property-card group bg-zinc-900/40 backdrop-blur-xl rounded-[32px] shadow-2xl hover:shadow-gold-primary/5 transition-all duration-500 border border-white/10 overflow-hidden', 
       isListView ? 'flex flex-col sm:flex-row' : 'flex flex-col',
       className
     )}>
@@ -57,38 +57,38 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
       )}>
         <Link to={`/properties/${property._id}`} onClick={rememberScroll} className="block w-full h-full">
           {isImageLoading && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center z-10">
+            <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center z-10">
               <span className="sr-only">Chargement...</span>
             </div>
           )}
           <img
             src={imageError ? '/images/og/og-property.jpg' : getImageUrl(mainImage)}
             alt={property.titre}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
             onLoad={handleImageLoad}
             onError={handleImageError}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-80" />
         </Link>
 
         {/* Badges Overlay */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
-            <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-gray-900 inline-flex items-center gap-1.5 shadow-sm border border-white/20">
+            <div className="bg-zinc-950/80 backdrop-blur-xl px-4 py-1.5 rounded-full text-[10px] font-black text-gold-primary inline-flex items-center gap-2 shadow-xl border border-white/10 uppercase tracking-widest">
               {(() => {
                 const Icon = getPropertyTypeIcon(property.categorie);
-                return <Icon className="w-3.5 h-3.5 text-gold-primary" />;
+                return <Icon className="w-3.5 h-3.5" />;
               })()}
-              <span className="uppercase tracking-wide text-[10px]">{property.categorie}</span>
+              <span>{property.categorie}</span>
             </div>
 
             {isAuthenticated && (
               <button
                 onClick={handleFavoriteClick}
                 className={cn(
-                  'p-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-sm',
+                  'p-2.5 rounded-full backdrop-blur-xl transition-all duration-500 shadow-xl border border-white/10',
                   isFavorite
-                    ? 'bg-red-500 text-white hover:bg-red-600'
-                    : 'bg-white/90 text-gray-600 hover:bg-white hover:text-red-500'
+                    ? 'bg-red-500 text-white hover:bg-red-600 scale-110 border-red-400/50'
+                    : 'bg-zinc-950/60 text-white/60 hover:text-red-500 hover:scale-110'
                 )}
                 aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
               >
@@ -97,13 +97,13 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
             )}
         </div>
 
-        {/* Price Tag Overlay (Bottom Left) - Only for Grid or Mobile List */}
-        <div className="absolute bottom-4 left-4 z-20">
-             <div className="text-white font-bold text-xl sm:text-2xl drop-shadow-md">
+        {/* Price Tag Overlay (Bottom Left) */}
+        <div className="absolute bottom-5 left-5 z-20">
+             <div className="text-white font-black text-2xl sm:text-3xl tracking-tighter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
                 {formatPrice(property.prix)}
              </div>
-             <div className="flex items-center gap-1 text-white/90 text-xs sm:text-sm font-medium drop-shadow-md">
-                <MapPin className="w-3.5 h-3.5" />
+             <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-bold uppercase tracking-wider drop-shadow-md">
+                <MapPin className="w-3.5 h-3.5 text-gold-primary" />
                 <span className="truncate max-w-[200px]">{property.ville}</span>
              </div>
         </div>
@@ -111,60 +111,60 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
 
       {/* Content */}
       <div className={cn(
-          "flex flex-col justify-between p-5 sm:p-6",
+          "flex flex-col justify-between p-6 sm:p-8",
           isListView ? "flex-1" : "flex-1"
       )}>
-        <div>
-            <div className="flex justify-between items-start mb-2">
+        <div className="space-y-4">
+            <div className="flex justify-between items-start">
                  <Link to={`/properties/${property._id}`} onClick={rememberScroll} className="group-hover:text-gold-primary transition-colors">
-                    <h3 className="text-lg font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
+                    <h3 className="text-xl font-black text-white line-clamp-1 leading-none mb-1 tracking-tight italic uppercase">
                         {property.titre}
                     </h3>
                  </Link>
             </div>
 
-            <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">
+            <p className="text-zinc-400 text-sm line-clamp-2 leading-relaxed font-medium opacity-80">
             {property.description}
             </p>
 
-            {/* Rating - moved below description */}
+            {/* Rating */}
             {property.noteMoyenne > 0 && (
-                <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 mb-4">
+                <div className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/5 mb-2 transition-colors hover:bg-white/10">
                     <div className="flex items-center gap-2">
-                        <StarRating value={property.noteMoyenne} readOnly count={5} className="text-xs" />
-                        <span className="text-sm font-bold text-gray-700">{property.noteMoyenne.toFixed(1)}</span>
+                        <StarRating value={property.noteMoyenne} readOnly count={5} className="text-[10px]" />
+                        <span className="text-xs font-black text-gold-primary">{property.noteMoyenne.toFixed(1)}</span>
                     </div>
-                    <span className="text-xs text-gray-500">{property.nombreAvis || 0} avis</span>
+                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{property.nombreAvis || 0} avis</span>
                 </div>
             )}
 
             {/* Features Grid */}
-            <div className="grid grid-cols-3 gap-2 mb-6">
+            <div className="grid grid-cols-3 gap-3">
             {property.nombre_chambres > 0 && (
-                <div className="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-lg border border-gray-100">
-                    <Bed className="w-4 h-4 text-gray-400 mb-1" />
-                    <span className="text-xs font-semibold text-gray-700">{property.nombre_chambres} <span className="font-normal text-gray-400 hidden sm:inline">Ch.</span></span>
+                <div className="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-gold-primary/20 transition-all group/feat">
+                    <Bed className="w-4 h-4 text-zinc-500 mb-1 group-hover/feat:text-gold-primary transition-colors" />
+                    <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest leading-none">{property.nombre_chambres} Ch.</span>
                 </div>
             )}
             {property.nombre_salles_bain > 0 && (
-                <div className="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-lg border border-gray-100">
-                    <Bath className="w-4 h-4 text-gray-400 mb-1" />
-                    <span className="text-xs font-semibold text-gray-700">{property.nombre_salles_bain} <span className="font-normal text-gray-400 hidden sm:inline">Sdb.</span></span>
+                <div className="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-gold-primary/20 transition-all group/feat">
+                    <Bath className="w-4 h-4 text-zinc-500 mb-1 group-hover/feat:text-gold-primary transition-colors" />
+                    <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest leading-none">{property.nombre_salles_bain} Sdb.</span>
                 </div>
             )}
             {property.superficie > 0 && (
-                <div className="flex flex-col items-center justify-center p-2 bg-gray-50 rounded-lg border border-gray-100">
-                    <Square className="w-4 h-4 text-gray-400 mb-1" />
-                    <span className="text-xs font-semibold text-gray-700">{property.superficie} <span className="font-normal text-gray-400">m²</span></span>
+                <div className="flex flex-col items-center justify-center p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-gold-primary/20 transition-all group/feat">
+                    <Square className="w-4 h-4 text-zinc-500 mb-1 group-hover/feat:text-gold-primary transition-colors" />
+                    <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest leading-none">{property.superficie} m²</span>
                 </div>
             )}
             </div>
         </div>
 
         {/* Actions */}
-        <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4 mt-auto">
+        <div className="pt-8 flex items-center justify-between gap-4 mt-auto">
             <Link to={`/properties/${property._id}`} onClick={rememberScroll} className="w-full">
-                <Button className="w-full bg-gray-900 hover:bg-black text-white rounded-lg py-2.5 shadow-sm hover:shadow-md transition-all">
+                <Button className="w-full bg-zinc-950 hover:bg-black text-white border border-white/10 rounded-2xl py-6 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl hover:-translate-y-1 transition-all">
                     Voir détails
                 </Button>
             </Link>

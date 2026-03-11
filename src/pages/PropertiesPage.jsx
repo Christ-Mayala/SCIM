@@ -11,6 +11,7 @@ import { cn } from '../lib/utils';
 import SEOHead from '../components/seo/SEOHead';
 import { PropertiesListStructuredData } from '../components/seo/StructuredData';
 import { seoConfig } from '../utils/seoData';
+import PageHero from '../components/layout/PageHero';
 
 const PropertiesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -151,7 +152,7 @@ const PropertiesPage = () => {
   }, [loading, properties.length, restored]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-zinc-950 selection:bg-gold-primary/30 pb-20">
       <SEOHead 
         title={seoConfig.properties.title}
         description={seoConfig.properties.description}
@@ -159,95 +160,106 @@ const PropertiesPage = () => {
         image={seoConfig.properties.image}
       />
       <PropertiesListStructuredData properties={properties} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Nos Propriétés
-          </h1>
-          <p className="text-lg text-gray-600">
-            Découvrez notre sélection de {pagination.total} propriétés exceptionnelles
-          </p>
+
+      <PageHero
+        badgeText="Catalogue Exclusif"
+        title={
+          <>
+            Découvrez nos <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">Propriétés d'Exception</span>
+          </>
+        }
+        description={`Explorez notre sélection de ${pagination.total} biens immobiliers rigoureusement sélectionnés pour leur qualité et leur emplacement.`}
+        backgroundImage="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+        className="mb-0"
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+        {/* Filters Section with glassmorphism */}
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/10 p-6 mb-12">
+          <PropertyFilters />
         </div>
 
-        {/* Filters */}
-        <PropertyFilters className="mb-8" />
-
         {/* Toolbar */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-            {/* Results Count */}
-            <div className="text-gray-600">
-              {loading ? (
-                'Chargement...'
-              ) : (
-                `${pagination.total} propriété${pagination.total > 1 ? 's' : ''} trouvée${pagination.total > 1 ? 's' : ''}`
-              )}
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-1 bg-gold-primary rounded-full" />
+             <div>
+                <h2 className="text-xl font-black text-white tracking-tight italic uppercase">Liste des Biens<span className="text-gold-primary">.</span></h2>
+                <p className="text-sm text-zinc-500 font-medium">
+                  {loading ? 'Chargement...' : `${pagination.total} propriétés trouvées`}
+                </p>
+             </div>
+          </div>
 
-            {/* Controls */}
-            <div className="flex w-full sm:w-auto flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-              {/* Sort */}
-              <Select
-                value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
-                options={sortOptions}
-                className="w-full sm:w-auto"
-                leftIcon={<SortAsc className="w-4 h-4" />}
-              />
+          <div className="flex items-center gap-4 bg-zinc-900/60 p-2 rounded-2xl border border-white/10 shadow-sm backdrop-blur-xl">
+            {/* Sort */}
+            <Select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+              options={sortOptions}
+              className="border-none bg-transparent focus:ring-0 text-sm font-bold text-zinc-400 hover:text-white transition-colors"
+              leftIcon={<SortAsc className="w-4 h-4 text-gold-primary" />}
+            />
 
-              {/* View Mode */}
-              <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    'p-2 rounded-md transition-colors',
-                    viewMode === 'grid'
-                      ? 'bg-white text-gold-primary shadow-sm'
-                      : 'text-gray-600 hover:text-gold-primary'
-                  )}
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={cn(
-                    'p-2 rounded-md transition-colors',
-                    viewMode === 'list'
-                      ? 'bg-white text-gold-primary shadow-sm'
-                      : 'text-gray-600 hover:text-gold-primary'
-                  )}
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
+            <div className="w-px h-6 bg-white/10 mx-2" />
+
+            {/* View Mode */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'p-2.5 rounded-xl transition-all duration-300',
+                  viewMode === 'grid'
+                    ? 'bg-gold-primary text-black shadow-lg shadow-gold-primary/20'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                )}
+              >
+                <Grid className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  'p-2.5 rounded-xl transition-all duration-300',
+                  viewMode === 'list'
+                    ? 'bg-gold-primary text-black shadow-lg shadow-gold-primary/20'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                )}
+              >
+                <List className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
 
         {/* Properties Grid/List */}
         {loading ? (
-          <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center justify-center py-32 gap-6">
             <LoadingSpinner size="lg" />
+            <p className="text-zinc-400 font-medium animate-pulse">Recherche des meilleures opportunités...</p>
           </div>
         ) : properties.length === 0 ? (
-          <div className="text-center py-12">
-            <Home className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <div className="py-20 text-center bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-xl">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/5 border border-white/10 rounded-2xl mb-6 text-gold-primary">
+               <Home className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-black text-white mb-3 uppercase italic">
               Aucune propriété trouvée
             </h3>
-            <p className="text-gray-600 mb-6">
-              Essayez de modifier vos critères de recherche pour voir plus de résultats.
+            <p className="text-zinc-500 mb-8 max-w-sm mx-auto font-medium text-sm">
+              Nous n'avons pas trouvé de biens correspondant à vos critères actuels.
             </p>
-            <Button onClick={() => window.location.reload()}>
+            <Button 
+               onClick={() => window.location.reload()}
+               className="bg-zinc-950 text-white hover:bg-black px-10 py-6 rounded-2xl font-black uppercase tracking-widest"
+            >
               Réinitialiser les filtres
             </Button>
           </div>
         ) : (
-          <>
+          <div className="space-y-12">
             <div
               className={cn(
-                'grid gap-6',
+                'grid gap-8',
                 viewMode === 'grid'
                   ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                   : 'grid-cols-1'
@@ -256,29 +268,34 @@ const PropertiesPage = () => {
               {properties.map((property, index) => (
                 <div
                   key={property._id}
-                  className="animate-fade-in"
+                  className="animate-in fade-in slide-in-from-bottom-5 duration-700"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <PropertyCard
                     property={property}
-                    className={viewMode === 'list' ? 'flex flex-row' : ''}
+                    className={cn(
+                      "group border-none bg-transparent shadow-none",
+                      viewMode === 'list' ? 'flex flex-col md:flex-row' : ''
+                    )}
                   />
                 </div>
               ))}
             </div>
 
             {/* Pagination */}
-            {renderPagination()}
-          </>
+            <div className="pt-10 border-t border-zinc-100">
+               {renderPagination()}
+            </div>
+          </div>
         )}
 
         {/* Load More Button (Alternative to pagination) */}
         {!loading && properties.length > 0 && pagination.page < pagination.totalPages && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-12">
             <Button
               onClick={() => handlePageChange(pagination.page + 1)}
               size="lg"
-              variant="outline"
+              className="bg-white border-2 border-zinc-950 text-zinc-950 hover:bg-zinc-950 hover:text-white px-12 py-7 rounded-2xl font-black uppercase tracking-widest transition-all"
             >
               Charger plus de propriétés
             </Button>

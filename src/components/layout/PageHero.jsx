@@ -43,12 +43,12 @@ const PageHero = ({
             </div>
           ) : null}
 
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-bold tracking-tight mb-6 leading-[1.1]">
             {title}
           </h1>
 
           {description ? (
-            <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
+            <p className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
               {description}
             </p>
           ) : null}
@@ -63,12 +63,8 @@ const PageHero = ({
         </div>
       </div>
 
-      {/* Modern Slope Divider */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 text-zinc-50 translate-y-[1px]">
-        <svg className="w-full h-full" viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none">
-          <path d="M0 100C300 100 600 0 1440 100H0Z" fill="currentColor" />
-        </svg>
-      </div>
+      {/* Bottom fade to zinc-950 instead of white SVG slope */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-zinc-950 pointer-events-none" />
     </section>
   );
 };

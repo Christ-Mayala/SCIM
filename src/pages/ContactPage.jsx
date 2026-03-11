@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, MessageCircle, User, FileText, Calendar, CheckCircle, Shield, Building } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle, User, FileText, Calendar, CheckCircle, Shield, Building, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -147,7 +147,13 @@ const ContactPage = () => {
   return (
     <>
       <SEO title={seoConfig.contact.title} description={seoConfig.contact.description} />
-      <div className="min-h-screen bg-zinc-50">
+      <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-1/4 -right-40 w-[600px] h-[600px] bg-gold-dark/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+
         {/* Hero Section */}
         <PageHero
           badgeIcon={Sparkles}
@@ -155,7 +161,7 @@ const ContactPage = () => {
           title={
             <>
               Votre Projet Immobilier <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">Mérite Notre Expertise</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary via-amber-200 to-gold-dark">Mérite Notre Expertise</span>
             </>
           }
           description="Notre équipe d'experts vous accompagne à chaque étape. Discutons de votre projet et trouvons ensemble la meilleure solution."
@@ -164,14 +170,16 @@ const ContactPage = () => {
 
         {/* Success Message */}
         {submitted && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-6 shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+            <div className="bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 text-emerald-400 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex items-center space-x-4">
-                <CheckCircle className="w-8 h-8" />
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-emerald-500" />
+                </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">Message envoyé avec succès !</h3>
-                  <p className="text-emerald-100">
-                    Nous avons bien reçu votre message et vous répondrons dans les plus brefs délais.
+                  <h3 className="font-black text-xl tracking-tight text-white">Message envoyé avec succès !</h3>
+                  <p className="font-medium opacity-80">
+                    Nous avons bien reçu votre demande et notre conciergerie vous répondra sous 24h.
                   </p>
                 </div>
               </div>
@@ -179,146 +187,150 @@ const ContactPage = () => {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Form */}
-            <div className="lg:sticky lg:top-8">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 lg:p-10 border border-gray-100">
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gold-primary to-gold-dark rounded-2xl mb-4">
-                    <MessageCircle className="w-8 h-8 text-white" />
+            <div className="lg:sticky lg:top-32">
+              <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 lg:p-8 shadow-2xl">
+                <div className="text-center lg:text-left mb-8">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gold-primary/10 border border-gold-primary/20 rounded-xl mb-4">
+                    <MessageCircle className="w-6 h-6 text-gold-primary" />
                   </div>
-                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                    Parlons de votre projet
+                  <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tight mb-2">
+                    Parlons de <span className="text-gold-primary text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">votre projet</span>
                   </h2>
-                  <p className="text-gray-600">
-                    Remplissez ce formulaire et nous vous recontacterons sous 24h
+                  <p className="text-zinc-400 font-medium">
+                    Remplissez ce formulaire et un consultant luxury vous recontactera.
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Input
-                        label="Nom complet *"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        error={errors.nom}
-                        placeholder="Votre nom et prénom"
-                        className="w-full"
-                        leftIcon={<User className="w-5 h-5" />}
-                      />
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Nom complet</label>
+                       <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center text-zinc-500 transition-colors group-focus-within:text-gold-primary">
+                          <User className="w-4 h-4" />
+                        </div>
+                        <input
+                          name="nom"
+                          value={formData.nom}
+                          onChange={handleChange}
+                          placeholder="Votre nom"
+                          className="w-full h-12 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                          required
+                        />
+                      </div>
+                      {errors.nom && <p className="text-xs text-red-500 mt-1">{errors.nom}</p>}
                     </div>
 
-                    <div>
-                      <Input
-                        label="Email *"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        error={errors.email}
-                        placeholder="votre@email.com"
-                        className="w-full"
-                        leftIcon={<Mail className="w-5 h-5" />}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Input
-                        label="Téléphone"
-                        type="tel"
-                        name="telephone"
-                        value={formData.telephone}
-                        onChange={handleChange}
-                        placeholder="+242 06 123 45 67"
-                        className="w-full"
-                        leftIcon={<Phone className="w-5 h-5" />}
-                      />
-                    </div>
-
-                    <div>
-                      <Select
-                        label="Sujet *"
-                        name="sujet"
-                        value={formData.sujet}
-                        onChange={handleChange}
-                        options={subjectOptions}
-                        error={errors.sujet}
-                        placeholder="Sélectionnez un sujet"
-                        leftIcon={<FileText className="w-5 h-5" />}
-                      />
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Email</label>
+                       <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center text-zinc-500 transition-colors group-focus-within:text-gold-primary">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="votre@prestige.com"
+                          className="w-full h-12 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                          required
+                        />
+                      </div>
+                      {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                     </div>
                   </div>
 
-                  <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Téléphone</label>
+                       <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center text-zinc-500 transition-colors group-focus-within:text-gold-primary">
+                          <Phone className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="telephone"
+                          value={formData.telephone}
+                          onChange={handleChange}
+                          placeholder="+242 06 123 45 67"
+                          className="w-full h-12 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Sujet</label>
+                       <Select
+                         name="sujet"
+                         value={formData.sujet}
+                         onChange={handleChange}
+                         options={subjectOptions}
+                         error={errors.sujet}
+                         placeholder="Sélectionnez un sujet"
+                         leftIcon={<FileText className="w-4 h-4" />}
+                         className="h-12 bg-white/5 border-white/10 rounded-2xl text-white"
+                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Message</label>
                     <Textarea
-                      label={
-                        <span className="flex items-center">
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          Message *
-                        </span>
-                      }
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
                       error={errors.message}
                       rows={6}
                       placeholder="Décrivez-nous votre projet en détail..."
-                      className="w-full"
+                      className="w-full bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-medium py-4 px-6"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     loading={loading}
-                    className="w-full group py-4 bg-gradient-to-r from-gold-primary to-gold-dark hover:from-gold-dark hover:to-gold-primary text-lg font-semibold shadow-lg hover:shadow-xl"
+                    className="w-full h-14 bg-gold-primary hover:bg-amber-300 text-zinc-950 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl transition-all duration-300"
                   >
                     <span className="flex items-center justify-center">
-                      <Send className="mr-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      {loading ? 'Envoi en cours...' : 'Envoyer mon message'}
+                      <Send className="mr-3 w-5 h-5" />
+                      Envoyer ma demande
                     </span>
                   </Button>
 
-                  <p className="text-center text-sm text-gray-500">
-                    En soumettant ce formulaire, vous acceptez notre politique de confidentialité.
+                  <p className="text-center text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    Discrétion et confidentialité garanties par SCIM
                   </p>
                 </form>
               </div>
             </div>
 
             {/* Contact Information */}
-            <div className="space-y-8">
+            <div className="space-y-12">
               {/* Contact Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {contactInfo.map((info, index) => (
                   <div 
                     key={index} 
-                    className="group bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:border-gold-primary/30 transition-all duration-300"
+                    className="group bg-zinc-900/40 backdrop-blur-3xl rounded-[32px] border border-white/10 p-8 hover:border-gold-primary/30 transition-all duration-500 shadow-2xl"
                   >
-                    <div className="flex items-start space-x-4">
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <info.icon className={`w-6 h-6 ${info.iconColor}`} />
+                    <div className="flex flex-col gap-6">
+                      <div className={`w-14 h-14 rounded-2xl bg-gold-primary/10 border border-gold-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                        <info.icon className={`w-7 h-7 text-gold-primary`} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">
-                          {info.title}
-                        </h3>
-                        <p className="text-gray-800 font-semibold text-lg mb-1">
-                          {info.details}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {info.subtitle}
-                        </p>
+                        <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-2">{info.title}</h3>
+                        <p className="text-white font-black text-xl mb-2 tracking-tight">{info.details}</p>
+                        <p className="text-sm text-zinc-400 font-medium mb-4">{info.subtitle}</p>
                         {info.action && (
                           <a
                             href={info.action}
-                            className="inline-flex items-center mt-2 text-sm font-medium text-gold-primary hover:text-gold-dark"
+                            className="inline-flex items-center text-xs font-black text-gold-primary uppercase tracking-widest hover:text-white transition-colors"
                           >
-                            Contactez-nous →
+                            Nous joindre <ArrowLeft className="ml-2 w-4 h-4 rotate-180" />
                           </a>
                         )}
                       </div>
@@ -328,65 +340,69 @@ const ContactPage = () => {
               </div>
 
               {/* Quick Contact CTA */}
-              <div className="relative overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-gold-primary to-gold-dark"></div>
-                <div className="relative p-8 text-white">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                      <Phone className="w-6 h-6" />
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 group shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-gold-primary to-gold-dark opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                
+                <div className="relative p-6 lg:p-8 text-zinc-950 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="space-y-3 text-center md:text-left">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      <Clock className="w-3 h-3" />
+                      Assistance Immédiate
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-2">Besoin d'une réponse immédiate ?</h3>
-                      <p className="mb-6 opacity-90">
-                        Notre équipe est disponible dès maintenant pour répondre à vos questions les plus urgentes.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <Button
-                          onClick={() => window.location.href = 'tel:+242061234567'}
-                          className="bg-white text-gold-primary hover:bg-gray-100 px-6"
-                        >
-                          <Phone className="w-4 h-4 mr-2" />
-                          Appeler maintenant
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => window.location.href = 'mailto:contact@scim.cg'}
-                          className="border-white text-white hover:bg-white/10"
-                        >
-                          <Mail className="w-4 h-4 mr-2" />
-                          Envoyer un email
-                        </Button>
-                      </div>
-                    </div>
+                    <h3 className="text-2xl font-black tracking-tighter leading-none">
+                      Besoin d'une réponse <br /> ultra-rapide ?
+                    </h3>
+                    <p className="font-bold text-zinc-950/70 max-w-sm">
+                      Accédez à notre ligne prioritaire pour vos demandes critiques et projets urgents.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-4 w-full md:w-auto">
+                    <Button
+                      onClick={() => window.location.href = 'tel:+242061234567'}
+                      className="bg-zinc-950 text-white hover:bg-zinc-900 h-16 px-8 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl"
+                    >
+                      <Phone className="w-4 h-4 mr-3" />
+                      Appel Prioritaire
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.location.href = 'mailto:contact@scim.cg'}
+                      className="border-zinc-950/20 text-zinc-950 hover:bg-zinc-950 hover:text-white h-16 px-8 rounded-2xl font-black uppercase tracking-widest text-xs"
+                    >
+                      Conciergerie Mail
+                    </Button>
                   </div>
                 </div>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <div className="flex items-center space-x-3 mb-6">
-                  <MapPin className="w-6 h-6 text-gold-primary" />
-                  <h3 className="text-xl font-bold text-gray-900">Notre agence à Brazzaville</h3>
+              {/* Map Section */}
+              <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-gold-primary/10 rounded-xl flex items-center justify-center border border-gold-primary/20">
+                    <MapPin className="w-5 h-5 text-gold-primary" />
+                  </div>
+                  <h3 className="text-lg font-black text-white tracking-tight uppercase italic">Le Siège SCIM</h3>
                 </div>
                 
-                <div className="relative aspect-video rounded-xl overflow-hidden ring-1 ring-gray-200">
+                <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden ring-1 ring-white/10 shadow-2xl group">
                   <iframe
                     title="SCIM Immobilier — Brazzaville"
                     src="https://www.google.com/maps?q=SCIM+Immobilier,+Bacongo,+Brazzaville&output=embed"
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 w-full h-full grayscale-[0.8] opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     allowFullScreen
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent pointer-events-none group-hover:opacity-0 transition-opacity"></div>
                   <a
                     href="https://maps.app.goo.gl/9LoE7pMV6gA9vee87"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute top-3 left-3 z-10 inline-flex items-center gap-2 bg-black/50 text-white rounded-xl px-3 py-2 backdrop-blur-sm hover:bg-black/60"
-                    aria-label="Voir l’emplacement sur Google Maps"
+                    className="absolute bottom-6 left-6 z-20 inline-flex items-center gap-2 bg-gold-primary text-zinc-950 rounded-xl px-4 py-2.5 font-black uppercase tracking-widest text-[10px] shadow-2xl hover:bg-white transition-all transform hover:scale-105"
                   >
                     <MapPin className="w-4 h-4" />
-                    <span className="text-sm font-medium">Voir sur Google Maps</span>
+                    Itinéraire Prestige
                   </a>
                 </div>
               </div>
@@ -394,40 +410,41 @@ const ContactPage = () => {
           </div>
 
           {/* FAQ Section */}
-          <div className="mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center space-x-2 mb-6">
-                <div className="w-12 h-px bg-gold-primary"></div>
-                <span className="text-gold-primary font-semibold uppercase tracking-wider text-sm">Questions courantes</span>
-                <div className="w-12 h-px bg-gold-primary"></div>
+          <div className="mt-16 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-gold-primary/30 to-transparent"></div>
+            
+            <div className="pt-12 text-center mb-12">
+              <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gold-primary uppercase tracking-[0.3em] mb-6">
+                <Shield className="w-3 h-3" />
+                Informations Clients
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                FAQ - <span className="text-gold-primary">Réponses rapides</span>
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-none">
+                FAQ — <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary via-amber-200 to-gold-dark">Réponses d'Excellence</span>
               </h2>
               
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Retrouvez les réponses aux questions les plus fréquentes concernant nos services.
+              <p className="text-zinc-400 font-medium max-w-xl mx-auto">
+                Tout ce que vous devez savoir pour démarrer votre aventure immobilière avec SCIM dans les meilleures conditions.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
               {faqs.map((faq, index) => (
                 <div 
                   key={index} 
-                  className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl hover:border-gold-primary/30 transition-all duration-300"
+                  className="group bg-zinc-900/30 backdrop-blur-xl rounded-3xl p-6 border border-white/5 hover:border-gold-primary/20 transition-all duration-500 hover:bg-zinc-900/50"
                 >
-                  <div className="flex items-start space-x-4">
+                  <div className="flex gap-5">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <faq.icon className="w-6 h-6 text-gray-700" />
+                      <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:bg-gold-primary/10 group-hover:border-gold-primary/30 transition-all duration-500">
+                        <faq.icon className="w-6 h-6 text-zinc-500 group-hover:text-gold-primary transition-colors" />
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 mb-3 text-lg">
+                      <h3 className="font-black text-white mb-3 text-base tracking-tight leading-tight">
                         {faq.question}
                       </h3>
-                      <p className="text-gray-600 leading-relaxed">
+                      <p className="text-zinc-400 font-medium leading-relaxed group-hover:text-zinc-300 transition-colors">
                         {faq.answer}
                       </p>
                     </div>
@@ -436,17 +453,20 @@ const ContactPage = () => {
               ))}
             </div>
 
-            <div className="text-center mt-12">
-              <p className="text-gray-600">
-                Vous ne trouvez pas la réponse à votre question ? 
-                <a href="#form" className="ml-2 font-semibold text-gold-primary hover:text-gold-dark">
-                  Contactez-nous directement →
-                </a>
-              </p>
+            <div className="text-center mt-20">
+              <div className="inline-block p-1 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-2xl">
+                <div className="bg-zinc-950 px-8 py-4 rounded-xl flex items-center gap-4">
+                  <p className="text-zinc-500 font-medium">Vous avez une demande spécifique ?</p>
+                  <a href="#form" className="font-black text-gold-primary uppercase tracking-widest text-[10px] hover:text-white transition-colors">
+                    Échanger directement <ArrowLeft className="ml-2 w-4 h-4 rotate-180 inline" />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </>
   );
 };

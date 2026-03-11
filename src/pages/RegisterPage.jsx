@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle, Building, Shield, Star, ArrowRight, Key } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle2, Building, Shield, Sparkles, Star, ArrowRight, Key } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
-import { validateEmail, validatePhone } from '../lib/utils';
+import { cn, validateEmail, validatePhone } from '../lib/utils';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -138,358 +138,285 @@ const RegisterPage = () => {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gold-primary/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-gold-dark/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 right-1/3 w-80 h-80 bg-gold-primary/5 rounded-full blur-3xl" />
+    <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
         
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+        {/* Subtle Grid */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px),
                            linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-        }}></div>
+          backgroundSize: '40px 40px',
+        }} />
       </div>
 
-      <div className="relative flex min-h-screen">
-        {/* Left Panel - Benefits */}
-        <div className="hidden lg:flex lg:w-1/2 relative">
-          <div className="absolute inset-0">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80")',
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/95 via-zinc-900/90 to-zinc-900/80"></div>
-          </div>
-          
-          <div className="relative flex flex-col justify-between p-12 w-full">
-            {/* Logo */}
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl">
-                <img 
-                  src="/images/scim-logo.jpg" 
-                  alt="SCIM" 
-                  className="h-16 w-16 rounded-full object-cover border-4 border-white/20"
-                />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white">SCIM</div>
-                <div className="text-sm text-gray-200">Immobilier Congo</div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="max-w-md">
-              <div className="inline-flex items-center space-x-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
-                <Key className="w-4 h-4" />
-                <span className="text-sm font-medium text-white">Création de compte</span>
-              </div>
-              
-              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-                Rejoignez notre <br />
-                <span className="text-gold-primary">communauté immobilière</span>
-              </h1>
-              
-              <p className="text-xl text-gray-200 mb-10 leading-relaxed">
-                Créez votre compte gratuit et accédez à des opportunités immobilières exclusives.
-              </p>
-
-              {/* Benefits List */}
-              <div className="space-y-6 mb-12">
-                <h3 className="text-lg font-semibold text-white mb-4">Vos avantages :</h3>
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <benefit.icon className="w-5 h-5 text-gold-primary" />
-                    </div>
-                    <span className="text-gray-200">{benefit.text}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Testimonial */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
+      <div className="relative w-full max-w-[1240px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900/40 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
+        {/* Left Side: Luxury Experience */}
+        <div className="hidden lg:flex flex-col justify-between p-16 relative overflow-hidden border-r border-white/5">
+           <div className="absolute inset-0 bg-gradient-to-br from-gold-primary/20 via-transparent to-transparent pointer-events-none" />
+           
+           <div className="relative z-10">
+              <Link to="/" className="flex items-center gap-4 group">
+                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 group-hover:border-gold-primary transition-all duration-500 shadow-2xl">
+                   <img 
+                    src="/images/scim-logo.jpg" 
+                    alt="SCIM" 
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
                 </div>
-                <p className="text-gray-200 italic mb-4">
-                  "Grâce à SCIM, j'ai trouvé la maison parfaite pour ma famille en moins d'une semaine !"
-                </p>
-                <div className="text-sm text-gray-300">- Marie K., propriétaire depuis 2023</div>
-              </div>
-            </div>
+                <div className="space-y-0.5">
+                   <div className="text-2xl font-black text-white tracking-widest leading-none uppercase">SCIM</div>
+                   <div className="text-[10px] font-black text-gold-primary uppercase tracking-[0.3em]">Signature Immobilière</div>
+                </div>
+              </Link>
+           </div>
 
-            {/* Footer */}
-            <div className="text-sm text-gray-300">
-              <p>© 2024 SCIM Immobilier • Déjà 5 000+ membres</p>
-            </div>
-          </div>
+           <div className="relative z-10 space-y-12">
+              <div className="space-y-6">
+                 <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gold-primary/10 rounded-full border border-gold-primary/20 text-[10px] font-black text-gold-primary uppercase tracking-widest backdrop-blur-md">
+                    <Sparkles className="w-4 h-4" />
+                    Accès Prestige
+                 </div>
+                 <h1 className="text-5xl font-black text-white tracking-tighter leading-[1.1] mb-4">
+                   L'élégance <br />
+                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary via-amber-200 to-gold-dark">aux sommets.</span>
+                 </h1>
+                 <p className="text-lg text-zinc-400 font-medium max-w-sm leading-relaxed">
+                   Devenez membre privilége et accédez aux opportunités les plus prestigieuses du marché.
+                 </p>
+              </div>
+
+              {/* Benefits List Refined */}
+              <div className="space-y-6">
+                 {benefits.map((benefit, index) => {
+                    const Icon = benefit.icon;
+                    return (
+                      <div key={index} className="flex items-center gap-5 group/item cursor-default">
+                         <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gold-primary group-hover/item:bg-gold-primary group-hover/item:text-zinc-950 transition-all duration-500 group-hover/item:scale-110 shadow-lg">
+                            <Icon className="w-5 h-5" />
+                         </div>
+                         <span className="text-xs font-black text-zinc-400 group-hover/item:text-white uppercase tracking-widest transition-colors">{benefit.text}</span>
+                      </div>
+                    );
+                 })}
+              </div>
+           </div>
+
+           <div className="relative z-10 pt-10 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                 <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Congo-Brazzaville • Excellence</p>
+                 <div className="flex -space-x-3">
+                    {[1,2,3].map(i => (
+                      <div key={i} className="w-9 h-9 rounded-full border-2 border-zinc-900 bg-zinc-800 ring-2 ring-gold-primary/5" />
+                    ))}
+                    <div className="w-9 h-9 rounded-full border-2 border-zinc-900 bg-gold-primary flex items-center justify-center text-[8px] font-black text-zinc-950">+5k</div>
+                 </div>
+              </div>
+           </div>
         </div>
 
-        {/* Right Panel - Register Form */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-          <div className="w-full max-w-md">
-            {/* Mobile Logo */}
-            <div className="lg:hidden flex flex-col items-center mb-8">
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl mb-4">
-                <img 
-                  src="/images/scim-logo.jpg" 
-                  alt="SCIM" 
-                  className="h-20 w-20 rounded-full object-cover border-4 border-white/20"
-                />
-              </div>
-              <h1 className="text-2xl font-bold text-white text-center">Rejoignez SCIM Immobilier</h1>
-              <p className="text-gray-300 text-center mt-2">Créez votre compte en 2 minutes</p>
+        {/* Right Side: Form */}
+        <div className="p-8 lg:p-16 bg-zinc-900/80 backdrop-blur-3xl flex flex-col justify-center relative border-l border-white/5 overflow-y-auto scrollbar-hide">
+          {/* Mobile Header (Visible only on mobile) */}
+          <div className="lg:hidden flex flex-col items-center mb-12">
+             <Link to="/" className="mb-6">
+                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 shadow-2xl">
+                   <img src="/images/scim-logo.jpg" alt="SCIM" className="h-12 w-12 rounded-full object-cover" />
+                </div>
+             </Link>
+             <h1 className="text-3xl font-black text-white tracking-tight text-center">SCIM <span className="text-gold-primary">SIGNATURE</span></h1>
+          </div>
+
+          <div className="max-w-md mx-auto w-full py-4">
+            <div className="mb-10 text-center lg:text-left">
+              <h2 className="text-2xl font-black text-white tracking-tight mb-3">Création de Profil</h2>
+              <p className="text-zinc-400 font-medium">Rejoignez notre cercle privé en quelques instants.</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-                  Créez votre compte
-                </h2>
-                <p className="text-gray-200">
-                  Rejoignez la première plateforme immobilière du Congo
-                </p>
-              </div>
-
-              {/* Error Message */}
-              {errors.general && (
-                <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-                  <p className="text-red-400 text-sm">{errors.general}</p>
+            {errors.general && (
+              <div className="mb-8 p-5 bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="p-3 bg-red-500/20 rounded-xl text-red-500">
+                   <Lock className="w-5 h-5" />
                 </div>
-              )}
+                <p className="text-sm font-black text-red-400 leading-tight">{errors.general}</p>
+              </div>
+            )}
 
-              {/* Form */}
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {/* Full Name */}
-                <div>
-                  <Input
-                    label="Nom complet *"
-                    labelClassName="text-white"
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Identité Complète</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-gold-primary">
+                    <User className="w-5 h-5 text-zinc-500 transition-colors" />
+                  </div>
+                  <input
                     type="text"
                     name="nom"
                     value={formData.nom}
                     onChange={handleChange}
-                    placeholder="Votre nom et prénom"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
-                    leftIcon={<User className="w-5 h-5" />}
-                    error={errors.nom}
-                    errorClassName="text-red-400"
+                    placeholder="Prénoms & Nom de famille"
+                    className="w-full h-14 pl-16 pr-6 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                    required
                   />
                 </div>
+                {errors.nom && <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{errors.nom}</p>}
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Email */}
-                  <div>
-                    <Input
-                      label="Email *"
-                      labelClassName="text-white"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">E-mail</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-gold-primary">
+                      <Mail className="w-5 h-5 text-zinc-500 transition-colors" />
+                    </div>
+                    <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="votre@email.com"
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-300"
-                      leftIcon={<Mail className="w-5 h-5" />}
-                      error={errors.email}
-                      errorClassName="text-red-400"
+                      className="w-full h-14 pl-16 pr-6 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                      required
                     />
                   </div>
+                  {errors.email && <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{errors.email}</p>}
+                </div>
 
-                  {/* Phone */}
-                  <div>
-                    <Input
-                      label="Téléphone *"
-                      labelClassName="text-white"
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Téléphone</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-gold-primary">
+                      <Phone className="w-5 h-5 text-zinc-500 transition-colors" />
+                    </div>
+                    <input
                       type="tel"
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder="+242 06 123 45 67"
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-300"
-                      leftIcon={<Phone className="w-5 h-5" />}
-                      error={errors.telephone}
-                      errorClassName="text-red-400"
+                      placeholder="+242 06..."
+                      className="w-full h-14 pl-16 pr-6 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-bold text-sm"
+                      required
                     />
                   </div>
+                  {errors.telephone && <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{errors.telephone}</p>}
                 </div>
+              </div>
 
-                {/* Password */}
-                <div>
-                  <Input
-                    label="Mot de passe *"
-                    labelClassName="text-white"
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Série de Caractères (Pass)</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-gold-primary">
+                    <Lock className="w-5 h-5 text-zinc-500 transition-colors" />
+                  </div>
+                  <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Créez un mot de passe sécurisé"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
-                    leftIcon={<Lock className="w-5 h-5" />}
-                    rightIcon={
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="hover:text-gray-200 transition-colors focus:outline-none"
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    }
-                    error={errors.password}
-                    errorClassName="text-red-400"
+                    placeholder="••••••••"
+                    className="w-full h-14 pl-16 pr-14 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-mono font-bold text-sm"
+                    required
                   />
-                  
-                  {/* Password Strength */}
-                  {formData.password && (
-                    <div className="mt-3">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-xs text-gray-300">Force du mot de passe</span>
-                        <span className="text-xs text-gray-300">
-                          {passwordStrength < 3 ? 'Faible' : passwordStrength < 4 ? 'Moyen' : 'Fort'}
-                        </span>
-                      </div>
-                      <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full transition-all duration-300 ${
-                            passwordStrength < 3 ? 'bg-red-500' : 
-                            passwordStrength < 4 ? 'bg-yellow-500' : 'bg-green-500'
-                          }`}
-                          style={{ width: `${passwordStrength * 20}%` }}
-                        ></div>
-                      </div>
-                      
-                      {/* Requirements */}
-                      <div className="mt-3 space-y-1">
-                        {passwordRequirements.map((req, index) => (
-                          <div key={index} className="flex items-center">
-                            {req.met ? (
-                              <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                            ) : (
-                              <div className="w-3 h-3 border border-gray-500 rounded-full mr-2"></div>
-                            )}
-                            <span className={`text-xs ${req.met ? 'text-green-400' : 'text-gray-300'}`}>
-                              {req.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
+                {errors.password && <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{errors.password}</p>}
+                
+                {formData.password && (
+                  <div className="px-5 py-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                     <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Niveau de Sécurisation</span>
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest",
+                          passwordStrength < 3 ? 'text-red-500' : passwordStrength < 4 ? 'text-amber-500' : 'text-emerald-500'
+                        )}>
+                           {passwordStrength < 3 ? 'Inadéquat' : passwordStrength < 4 ? 'Standard' : 'Optimal'}
+                        </span>
+                     </div>
+                     <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div 
+                          className={cn(
+                            "h-full transition-all duration-700",
+                            passwordStrength < 3 ? 'bg-red-500' : passwordStrength < 4 ? 'bg-amber-500' : 'bg-emerald-500'
+                          )}
+                          style={{ width: `${passwordStrength * 20}%` }}
+                        />
+                     </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Confirm Password */}
-                <div>
-                  <Input
-                    label="Confirmer le mot de passe *"
-                    labelClassName="text-white"
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Validation du Pass</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-gold-primary">
+                    <Lock className="w-5 h-5 text-zinc-500 transition-colors" />
+                  </div>
+                  <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    placeholder="Retapez votre mot de passe"
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-300"
-                    leftIcon={<Lock className="w-5 h-5" />}
-                    rightIcon={
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="hover:text-gray-200 transition-colors focus:outline-none"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    }
-                    error={errors.confirmPassword}
-                    errorClassName="text-red-400"
+                    placeholder="Répétez le mot de passe"
+                    className="w-full h-14 pl-16 pr-14 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 focus:border-gold-primary/50 transition-all font-mono font-bold text-sm"
+                    required
                   />
-                </div>
-
-                {/* Terms */}
-                <div className="flex items-start space-x-3">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="acceptTerms"
-                      checked={formData.acceptTerms}
-                      onCheckedChange={(checked) =>
-                        handleChange({ target: { name: 'acceptTerms', type: 'checkbox', checked } })
-                      }
-                      className="border-white/30 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-                    />
-                    <label htmlFor="acceptTerms" className="text-sm text-gray-200 cursor-pointer select-none">
-                      J'accepte les{' '}
-                      <Link to="/terms" className="text-gold-primary hover:text-gold-dark">
-                        conditions d'utilisation
-                      </Link>{' '}
-                      et la{' '}
-                      <Link to="/privacy" className="text-gold-primary hover:text-gold-dark">
-                        politique de confidentialité
-                      </Link>
-                    </label>
-                  </div>
-                </div>
-                {errors.acceptTerms && (
-                  <p className="mt-1 text-xs text-red-400">
-                    {errors.acceptTerms}
-                  </p>
-                )}
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="w-full group py-4 bg-gradient-to-r from-gold-primary to-gold-dark hover:from-gold-dark hover:to-gold-primary text-lg font-semibold shadow-lg hover:shadow-xl"
-                  disabled={!formData.acceptTerms || loading}
-                >
-                  <span className="flex items-center justify-center">
-                    {loading ? 'Création en cours...' : 'Créer mon compte gratuit'}
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </Button>
-              </form>
-
-              {/* Login Link */}
-              <div className="mt-8 text-center">
-                <p className="text-gray-300">
-                  Vous avez déjà un compte ?{' '}
-                  <Link
-                    to="/login"
-                    className="font-semibold text-gold-primary hover:text-gold-dark transition-colors group"
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
                   >
-                    <span className="flex items-center justify-center">
-                      Connectez-vous ici
-                      <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </Link>
-                </p>
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-[10px] font-bold text-red-500 ml-1 mt-1">{errors.confirmPassword}</p>}
               </div>
 
-              {/* Security Info */}
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center justify-center space-x-2 text-xs text-gray-300">
-                  <Shield className="w-3 h-3" />
-                  <span>Inscription sécurisée • Vos données sont protégées</span>
-                </div>
+              <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors group cursor-pointer" onClick={() => handleChange({ target: { name: 'acceptTerms', type: 'checkbox', checked: !formData.acceptTerms } })}>
+                 <div className={"w-6 h-6 rounded-lg border transition-all flex items-center justify-center flex-shrink-0 " + (formData.acceptTerms ? 'bg-gold-primary border-gold-primary shadow-[0_0_15px_rgba(201,162,39,0.3)]' : 'border-white/20 bg-white/5 group-hover:border-gold-primary/50')}>
+                    {formData.acceptTerms && <Key className="w-3 h-3 text-zinc-950" />}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-zinc-400 leading-relaxed uppercase tracking-widest">
+                       J'atteste avoir lu et j'accepte sans réserve les <Link to="/terms" className="text-gold-primary hover:underline underline-offset-4">conditions d'exclusion</Link> et la <Link to="/privacy" className="text-gold-primary hover:underline underline-offset-4">politique de confidentialité</Link>.
+                    </p>
+                 </div>
               </div>
+
+              <Button
+                type="submit"
+                loading={loading}
+                className="w-full h-16 bg-gold-primary hover:bg-amber-300 text-zinc-950 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] shadow-[0_20px_40px_rgba(201,162,39,0.2)] hover:shadow-[0_25px_50px_rgba(201,162,39,0.3)] transition-all duration-500 hover:-translate-y-1 active:scale-[0.98]"
+                disabled={!formData.acceptTerms || loading}
+              >
+                Initialiser mon Profil Prestige
+              </Button>
+            </form>
+
+            <div className="mt-10 text-center">
+              <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px]">
+                Adhérent de longue date ?{' '}
+                <Link
+                  to="/login"
+                  className="ml-2 text-gold-primary hover:text-amber-200 transition-colors underline underline-offset-8 transition-all"
+                >
+                  Authentification Directe
+                </Link>
+              </p>
             </div>
 
-            {/* Mobile Benefits */}
-            <div className="lg:hidden mt-8">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Pourquoi s'inscrire ?</h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center justify-center space-x-3 text-gray-200">
-                      <benefit.icon className="w-4 h-4 text-gold-primary" />
-                      <span className="text-sm">{benefit.text}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Security Info */}
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <div className="flex items-center justify-center gap-3 text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">
+                <Shield className="w-3 h-3 text-gold-primary" />
+                <span>Protection Signature • Données Chiffrées AES-256</span>
               </div>
             </div>
           </div>

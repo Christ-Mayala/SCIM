@@ -74,7 +74,7 @@ const ClientHeader = () => {
           isScrolled 
             ? "bg-zinc-950/90 border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.5)]" 
             : "bg-zinc-950/70 border-white/20 shadow-sm",
-          "backdrop-blur-2xl border rounded-full ring-1 ring-white/5"
+          "backdrop-blur-xl border rounded-full ring-1 ring-white/5"
         )}>
           {/* Left: Logo */}
           <Link to="/home" className="flex items-center gap-2 pl-2 group">
