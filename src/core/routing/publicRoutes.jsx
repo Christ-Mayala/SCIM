@@ -13,6 +13,7 @@ import AboutPage from '../../pages/AboutPage';
 import PrivacyPage from '../../pages/PrivacyPage';
 import TermsPage from '../../pages/TermsPage';
 import CookiesPage from '../../pages/CookiesPage';
+import SpecialOffersPage from '../../pages/SpecialOffersPage';
 import AuthCallbackPage from '../../pages/AuthCallbackPage';
 
 export const publicRoutes = [
@@ -30,4 +31,5 @@ export const publicRoutes = [
   { path: '/privacy', element: <PrivacyPage /> },
   { path: '/terms', element: <TermsPage /> },
   { path: '/cookies', element: <CookiesPage /> },
+  { path: '/offres-speciales', element: <SpecialOffersPage /> },
 ];

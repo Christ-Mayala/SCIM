@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Building2, MessageSquare, Users, AlertCircle, Settings, ArrowRight, Star, CalendarDays, PhoneCall, MessageCircle, Eye } from 'lucide-react';
+import { BarChart3, Building2, MessageSquare, Users, AlertCircle, Settings, ArrowRight, Star, CalendarDays, PhoneCall, MessageCircle, Eye, ClipboardList } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { adminAPI, formatDate, formatPrice, reservationAPI } from '../../../lib/api';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
@@ -164,6 +164,7 @@ const AdminDashboardPage = () => {
   const quickLinks = useMemo(
     () => [
       { to: '/admin/properties', title: 'Gérer les annonces', icon: Building2 },
+      { to: '/admin/submissions', title: 'Validation Biens', icon: ClipboardList },
       { to: '/admin/reservations', title: 'Réservations', icon: CalendarDays },
       { to: '/admin/users', title: 'Utilisateurs', icon: Users },
       { to: '/admin/messages', title: 'Messages', icon: MessageSquare },

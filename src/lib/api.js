@@ -136,6 +136,9 @@ export const propertyAPI = {
     // propertyData est déjà un FormData depuis PropertyContext
     return api.post('/property', propertyData);
   },
+  submitForPublication: (propertyData) => {
+    return api.post('/property/submissions', propertyData);
+  },
   update: (id, propertyData) => {
     // propertyData est déjà un FormData depuis PropertyContext
     return api.put(`/property/${id}`, propertyData);
@@ -195,6 +198,10 @@ export const adminAPI = {
   getPropertyById: (id) => api.get(`/admin/properties/${id}`),
   updatePropertyStatus: (id, status) => api.put(`/admin/properties/${id}/status`, { status }),
   deleteProperty: (id) => api.delete(`/admin/properties/${id}`),
+
+  getPropertySubmissions: (params = {}) => api.get('/admin/property-submissions', { params }),
+  updatePropertySubmission: (id, payload) => api.put(`/admin/property-submissions/${id}`, payload),
+  updatePropertySubmissionStatus: (id, status) => api.put(`/admin/property-submissions/${id}/status`, { status }),
 
   getUsers: (params = {}) => api.get('/admin/users', { params }),
   getUserById: (id) => api.get(`/admin/users/${id}`),

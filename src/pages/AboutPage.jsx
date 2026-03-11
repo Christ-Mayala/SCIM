@@ -1,9 +1,10 @@
 import React from 'react';
-import { Award, Users, TrendingUp, Shield, Heart, Star, ChevronRight, Building, Target, CheckCircle } from 'lucide-react';
+import { Award, Users, TrendingUp, Shield, Heart, Star, ChevronRight, Building, Target, CheckCircle, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import SEO from '../components/layout/SEO';
 import { seoConfig } from '../utils/seoData';
+import PageHero from '../components/layout/PageHero';
 import '../animations.css';
 
 const AboutPage = () => {
@@ -109,56 +110,35 @@ const AboutPage = () => {
       <SEO title={seoConfig.about.title} description={seoConfig.about.description} />
       <div className="min-h-screen bg-white">
         {/* Hero Section améliorée */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: 'url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/80 to-gray-900/90"></div>
-          </div>
+        <PageHero
+          badgeIcon={Building}
+          badgeText="A propos SCIM"
+          title={
+            <>
+              À propos de <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">SCIM Immobilier</span>
+            </>
+          }
+          description="Leader dans l'accompagnement immobilier depuis 2018, nous transformons vos ambitions en realites tangibles avec expertise et passion."
+          backgroundImage="/images/og/og-about.jpg"
+          className="pb-10"
+          actions={(
+            <>
+              <Link to="/contact">
+                <Button className="bg-gold-primary text-zinc-950 hover:bg-amber-300">
+                  Rencontrer notre equipe
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/properties">
+                <Button variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10">
+                  <Search className="mr-2 h-4 w-4" />
+                  Explorer nos biens
+                </Button>
+              </Link>
+            </>
+          )}
+        />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-            <div className="text-center max-w-4xl mx-auto">
-              <div className="inline-flex items-center space-x-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
-                <Building className="w-5 h-5" />
-                <span className="text-sm font-medium">SCIM Immobilier</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-                À Propos de
-                <span className="text-gold-primary block mt-2">SCIM Immobilier</span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Leader dans l'accompagnement immobilier depuis 2018, 
-                nous transformons vos ambitions en réalités tangibles 
-                avec expertise et passion.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/contact">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="bg-gold-primary hover:bg-gold-dark text-white px-8"
-                  >
-                    Rencontrer notre équipe
-                    <ChevronRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-          
-          {/* Shape divider - Même que sur Home */}
-          <div className="absolute bottom-0 left-0 right-0">
-            <svg className="w-full h-12 text-white" viewBox="0 0 1000 100" preserveAspectRatio="none">
-              <path d="M0,0 L0,100 L1000,100 L1000,0 Q500,80 0,0 Z" fill="currentColor"/>
-            </svg>
-          </div>
-        </section>
 
         {/* Stats Section améliorée - Avec -mt-1 comme sur Home */}
         <section className="py-20 bg-white -mt-1">
@@ -502,7 +482,7 @@ const AboutPage = () => {
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Prêt à concrétiser votre projet immobilier ?
+              Prêt à concrétiser votre projet immobilier 
             </h2>
             <p className="text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
               Notre équipe d'experts vous attend pour une consultation personnalisée 
@@ -535,7 +515,7 @@ const AboutPage = () => {
             </div>
             
             <p className="text-white/70 mt-10 text-sm">
-              Consultation gratuite • Réponse sous 24h • Expertise garantie
+              Consultation gratuite ⬢ Réponse sous 24h ⬢ Expertise garantie
             </p>
           </div>
         </section>
@@ -545,3 +525,6 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+
+
+

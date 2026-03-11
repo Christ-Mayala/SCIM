@@ -8,6 +8,9 @@ import { validateEmail } from '../lib/utils';
 import SEO from '../components/layout/SEO';
 import { seoConfig } from '../utils/seoData';
 
+import PageHero from '../components/layout/PageHero';
+import { Sparkles } from 'lucide-react';
+
 const ContactPage = () => {
   const [formData, setFormData] = useState({
     nom: '',
@@ -144,46 +147,20 @@ const ContactPage = () => {
   return (
     <>
       <SEO title={seoConfig.contact.title} description={seoConfig.contact.description} />
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="min-h-screen bg-zinc-50">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-          <div className="absolute inset-0">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1558036117-15e82a2c9a9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-                filter: 'brightness(0.7)'
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/95 via-gray-900/90 to-gray-900/95"></div>
-          </div>
-          
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
-            <div className="text-center max-w-4xl mx-auto">
-              <div className="inline-flex items-center space-x-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Contactez-nous</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Votre Projet Immobilier <br />
-                <span className="text-gold-primary">Mérite Notre Expertise</span>
-              </h1>
-              
-              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Notre équipe d'experts vous accompagne à chaque étape. 
-                Discutons de votre projet et trouvons ensemble la meilleure solution.
-              </p>
-            </div>
-          </div>
-          
-          {/* Shape divider */}
-          <div className="absolute bottom-0 left-0 right-0">
-            <svg className="w-full h-12 text-white" viewBox="0 0 1000 100" preserveAspectRatio="none">
-              <path d="M0,0 L0,100 L1000,100 L1000,0 Q500,80 0,0 Z" fill="currentColor"/>
-            </svg>
-          </div>
-        </section>
+        <PageHero
+          badgeIcon={Sparkles}
+          badgeText="Contactez-nous"
+          title={
+            <>
+              Votre Projet Immobilier <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">Mérite Notre Expertise</span>
+            </>
+          }
+          description="Notre équipe d'experts vous accompagne à chaque étape. Discutons de votre projet et trouvons ensemble la meilleure solution."
+          backgroundImage="https://images.unsplash.com/photo-1558036117-15e82a2c9a9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+        />
 
         {/* Success Message */}
         {submitted && (

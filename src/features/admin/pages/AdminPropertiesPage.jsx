@@ -70,6 +70,8 @@ const AdminPropertiesPage = () => {
     }
   };
 
+
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -84,15 +86,16 @@ const AdminPropertiesPage = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-zinc-900">Annonces</h1>
-            <div className="mt-1 text-sm text-zinc-600">Gestion des propriétés (admin)</div>
+            <div className="mt-1 text-sm text-zinc-600">Gestion des propriétés et soumissions (admin)</div>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/admin/properties/new">
               <Button>Ajouter</Button>
             </Link>
-            <Button variant="outline" onClick={load}>Rafraîchir</Button>
           </div>
         </div>
+
+        <div className="mt-6 border-b border-zinc-200" />
 
         <form onSubmit={(e) => { e.preventDefault(); load(1); }} className="mt-6 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 shadow-sm">
           <div className="flex items-center gap-2">
@@ -115,50 +118,54 @@ const AdminPropertiesPage = () => {
 
         <div className="mt-6 grid gap-4">
           {filtered.length === 0 ? (
-            <div className="rounded-2xl bg-white p-10 text-center text-sm text-zinc-600 ring-1 ring-zinc-200">Aucune annonce.</div>
+            <div className="rounded-2xl bg-white p-10 text-center text-sm text-zinc-600 ring-1 ring-zinc-200">
+               Aucune annonce.
+            </div>
           ) : (
-            filtered.map((p) => (
-              <div key={p._id} className="rounded-2xl bg-white p-5 ring-1 ring-zinc-200 shadow-sm">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="min-w-0">
-                    <div className="font-semibold text-zinc-900 truncate">{p.titre}</div>
-                    <div className="mt-1 text-sm text-zinc-600 flex flex-wrap gap-x-4 gap-y-1">
-                      <span>{p.ville}</span>
-                      <span className="text-zinc-300">•</span>
-                      <span>{p.categorie}</span>
-                      <span className="text-zinc-300">•</span>
-                      <span className="font-semibold text-zinc-900">{formatPrice(p.prix)}</span>
-                      <span className="text-zinc-300">•</span>
-                      <span className={p.status === 'active' ? 'text-green-700' : 'text-zinc-500'}>
-                        {p.status === 'active' ? 'Active' : 'Inactive'}
-                      </span>
+            filtered.map((p) => {
+              return (
+                <div key={p._id} className="rounded-2xl bg-white p-5 ring-1 ring-zinc-200 shadow-sm">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-zinc-900 truncate">{p.titre}</div>
+                      <div className="mt-1 text-sm text-zinc-600 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>{p.ville}</span>
+                        <span className="text-zinc-300">•</span>
+                        <span>{p.categorie}</span>
+                        <span className="text-zinc-300">•</span>
+                        <span className="font-semibold text-zinc-900">{formatPrice(p.prix)}</span>
+                        <span className="text-zinc-300">•</span>
+                        <span className={p.status === 'active' ? 'text-green-700' : 'text-zinc-500'}>
+                          {p.status === 'active' ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleToggleStatus(p)} className="gap-2">
+                        {p.status === 'active' ? <PauseCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {p.status === 'active' ? 'Désactiver' : 'Activer'}
+                      </Button>
+                      <Link to={`/admin/properties/${p._id}/edit`}>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <Pencil className="h-4 w-4" />
+                          Modifier
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(p._id)}
+                        className="gap-2 text-red-600 hover:text-red-700 hover:border-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Supprimer
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleToggleStatus(p)} className="gap-2">
-                      {p.status === 'active' ? <PauseCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                      {p.status === 'active' ? 'Désactiver' : 'Activer'}
-                    </Button>
-                    <Link to={`/admin/properties/${p._id}/edit`}>
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <Pencil className="h-4 w-4" />
-                        Modifier
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(p._id)}
-                      className="gap-2 text-red-600 hover:text-red-700 hover:border-red-300"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Supprimer
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

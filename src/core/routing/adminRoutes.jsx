@@ -11,6 +11,7 @@ import AdminUsersPage from '../../features/admin/pages/AdminUsersPage';
 import AdminMessagesPage from '../../features/admin/pages/AdminMessagesPage';
 import AdminAnalyticsPage from '../../features/admin/pages/AdminAnalyticsPage';
 import AdminSettingsPage from '../../features/admin/pages/AdminSettingsPage';
+import AdminSubmissionsPage from '../../features/admin/pages/AdminSubmissionsPage';
 
 const LegacyEditPropertyRedirect = () => {
   const { id } = useParams();
@@ -33,4 +34,5 @@ export const adminRoutes = [
   { key: 'admin-messages', path: 'messages', element: <AdminMessagesPage /> },
   { key: 'admin-analytics', path: 'analytics', element: <AdminAnalyticsPage /> },
   { key: 'admin-settings', path: 'settings', element: <AdminSettingsPage /> },
+  { key: 'admin-submissions', path: 'submissions', element: <AdminSubmissionsPage /> },
 ];
