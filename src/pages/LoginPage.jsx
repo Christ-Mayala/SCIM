@@ -251,23 +251,23 @@ const LoginPage = () => {
               <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-zinc-100" />
+                    <div className="w-full border-t border-white/10" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-zinc-400">Ou continuez avec</span>
+                    <span className="px-2 bg-zinc-900 text-zinc-500 text-[10px] font-black uppercase tracking-widest">Ou continuez avec</span>
                   </div>
                 </div>
 
                 {/* Social Login Buttons */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
-                  <a href={API_BASE_URL + "/api/auth/google"} className="w-full inline-flex items-center justify-center px-4 py-3 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-600 bg-white hover:bg-zinc-50 transition-colors">
-                    <svg className="w-5 h-5 mr-3" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.8 0-5.18-1.88-6.04-4.42H2.34v2.84C4.13 20.98 7.79 23 12 23z" />
-                      <path d="M5.96 14.25c-.14-.42-.22-.86-.22-1.31s.08-.89.22-1.31V8.79H2.34C1.5 10.33 1 12.09 1 14s.5 3.67 1.34 5.21l3.62-2.96z" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.79 1 4.13 3.02 2.34 6.21l3.62 2.96c.86-2.54 3.24-4.42 6.04-4.42z" />
+                  <a href={API_BASE_URL + "/api/auth/google"} className="w-full inline-flex items-center justify-center gap-3 h-14 px-6 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white hover:bg-white/10 hover:border-white/20 transition-all tracking-widest uppercase">
+                    <svg className="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24">
+                      <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.8 0-5.18-1.88-6.04-4.42H2.34v2.84C4.13 20.98 7.79 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.96 14.25c-.14-.42-.22-.86-.22-1.31s.08-.89.22-1.31V8.79H2.34C1.5 10.33 1 12.09 1 14s.5 3.67 1.34 5.21l3.62-2.96z" />
+                      <path fill="#4285F4" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.79 1 4.13 3.02 2.34 6.21l3.62 2.96c.86-2.54 3.24-4.42 6.04-4.42z" />
                     </svg>
-                    Google
+                    Continuer avec Google
                   </a>
                   {/* Facebook désactivé temporairement */}
                 </div>
@@ -290,7 +290,7 @@ const LoginPage = () => {
               </div>
 
               {/* Security Info */}
-              <div className="mt-6 pt-6 border-t border-zinc-100">
+              <div className="mt-6 pt-6 border-t border-white/5">
                 <div className="flex items-center justify-center space-x-2 text-xs text-zinc-400">
                   <Shield className="w-3 h-3" />
                   <span>Connexion sécurisée • SSL encrypté</span>

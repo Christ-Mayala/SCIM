@@ -256,9 +256,9 @@ const PropertyDetailPage = () => {
 
   if (!property) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Propriété non trouvée</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Propriété non trouvée</h2>
           <Button onClick={() => navigate('/properties')}>
             Retour aux propriétés
           </Button>
@@ -290,7 +290,7 @@ const PropertyDetailPage = () => {
   const structuredData = generatePropertyStructuredData(property);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-950">
       <SEOHead 
         title={seoData.title}
         description={seoData.description}
@@ -316,7 +316,7 @@ const PropertyDetailPage = () => {
             <div className="flex items-center gap-6">
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 text-zinc-500 hover:text-zinc-950 transition-colors font-bold text-xs uppercase tracking-[0.2em]"
+                className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors font-bold text-xs uppercase tracking-[0.2em]"
               >
                 <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Partager</span>
@@ -349,12 +349,12 @@ const PropertyDetailPage = () => {
                  </div>
                  <div className={cn(
                    "px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-full",
-                   property.transactionType === 'vente' ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20" : "bg-blue-50 text-blue-600 ring-1 ring-blue-500/20"
+                   property.transactionType === 'vente' ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20" : "bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20"
                  )}>
                     {property.transactionType === 'vente' ? 'En Vente' : 'En Location'}
                  </div>
                  {property.isBonPlan && (
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full ring-1 ring-amber-500/20">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full ring-1 ring-amber-500/20">
                       <Sparkles className="w-3 h-3" />
                       Opportunité
                     </div>
@@ -425,17 +425,17 @@ const PropertyDetailPage = () => {
                   </div>
                   
                   {images.length > 1 && (
-                    <div className="p-6 bg-white border-t border-zinc-50 overflow-hidden">
-                      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-2">
+                    <div className="p-4 bg-zinc-950 border-t border-white/5 overflow-hidden">
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
                         {images.map((image, index) => (
                           <button
                             key={index}
                             onClick={() => setSelectedImageIndex(index)}
                             className={cn(
-                              'relative flex-shrink-0 w-28 h-20 rounded-2xl overflow-hidden transition-all duration-500',
+                              'relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden transition-all duration-500',
                               selectedImageIndex === index 
-                                ? 'ring-4 ring-gold-primary ring-offset-4 opacity-100 scale-105 shadow-xl' 
-                                : 'opacity-40 hover:opacity-100 hover:scale-105'
+                                ? 'ring-2 ring-gold-primary ring-offset-2 ring-offset-zinc-950 opacity-100 scale-105 shadow-xl' 
+                                : 'opacity-40 hover:opacity-80 hover:scale-105'
                             )}
                           >
                             <img
@@ -450,25 +450,25 @@ const PropertyDetailPage = () => {
                   )}
                 </>
               ) : (
-                <div className="aspect-[16/9] bg-zinc-50 flex flex-col items-center justify-center gap-6">
-                  <div className="w-20 h-20 bg-zinc-100 rounded-3xl flex items-center justify-center text-zinc-300">
+                <div className="aspect-[16/9] bg-zinc-900 flex flex-col items-center justify-center gap-6">
+                  <div className="w-20 h-20 bg-zinc-800 rounded-3xl flex items-center justify-center text-zinc-600">
                     <Home className="w-10 h-10" />
                   </div>
-                  <p className="font-black text-zinc-400 uppercase tracking-widest text-sm">Visualisation indisponible</p>
+                  <p className="font-black text-zinc-500 uppercase tracking-widest text-sm">Visualisation indisponible</p>
                 </div>
               )}
             </div>
 
             {/* Key Features Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {features.map((feature, index) => (
-                <div key={index} className="group bg-white p-6 rounded-3xl border border-zinc-100 hover:border-gold-primary/30 transition-all hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)]">
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-50 group-hover:bg-zinc-950 flex items-center justify-center text-zinc-500 group-hover:text-gold-primary transition-all duration-300 mb-4 shadow-sm group-hover:shadow-xl">
+                <div key={index} className="group bg-zinc-900/60 p-5 rounded-3xl border border-white/10 hover:border-gold-primary/30 transition-all hover:shadow-[0_20px_40px_rgba(201,162,39,0.1)] backdrop-blur-xl">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 group-hover:bg-gold-primary/10 flex items-center justify-center text-zinc-500 group-hover:text-gold-primary transition-all duration-300 mb-4 border border-white/5 group-hover:border-gold-primary/20">
                     <feature.icon className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-xl font-black text-zinc-950 tracking-tight">{feature.label.split(' ')[0]}</span>
-                    <span className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest">{feature.label.split(' ').slice(1).join(' ')}</span>
+                    <span className="block text-xl font-black text-white tracking-tight">{feature.label.split(' ')[0]}</span>
+                    <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">{feature.label.split(' ').slice(1).join(' ')}</span>
                   </div>
                 </div>
               ))}

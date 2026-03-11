@@ -1,23 +1,39 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Bed, Bath, Square, Eye } from 'lucide-react';
+import { Heart, MapPin, Bed, Bath, Square, Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProperty } from '../../contexts/PropertyContext';
 import { formatPrice, getImageUrl, getPropertyTypeIcon } from '../../lib/utils';
 import {Button} from '../ui/Button';
 import { cn } from '../../lib/utils';
 import StarRating from '../common/StarRating';
+import toast from 'react-hot-toast';
 
 const PropertyCard = ({ property, className, onFavoriteChange }) => {
   const { isAuthenticated } = useAuth();
-  const { toggleFavorite, favorites } = useProperty();
+  const { toggleFavorite, favorites, rateProperty } = useProperty();
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const isFavorite = favorites.includes(property._id);
   const mainImage = property.images?.[0]?.url || '/images/og/og-property.jpg';
-
   const isListView = className?.includes('flex-row');
+
+  const handleCardRating = async (rating) => {
+    if (!isAuthenticated || ratingLoading) return;
+    setRatingLoading(true);
+    setUserRating(rating);
+    try {
+      await rateProperty(property._id, rating);
+      toast.success(`✓ Note ${rating}/5 enregistrée`);
+    } catch {
+      setUserRating(0);
+    } finally {
+      setRatingLoading(false);
+    }
+  };
 
   const handleFavoriteClick = async (e) => {
     e.preventDefault();
@@ -128,15 +144,30 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
             </p>
 
             {/* Rating */}
-            {property.noteMoyenne > 0 && (
-                <div className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/5 mb-2 transition-colors hover:bg-white/10">
-                    <div className="flex items-center gap-2">
-                        <StarRating value={property.noteMoyenne} readOnly count={5} className="text-[10px]" />
-                        <span className="text-xs font-black text-gold-primary">{property.noteMoyenne.toFixed(1)}</span>
-                    </div>
-                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{property.nombreAvis || 0} avis</span>
+            <div className="space-y-2">
+              {property.noteMoyenne > 0 && (
+                <div className="flex items-center justify-between bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                  <div className="flex items-center gap-2">
+                    <StarRating value={property.noteMoyenne} showNumber={false} />
+                    <span className="text-xs font-black text-gold-primary">{property.noteMoyenne.toFixed(1)}</span>
+                  </div>
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{property.nombreAvis || 0} avis</span>
                 </div>
-            )}
+              )}
+              {isAuthenticated && (
+                <div className="flex items-center justify-between bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-gold-primary/20 transition-colors">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{userRating > 0 ? `Ma note : ${userRating}/5` : 'Votre avis'}</span>
+                  <StarRating 
+                    value={userRating} 
+                    interactive 
+                    showNumber={false} 
+                    onRate={handleCardRating}
+                    disabled={ratingLoading}
+                    className="scale-90"
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Features Grid */}
             <div className="grid grid-cols-3 gap-3">
