@@ -19,15 +19,20 @@ const PageHero = ({
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-gold-primary/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
         
         {backgroundImage && (
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 transition-opacity duration-700"
-            style={{ backgroundImage: `url("${backgroundImage}")` }}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
+            style={{ backgroundImage: `url("${backgroundImage}")`, opacity: 0.35 }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/80 to-zinc-950" />
+        {/* Dark overlay — lighter when we have a bg image to keep it visible */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-b",
+          backgroundImage
+            ? "from-zinc-950/40 via-zinc-950/60 to-zinc-950"
+            : "from-zinc-950/20 via-zinc-950/80 to-zinc-950"
+        )} />
       </div>
 
       <div className={cn(

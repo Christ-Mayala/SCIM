@@ -6,8 +6,6 @@ import { PropertyProvider } from './contexts/PropertyContext';
 import { MessageProvider } from './contexts/MessageContext';
 import { ToastProvider } from './components/common/Toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
-
-import IntroPage from './pages/IntroPage';
 import AppShell from './core/layout/AppShell';
 
 import './App.css';
@@ -22,7 +20,6 @@ function App() {
               <MessageProvider>
                 <Router>
                   <Routes>
-                    <Route path="/" element={<IntroPage />} />
                     <Route path="/*" element={<AppShell />} />
                   </Routes>
                 </Router>

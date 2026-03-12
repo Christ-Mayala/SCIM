@@ -625,14 +625,14 @@ const PropertyDetailPage = () => {
                           : 'sur demande';
                         const typeLabel = property.transactionType === 'vente' ? 'Vente' : 'Location';
                         const message = encodeURIComponent(
-                          `🏡 *SCIM Immobilier — Demande d'Information*\n` +
+                          `[SCIM Immobilier — Demande d'Information]\n` +
                           `━━━━━━━━━━━━━━━━━━━━\n\n` +
                           `Bonjour, je souhaite obtenir plus d'informations concernant le bien suivant :\n\n` +
-                          `📌 *${property.titre}*\n` +
-                          `📍 ${property.adresse ? property.adresse + ', ' : ''}${property.ville}\n` +
-                          `🏷️ Type : ${property.categorie} — ${typeLabel}\n` +
-                          `💰 Prix : ${price}\n\n` +
-                          `🔗 Voir l'annonce : ${window.location.href}\n\n` +
+                          `* ${property.titre}\n` +
+                          `- ${property.adresse ? property.adresse + ', ' : ''}${property.ville}\n` +
+                          `- Type : ${property.categorie} — ${typeLabel}\n` +
+                          `- Prix : ${price}\n\n` +
+                          `Lien de l'annonce : ${window.location.href}\n\n` +
                           `Merci de me revenir dans les plus brefs délais.`
                         );
                         window.open(`https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone}?text=${message}`, '_blank');

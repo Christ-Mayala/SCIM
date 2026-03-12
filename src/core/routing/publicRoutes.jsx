@@ -17,6 +17,7 @@ import SpecialOffersPage from '../../pages/SpecialOffersPage';
 import AuthCallbackPage from '../../pages/AuthCallbackPage';
 
 export const publicRoutes = [
+  { path: '/', element: <HomePage /> },
   { path: '/home', element: <HomePage /> },
   { path: '/properties', element: <PropertiesPage /> },
   { path: '/properties/:id', element: <PropertyDetailPage /> },
