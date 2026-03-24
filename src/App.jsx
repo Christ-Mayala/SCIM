@@ -4,7 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { MessageProvider } from './contexts/MessageContext';
-import { ToastProvider } from './components/common/Toast';
+import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import AppShell from './core/layout/AppShell';
 
@@ -14,7 +14,8 @@ function App() {
   return (
     <HelmetProvider>
       <ErrorBoundary>
-        <ToastProvider>
+        <>
+          <Toaster position="top-right" reverseOrder={false} />
           <AuthProvider>
             <PropertyProvider>
               <MessageProvider>
@@ -26,7 +27,7 @@ function App() {
               </MessageProvider>
             </PropertyProvider>
           </AuthProvider>
-        </ToastProvider>
+        </>
       </ErrorBoundary>
     </HelmetProvider>
   );

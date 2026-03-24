@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Share2, Copy, Facebook, Twitter, MessageCircle, Mail } from 'lucide-react';
-import { useToast } from '../common/Toast';
+import toast from 'react-hot-toast';
 
 const ShareButton = ({ 
   url = window.location.href,
@@ -10,7 +10,6 @@ const ShareButton = ({
   size = 'md'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const toast = useToast();
 
   const sizes = {
     sm: 'w-4 h-4',

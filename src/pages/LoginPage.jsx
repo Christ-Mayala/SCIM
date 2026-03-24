@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail } from '../lib/utils';
 import { API_BASE_URL } from '../lib/api';
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -71,10 +72,12 @@ const LoginPage = () => {
     const result = await login(formData.email, formData.password, rememberMe);
 
     if (result.success) {
+      toast.success('Connexion réussie ! Heureux de vous revoir.');
       navigate(from || '/dashboard', { replace: true });
     } else {
       const fieldErrors = result.fieldErrors || {};
       setErrors({ ...fieldErrors, general: result.message || '' });
+      toast.error(result.message || 'Identifiants invalides');
     }
   };
 
@@ -88,8 +91,8 @@ const LoginPage = () => {
     <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] will-change-transform" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/10 rounded-full blur-[120px] will-change-transform" style={{ animationDelay: '2s' }} />
         
         {/* Subtle Grid */}
         <div className="absolute inset-0 opacity-[0.02]" style={{
@@ -98,7 +101,7 @@ const LoginPage = () => {
         }} />
       </div>
 
-      <div className="relative w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900/40 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
+      <div className="relative w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900 rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
         {/* Left Side: Brand Experience */}
         <div className="hidden lg:flex flex-col justify-between p-16 relative overflow-hidden">
            <div className="absolute inset-0 bg-gradient-to-br from-gold-primary/20 via-transparent to-transparent pointer-events-none" />
@@ -146,14 +149,14 @@ const LoginPage = () => {
                    Congo-Brazzaville <span className="w-1 h-1 bg-gold-primary rounded-full" /> Excellence
                  </p>
                  <p className="text-[10px] font-black text-gold-primary uppercase tracking-[0.3em] flex items-center gap-2">
-                   <Sparkles className="w-3 h-3 animate-pulse" /> Rejoignez l'élite
+                   <Sparkles className="w-3 h-3" /> Rejoignez l'élite
                  </p>
               </div>
            </div>
         </div>
 
         {/* Right Side: Form */}
-        <div className="p-8 lg:p-16 bg-zinc-900/80 backdrop-blur-3xl flex flex-col justify-center relative border-l border-white/5">
+        <div className="p-8 lg:p-16 bg-zinc-900 flex flex-col justify-center relative border-l border-white/5">
           {/* Mobile Header (Visible only on mobile) */}
           <div className="lg:hidden flex flex-col items-center mb-12">
              <Link to="/" className="mb-6">

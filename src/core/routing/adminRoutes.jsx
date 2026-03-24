@@ -1,17 +1,17 @@
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 
-import AddPropertyPage from '../../pages/AddPropertyPage';
-import EditPropertyPage from '../../pages/EditPropertyPage';
+const AddPropertyPage = React.lazy(() => import('../../pages/AddPropertyPage'));
+const EditPropertyPage = React.lazy(() => import('../../pages/EditPropertyPage'));
 
-import AdminDashboardPage from '../../features/admin/pages/AdminDashboardPage';
-import AdminPropertiesPage from '../../features/admin/pages/AdminPropertiesPage';
-import AdminReservationsPage from '../../features/admin/pages/AdminReservationsPage';
-import AdminUsersPage from '../../features/admin/pages/AdminUsersPage';
-import AdminMessagesPage from '../../features/admin/pages/AdminMessagesPage';
-import AdminAnalyticsPage from '../../features/admin/pages/AdminAnalyticsPage';
-import AdminSettingsPage from '../../features/admin/pages/AdminSettingsPage';
-import AdminSubmissionsPage from '../../features/admin/pages/AdminSubmissionsPage';
+const AdminDashboardPage = React.lazy(() => import('../../features/admin/pages/AdminDashboardPage'));
+const AdminPropertiesPage = React.lazy(() => import('../../features/admin/pages/AdminPropertiesPage'));
+const AdminReservationsPage = React.lazy(() => import('../../features/admin/pages/AdminReservationsPage'));
+const AdminUsersPage = React.lazy(() => import('../../features/admin/pages/AdminUsersPage'));
+const AdminMessagesPage = React.lazy(() => import('../../features/admin/pages/AdminMessagesPage'));
+const AdminAnalyticsPage = React.lazy(() => import('../../features/admin/pages/AdminAnalyticsPage'));
+const AdminSettingsPage = React.lazy(() => import('../../features/admin/pages/AdminSettingsPage'));
+const AdminSubmissionsPage = React.lazy(() => import('../../features/admin/pages/AdminSubmissionsPage'));
 
 const LegacyEditPropertyRedirect = () => {
   const { id } = useParams();

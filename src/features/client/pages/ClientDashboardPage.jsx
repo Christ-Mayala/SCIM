@@ -120,7 +120,7 @@ const ClientDashboardPage = () => {
       </div>
 
       {/* Header Banner */}
-      <div className="relative bg-zinc-900/60 border-b border-white/10">
+      <div className="relative bg-zinc-900 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
             <Sparkles className="h-3 w-3" />
@@ -135,7 +135,7 @@ const ClientDashboardPage = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Actions */}
-        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 mb-8 shadow-xl">
+        <div className="bg-zinc-900 rounded-3xl border border-white/10 p-6 mb-8 shadow-xl">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-1 h-5 bg-gold-primary rounded-full" />
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Actions Rapides</h2>

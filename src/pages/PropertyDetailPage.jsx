@@ -300,7 +300,7 @@ const PropertyDetailPage = () => {
         structuredData={structuredData}
       />
       {/* Header / Breadcrumb */}
-      <div className="bg-zinc-950/80 backdrop-blur-xl sticky top-20 z-30 border-b border-white/10 shadow-2xl shadow-black/50">
+      <div className="bg-zinc-950 sticky top-20 z-30 border-b border-white/10 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -402,24 +402,24 @@ const PropertyDetailPage = () => {
                       className="w-full h-full object-cover transition-all duration-1000 scale-100 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-12">
-                       <div className="bg-white/20 backdrop-blur-md text-white px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-widest border border-white/30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                       <div className="bg-white/20 text-white px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-widest border border-white/30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                          Explorer la galerie
                        </div>
                     </div>
                     
                     {/* Navigation Overlays */}
                     <div className="absolute inset-y-0 left-0 w-24 flex items-center justify-center translate-x-[-100%] group-hover:translate-x-0 transition-transform">
-                       <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="p-3 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors">
+                       <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="p-3 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors">
                           <ChevronLeft className="w-6 h-6" />
                        </button>
                     </div>
                     <div className="absolute inset-y-0 right-0 w-24 flex items-center justify-center translate-x-[100%] group-hover:translate-x-0 transition-transform">
-                       <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="p-3 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors">
+                       <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="p-3 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors">
                           <ChevronRight className="w-6 h-6" />
                        </button>
                     </div>
 
-                    <div className="absolute top-6 left-6 px-4 py-2 bg-zinc-950/80 backdrop-blur-md rounded-xl text-white text-[10px] font-black uppercase tracking-widest border border-white/10">
+                    <div className="absolute top-6 left-6 px-4 py-2 bg-zinc-950 rounded-xl text-white text-[10px] font-black uppercase tracking-widest border border-white/10">
                        Image {selectedImageIndex + 1} / {images.length}
                     </div>
                   </div>
@@ -462,7 +462,7 @@ const PropertyDetailPage = () => {
             {/* Key Features Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {features.map((feature, index) => (
-                <div key={index} className="group bg-zinc-900/60 p-5 rounded-3xl border border-white/10 hover:border-gold-primary/30 transition-all hover:shadow-[0_20px_40px_rgba(201,162,39,0.1)] backdrop-blur-xl">
+                <div key={index} className="group bg-zinc-900 p-5 rounded-3xl border border-white/10 hover:border-gold-primary/30 transition-all hover:shadow-[0_20px_40px_rgba(201,162,39,0.1)]">
                   <div className="w-12 h-12 rounded-2xl bg-white/5 group-hover:bg-gold-primary/10 flex items-center justify-center text-zinc-500 group-hover:text-gold-primary transition-all duration-300 mb-4 border border-white/5 group-hover:border-gold-primary/20">
                     <feature.icon className="w-6 h-6" />
                   </div>
@@ -926,7 +926,7 @@ const PropertyDetailPage = () => {
         <div className="relative w-full h-full flex flex-col items-center justify-center">
           <button
             onClick={() => setShowImageModal(false)}
-            className="absolute top-4 right-4 z-50 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all hover:rotate-90"
+            className="absolute top-4 right-4 z-50 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all hover:rotate-90"
           >
             <X className="w-6 h-6" />
           </button>
@@ -934,13 +934,13 @@ const PropertyDetailPage = () => {
           <div className="relative w-full flex-1 flex items-center justify-center p-4">
             <button
               onClick={prevImage}
-              className="absolute left-8 z-30 p-5 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white rounded-full transition-all hover:-translate-x-1"
+              className="absolute left-8 z-30 p-5 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all hover:-translate-x-1"
             >
               <ChevronLeft className="w-8 h-8" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-8 z-30 p-5 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white rounded-full transition-all hover:translate-x-1"
+              className="absolute right-8 z-30 p-5 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all hover:translate-x-1"
             >
               <ChevronRight className="w-8 h-8" />
             </button>
@@ -953,7 +953,7 @@ const PropertyDetailPage = () => {
           </div>
 
           {images.length > 1 && (
-            <div className="w-full p-8 bg-zinc-950/40 backdrop-blur-2xl border-t border-white/5">
+            <div className="w-full p-8 bg-zinc-950 border-t border-white/5">
               <div className="max-w-4xl mx-auto flex gap-4 overflow-x-auto pb-2 px-4 scrollbar-hide justify-center">
                 {images.map((image, idx) => (
                   <button

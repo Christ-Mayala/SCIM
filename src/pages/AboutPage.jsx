@@ -147,7 +147,7 @@ const AboutPage = () => {
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="group relative bg-white/80 backdrop-blur-xl p-8 rounded-[32px] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(201,162,39,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+                  className="group relative bg-white p-8 rounded-[32px] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(201,162,39,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
                 >
                   <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gold-primary/5 rounded-full blur-2xl group-hover:bg-gold-primary/10 transition-colors" />
                   
@@ -193,7 +193,7 @@ const AboutPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
                   
                   <div className="absolute bottom-0 left-0 w-full p-10 text-white">
-                    <div className="inline-block px-3 py-1 rounded-full bg-gold-primary/20 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
+                    <div className="inline-block px-3 py-1 rounded-full bg-gold-primary/20 border border-white/10 text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
                       Depuis 2018
                     </div>
                     <h3 className="text-3xl font-bold mb-3 tracking-tight">L'excellence au quotidien</h3>
@@ -213,7 +213,7 @@ const AboutPage = () => {
                     </div>
                   </div>
                   <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-gold-primary to-amber-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(201,162,39,0.3)] animate-pulse" />
+                    <div className="h-full bg-gradient-to-r from-gold-primary to-amber-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(201,162,39,0.3)]" />
                   </div>
                 </div>
 
@@ -419,7 +419,7 @@ const AboutPage = () => {
                   items: ['Négociation de haut vol', 'Gestion de processus', 'Suivi long terme']
                 }
               ].map((box, idx) => (
-                <div key={idx} className="relative group p-10 rounded-[40px] bg-zinc-900/50 border border-white/5 backdrop-blur-xl hover:border-gold-primary/30 transition-all duration-500">
+                <div key={idx} className="relative group p-10 rounded-[40px] bg-zinc-900 border border-white/5 hover:border-gold-primary/30 transition-all duration-500">
                   <div className="absolute -top-5 -left-5 w-14 h-14 bg-zinc-950 border border-gold-primary/20 rounded-2xl flex items-center justify-center shadow-2xl">
                     <span className="text-gold-primary font-black text-2xl">{idx + 1}</span>
                   </div>
@@ -477,7 +477,7 @@ const AboutPage = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto bg-transparent border-2 border-white/20 text-white hover:bg-white/5 hover:border-white px-12 py-8 rounded-2xl text-lg font-black uppercase tracking-widest backdrop-blur-md transition-all"
+                  className="w-full sm:w-auto bg-transparent border-2 border-white/20 text-white hover:bg-white/5 hover:border-white px-12 py-8 rounded-2xl text-lg font-black uppercase tracking-widest transition-all"
                 >
                   Nos Propriétés
                 </Button>

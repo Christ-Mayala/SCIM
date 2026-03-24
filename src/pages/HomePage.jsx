@@ -120,9 +120,9 @@ const HomePage = () => {
 
   const backgroundEffects = (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-gold-primary/10 rounded-full blur-[150px] animate-pulse" />
-      <div className="absolute bottom-0 -right-1/4 w-[800px] h-[800px] bg-gold-dark/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-white/2 rounded-full blur-[200px]" />
+      <div className="absolute top-0 -left-1/4 w-[400px] h-[400px] bg-gold-primary/5 rounded-full blur-[80px] will-change-transform" />
+      <div className="absolute bottom-0 -right-1/4 w-[400px] h-[400px] bg-gold-dark/5 rounded-full blur-[80px] will-change-transform" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/2 rounded-full blur-[100px]" />
     </div>
   );
 
@@ -140,18 +140,19 @@ const HomePage = () => {
       {/* Hero Section Luxe */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-32 sm:pt-40">
         <div className="absolute inset-0 z-0">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[10000ms] hover:scale-110"
-            style={{
-              backgroundImage: 'url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-            }}
-          ></div>
+          <img 
+            src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=75"
+            alt="Hero Background"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10000ms] hover:scale-110 will-change-transform"
+            loading="eager"
+            fetchpriority="high"
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/40 via-zinc-950/80 to-zinc-950"></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <div className="inline-flex items-center gap-3 px-6 py-2 bg-white/5 backdrop-blur-md rounded-full border border-white/10 mb-8">
-            <Sparkles className="w-4 h-4 text-gold-primary" />
+            {/* <Sparkles className="w-4 h-4 text-gold-primary" /> */}
             <span className="text-xs font-black uppercase tracking-[0.3em] text-white/80">L'Immobilier de Prestige au Congo</span>
           </div>
           
@@ -165,7 +166,7 @@ const HomePage = () => {
           </p>
 
           <form onSubmit={handleSearch} className="max-w-4xl mx-auto mb-16 px-4">
-            <div className="relative group p-1 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-[32px] backdrop-blur-2xl">
+            <div className="relative group p-1 bg-white/10 rounded-[32px]">
               <div className="flex flex-col md:flex-row gap-2 bg-zinc-900/60 rounded-[30px] p-2">
                 <div className="flex-1 relative">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5 group-focus-within:text-gold-primary transition-colors" />
@@ -205,7 +206,7 @@ const HomePage = () => {
       </section>
 
       {/* Stats Section Dark */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-32 relative overflow-hidden" style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' }}>
         {backgroundEffects}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -233,7 +234,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Properties Section */}
-      <section className="py-32 bg-zinc-900/30">
+      <section className="py-32 bg-zinc-900/30" style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="space-y-4">
@@ -266,7 +267,7 @@ const HomePage = () => {
       </section>
 
       {/* Philosophy Section */}
-      <section className="py-32 relative">
+      <section className="py-32 relative" style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-24">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-6">
             <Target className="w-3 h-3 text-gold-primary" />
@@ -294,7 +295,7 @@ const HomePage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-32 bg-zinc-950">
+      <section className="py-32 bg-zinc-950" style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-24">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-6">

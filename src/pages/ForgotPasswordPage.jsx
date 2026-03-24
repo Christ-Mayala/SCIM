@@ -76,8 +76,8 @@ const ForgotPasswordPage = () => {
 
   const renderBackground = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] will-change-transform" />
+      <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/5 rounded-full blur-[120px] will-change-transform" style={{ animationDelay: '2s' }} />
       <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: 'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)',
         backgroundSize: '40px 40px',
@@ -102,7 +102,7 @@ const ForgotPasswordPage = () => {
       </div>
 
       <div className="relative z-10 space-y-8">
-        <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gold-primary/10 rounded-full border border-gold-primary/20 text-[10px] font-black text-gold-primary uppercase tracking-widest backdrop-blur-md">
+        <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gold-primary/10 rounded-full border border-gold-primary/20 text-[10px] font-black text-gold-primary uppercase tracking-widest">
           <KeyRound className="w-4 h-4" />
           Récupération Sécurisée
         </div>
@@ -130,10 +130,10 @@ const ForgotPasswordPage = () => {
     <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6">
       {renderBackground()}
 
-      <div className="relative w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900/40 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
+      <div className="relative w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900 rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
         {renderBrandExperience()}
 
-        <div className="p-8 lg:p-16 bg-zinc-900/80 backdrop-blur-3xl flex flex-col justify-center relative border-l border-white/5">
+        <div className="p-8 lg:p-16 bg-zinc-900 flex flex-col justify-center relative border-l border-white/5">
           {/* Mobile Header */}
           <div className="lg:hidden flex flex-col items-center mb-12">
             <Link to="/" className="mb-6">

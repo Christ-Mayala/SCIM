@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import NewAdminLayout from '../../components/layout/AdminLayout';
 
 export const AuthenticatedLayout = () => {
   return (
@@ -14,7 +15,7 @@ export const AuthenticatedLayout = () => {
 export const AdminLayout = () => {
   return (
     <ProtectedRoute adminOnly>
-      <Outlet />
+      <NewAdminLayout />
     </ProtectedRoute>
   );
 };

@@ -88,7 +88,13 @@ async function fetchProperties() {
   try {
     console.log('📡 Récupération des propriétés depuis l\'API...');
     const response = await axios.get(`${config.apiBaseUrl}/property?limit=1000`);
-    const properties = response.data?.data || response.data || [];
+    
+    let properties = [];
+    if (Array.isArray(response.data)) properties = response.data;
+    else if (Array.isArray(response.data?.data)) properties = response.data.data;
+    else if (Array.isArray(response.data?.items)) properties = response.data.items;
+    else if (Array.isArray(response.data?.data?.items)) properties = response.data.data.items;
+    
     console.log(`✅ ${properties.length} propriétés récupérées`);
     return properties;
   } catch (error) {
@@ -99,6 +105,7 @@ async function fetchProperties() {
 
 // Fonction pour ajouter des routes dynamiques (propriétés)
 function addDynamicRoutes(staticRoutes, properties = []) {
+  if (!Array.isArray(properties)) properties = [];
   const propertyRoutes = properties.map(property => ({
     url: `/properties/${property._id || property.id}`,
     lastmod: property.updatedAt || property.updated_at || property.creeLe || config.currentDate,

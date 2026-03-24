@@ -1,10 +1,10 @@
 import React from 'react';
 
-import DashboardPage from '../../pages/DashboardPage';
-import ProfilePage from '../../pages/ProfilePage';
-import FavoritesPage from '../../pages/FavoritesPage';
-import MessagesPage from '../../pages/MessagesPage';
-import SubmitPropertyPage from '../../pages/SubmitPropertyPage';
+const DashboardPage = React.lazy(() => import('../../pages/DashboardPage'));
+const ProfilePage = React.lazy(() => import('../../pages/ProfilePage'));
+const FavoritesPage = React.lazy(() => import('../../pages/FavoritesPage'));
+const MessagesPage = React.lazy(() => import('../../pages/MessagesPage'));
+const SubmitPropertyPage = React.lazy(() => import('../../pages/SubmitPropertyPage'));
 
 export const protectedRoutes = [
   { path: '/dashboard', element: <DashboardPage /> },

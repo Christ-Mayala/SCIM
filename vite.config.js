@@ -17,7 +17,6 @@ export default defineConfig({
   },
   build: {
     sourcemap: false,
-    minify: 'terser',
     chunkSizeWarningLimit: 1000,
   },
 });

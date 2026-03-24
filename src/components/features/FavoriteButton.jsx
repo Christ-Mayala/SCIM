@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../common/Toast';
+import toast from 'react-hot-toast';
 import { useMutation } from '../../hooks/useApi';
 import api, { favoritesAPI } from '../../lib/api';
 
@@ -13,7 +13,6 @@ const FavoriteButton = ({
 }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { user, isAuthenticated } = useAuth();
-  const toast = useToast();
 
   const sizes = {
     sm: 'w-4 h-4',

@@ -11,6 +11,8 @@ import { protectedRoutes } from '../routing/protectedRoutes';
 import { adminAliasRoutes, adminRoutes } from '../routing/adminRoutes';
 import { AuthenticatedLayout, AdminLayout } from '../routing/ProtectedLayouts';
 
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+
 const renderRoutes = (routes) => {
   return routes.map((route) => {
     if (route.index) {
@@ -26,22 +28,24 @@ const AppShell = () => {
   const isAdminPath = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-950">
       <ScrollToTop />
       <AppHeader />
       <main className="flex-1">
-        <Routes>
-          {renderRoutes(publicRoutes)}
+        <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" /></div>}>
+          <Routes>
+            {renderRoutes(publicRoutes)}
 
-          <Route element={<AuthenticatedLayout />}>{renderRoutes(protectedRoutes)}</Route>
+            <Route element={<AuthenticatedLayout />}>{renderRoutes(protectedRoutes)}</Route>
 
-          <Route element={<AdminLayout />}>
-            {renderRoutes(adminAliasRoutes)}
-            <Route path="/admin">{renderRoutes(adminRoutes)}</Route>
-          </Route>
+            <Route element={<AdminLayout />}>
+              {renderRoutes(adminAliasRoutes)}
+              <Route path="/admin">{renderRoutes(adminRoutes)}</Route>
+            </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </React.Suspense>
       </main>
 
       {!isAdminPath ? <Footer /> : null}

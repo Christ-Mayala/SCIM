@@ -62,7 +62,7 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
 
   return (
     <div className={cn(
-      'property-card group bg-zinc-900/40 backdrop-blur-xl rounded-[32px] shadow-2xl hover:shadow-gold-primary/5 transition-all duration-500 border border-white/10 overflow-hidden', 
+      'property-card group bg-zinc-900/90 rounded-[32px] shadow-2xl hover:shadow-gold-primary/5 transition-all duration-500 border border-white/10 overflow-hidden', 
       isListView ? 'flex flex-col sm:flex-row' : 'flex flex-col',
       className
     )}>
@@ -80,9 +80,10 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
           <img
             src={imageError ? '/images/og/og-property.jpg' : getImageUrl(mainImage)}
             alt={property.titre}
-            className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110 will-change-transform"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-80" />
         </Link>

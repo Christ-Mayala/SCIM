@@ -183,9 +183,27 @@ export const PropertyProvider = ({ children }) => {
   const updateProperty = useCallback(async (id, propertyData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await propertyAPI.update(id, propertyData);
+
+      const data = new FormData();
+      const { images, ...rest } = propertyData;
+
+      Object.entries(rest).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          data.append(key, value);
+        }
+      });
+
+      if (Array.isArray(images)) {
+        images.forEach((imgFile) => {
+          if (imgFile) {
+            data.append('images', imgFile);
+          }
+        });
+      }
+
+      const response = await propertyAPI.update(id, data);
       dispatch({ type: 'UPDATE_PROPERTY', payload: response.data });
-      toast.success('Annonce mise à jour');
+      toast.success('Annonce mise à jour avec succès !');
       return { success: true, property: response.data };
     } catch (error) {
       const message = error.response?.data?.message || 'Erreur lors de la mise à jour';

@@ -25,11 +25,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+      // Le token est désormais géré automatiquement par les cookies HttpOnly (withCredentials: true)
 
       const isFormData =
         typeof FormData !== 'undefined' &&
@@ -84,14 +80,8 @@ api.interceptors.response.use(
           originalRequest._retry = true;
           try {
             const refreshResponse = await api.post('/users/refresh-token');
-            const newToken = refreshResponse?.data?.token;
-            if (newToken) {
-              localStorage.setItem('token', newToken);
-              api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-              originalRequest.headers = {
-                ...originalRequest.headers,
-                Authorization: `Bearer ${newToken}`,
-              };
+            // Le token est renouvelé et placé dans un cookie HttpOnly par le backend
+            if (refreshResponse && refreshResponse.status === 200) {
               return api(originalRequest);
             }
           } catch (_) {}
@@ -202,6 +192,7 @@ export const adminAPI = {
   getPropertySubmissions: (params = {}) => api.get('/admin/property-submissions', { params }),
   updatePropertySubmission: (id, payload) => api.put(`/admin/property-submissions/${id}`, payload),
   updatePropertySubmissionStatus: (id, status) => api.put(`/admin/property-submissions/${id}/status`, { status }),
+  deletePropertySubmission: (id) => api.delete(`/admin/property-submissions/${id}`),
 
   getUsers: (params = {}) => api.get('/admin/users', { params }),
   getUserById: (id) => api.get(`/admin/users/${id}`),

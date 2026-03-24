@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -111,10 +112,12 @@ const RegisterPage = () => {
       const result = await register(userData);
 
       if (result.success) {
+        toast.success('Compte créé avec succès ! Bienvenue chez SCIM.');
         navigate('/dashboard', { replace: true });
       } else {
         const fieldErrors = result.fieldErrors || {};
         setErrors({ ...fieldErrors, general: result.message || '' });
+        toast.error(result.message || 'Erreur lors de l\'inscription');
       }
     } catch (err) {
       console.error(err);
@@ -141,8 +144,8 @@ const RegisterPage = () => {
     <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] will-change-transform" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gold-dark/10 rounded-full blur-[120px] will-change-transform" style={{ animationDelay: '2s' }} />
         
         {/* Subtle Grid */}
         <div className="absolute inset-0 opacity-[0.02]" style={{
@@ -152,7 +155,7 @@ const RegisterPage = () => {
         }} />
       </div>
 
-      <div className="relative w-full max-w-[1240px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900/40 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
+      <div className="relative w-full max-w-[1240px] grid grid-cols-1 lg:grid-cols-2 bg-zinc-900 rounded-[40px] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden">
         {/* Left Side: Luxury Experience */}
         <div className="hidden lg:flex flex-col justify-between p-16 relative overflow-hidden border-r border-white/5">
            <div className="absolute inset-0 bg-gradient-to-br from-gold-primary/20 via-transparent to-transparent pointer-events-none" />
@@ -175,7 +178,7 @@ const RegisterPage = () => {
 
            <div className="relative z-10 space-y-12">
               <div className="space-y-6">
-                 <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gold-primary/10 rounded-full border border-gold-primary/20 text-[10px] font-black text-gold-primary uppercase tracking-widest backdrop-blur-md">
+                 <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gold-primary/10 rounded-full border border-gold-primary/20 text-[10px] font-black text-gold-primary uppercase tracking-widest">
                     <Sparkles className="w-4 h-4" />
                     Accès Prestige
                  </div>
@@ -218,7 +221,7 @@ const RegisterPage = () => {
         </div>
 
         {/* Right Side: Form */}
-        <div className="p-8 lg:p-16 bg-zinc-900/80 backdrop-blur-3xl flex flex-col justify-center relative border-l border-white/5 overflow-y-auto scrollbar-hide">
+        <div className="p-8 lg:p-16 bg-zinc-900 flex flex-col justify-center relative border-l border-white/5 overflow-y-auto scrollbar-hide">
           {/* Mobile Header (Visible only on mobile) */}
           <div className="lg:hidden flex flex-col items-center mb-12">
              <Link to="/" className="mb-6">

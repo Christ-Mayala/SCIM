@@ -16,9 +16,10 @@ const readStoredUser = () => {
   }
 };
 
+// On n'utilise plus de token dans le localStorage (géré par cookie HttpOnly)
 const initialToken = (() => {
   try {
-    return localStorage.getItem('token');
+    return localStorage.getItem('user') ? 'cookie_managed' : null;
   } catch (_) {
     return null;
   }
@@ -70,27 +71,19 @@ export const AuthProvider = ({ children }) => {
 
   const persistSession = useCallback((token, user) => {
     try {
-      if (token) localStorage.setItem('token', token);
       if (user) localStorage.setItem('user', JSON.stringify(user));
     } catch (_) {}
   }, []);
 
   const clearSession = useCallback(() => {
     try {
-      localStorage.removeItem('token');
       localStorage.removeItem('user');
     } catch (_) {}
   }, []);
 
   useEffect(() => {
     const run = async () => {
-      const token = (() => {
-        try {
-          return localStorage.getItem('token');
-        } catch (_) {
-          return null;
-        }
-      })();
+      const token = initialToken;
 
       const cachedUser = readStoredUser();
 
@@ -196,10 +189,8 @@ export const AuthProvider = ({ children }) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Le token est déjà dans l'URL, on le sauvegarde temporairement
-        // pour que l'appel à getProfile puisse l'utiliser
-        localStorage.setItem('token', token);
-
+        // Plus besoin de sauvegarder le token dans le localStorage ici
+        
         const me = await authAPI.getProfile();
         const profileUser = me.data;
 

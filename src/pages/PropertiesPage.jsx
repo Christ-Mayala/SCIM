@@ -82,7 +82,7 @@ const PropertiesPage = () => {
     const params = new URLSearchParams(searchParams);
     params.set('page', String(page));
     setSearchParams(params);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const handleSortChange = (newSortBy) => {
@@ -175,7 +175,7 @@ const PropertiesPage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
         {/* Filters Section with glassmorphism */}
-        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/10 p-6 mb-12">
+        <div className="bg-zinc-900/60 rounded-[32px] shadow-2xl border border-white/10 p-6 mb-12">
           <PropertyFilters />
         </div>
 
@@ -191,7 +191,7 @@ const PropertiesPage = () => {
              </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-zinc-900/60 p-2 rounded-2xl border border-white/10 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-4 bg-zinc-900/80 p-2 rounded-2xl border border-white/10 shadow-sm">
             {/* Sort */}
             <Select
               value={sortBy}
@@ -238,7 +238,7 @@ const PropertiesPage = () => {
             <p className="text-zinc-400 font-medium animate-pulse">Recherche des meilleures opportunités...</p>
           </div>
         ) : properties.length === 0 ? (
-          <div className="py-20 text-center bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-xl">
+          <div className="py-20 text-center bg-zinc-900/60 rounded-3xl border border-white/10 shadow-xl">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/5 border border-white/10 rounded-2xl mb-6 text-gold-primary">
                <Home className="w-10 h-10" />
             </div>

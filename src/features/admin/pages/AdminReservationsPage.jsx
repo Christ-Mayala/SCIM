@@ -1,630 +1,437 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { adminAPI } from '../../../lib/api';
+import React, { useEffect, useMemo, useState } from 'react';
+import { adminAPI, formatPrice, formatDate, reservationAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
-import { Search, Filter, Calendar, Download, RefreshCw, X, ChevronDown, ChevronLeft, ChevronRight, Eye, Phone, Mail, MapPin, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { formatPrice, formatDate } from '../../../lib/utils';
+import { Search, Filter, RefreshCw, X, ChevronLeft, ChevronRight, Eye, Clock, CheckCircle, XCircle, AlertCircle, CalendarDays, Download, Zap, MousePointer2, Building2, Phone, Mail, User, MapPin } from 'lucide-react';
+import { cn } from '../../../lib/utils';
+import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+
+const LIMIT = 5;
+
+const statusMap = {
+  en_attente:  { label: 'En attente',  cls: 'bg-amber-50 text-amber-600 border-amber-100',  icon: Clock },
+  confirmee:   { label: 'Confirmée',   cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: CheckCircle },
+  confirmée:   { label: 'Confirmée',   cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: CheckCircle },
+  annulee:     { label: 'Annulée',     cls: 'bg-red-50 text-red-600 border-red-100',  icon: XCircle },
+  annulée:     { label: 'Annulée',     cls: 'bg-red-50 text-red-600 border-red-100',  icon: XCircle },
+};
+
+const StatusBadge = ({ status }) => {
+  const s = statusMap[status] || { label: status || '—', cls: 'bg-zinc-100 text-zinc-500 border-zinc-200', icon: AlertCircle };
+  const Icon = s.icon;
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border', s.cls)}>
+      <Icon className="w-3 h-3" />
+      {s.label}
+    </span>
+  );
+};
+
+const StatCard = ({ label, value, icon: Icon, color, variant = 'default' }) => (
+  <div className="bg-white rounded-[2rem] border border-zinc-200/80 p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 relative overflow-hidden">
+    <div className={cn("absolute inset-x-0 top-0 h-1", color.split(' ')[0].replace('text-', 'bg-'))} />
+    <div className="flex items-center gap-4">
+      <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center shadow-lg shadow-zinc-900/5", color)}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-1.5">{label}</p>
+        <p className="text-2xl font-black text-zinc-900 leading-none tracking-tight">{value}</p>
+      </div>
+    </div>
+  </div>
+);
 
 const AdminReservationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reservations, setReservations] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0
-  });
-
-  // États pour les filtres
-  const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    dateRange: '',
-    propertyType: '',
-    clientId: '',
-    propertyId: ''
-  });
-
+  const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
+  const [filters, setFilters] = useState({ search: '', status: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = useState('');
 
-  // Options pour les filtres
-  const statusOptions = [
-    { value: '', label: 'Tous les statuts' },
-    { value: 'en_attente', label: 'En attente' },
-    { value: 'confirmee', label: 'Confirmée' },
-    { value: 'annulee', label: 'Annulée' },
-    { value: 'terminee', label: 'Terminée' }
-  ];
+  const exportToExcel = async () => {
+    try {
+      setExporting(true);
+      const res = await adminAPI.getReservations({ page: 1, limit: 2000, ...(filters.search && { search: filters.search }), ...(filters.status && { status: filters.status }) });
+      const rd = res.data?.data || res.data;
+      const all = Array.isArray(rd?.reservations) ? rd.reservations : Array.isArray(rd?.items) ? rd.items : [];
 
-  const propertyTypeOptions = [
-    { value: '', label: 'Tous les types' },
-    { value: 'appartement', label: 'Appartement' },
-    { value: 'maison', label: 'Maison' },
-    { value: 'terrain', label: 'Terrain' },
-    { value: 'hotel', label: 'Hôtel' },
-    { value: 'commercial', label: 'Commercial' }
-  ];
+      const rows = all.map(r => ({
+        'REF':             r.reference || r._id?.slice(-8).toUpperCase() || '—',
+        'DATE VISITE':     r.date ? new Date(r.date).toLocaleDateString('fr-FR') : '—',
+        'STATUT':          statusMap[r.status]?.label || r.status?.toUpperCase() || 'PÉNDING',
+        'CLIENT':          (r.user?.nom || r.user?.name || '—').toUpperCase(),
+        'TEL CLIENT':      r.user?.telephone || '—',
+        'EMAIL CLIENT':    r.user?.email || '—',
+        'PROPRIÉTÉ':       (r.property?.titre || '—').toUpperCase(),
+        'VILLE':           (r.property?.ville || '—').toUpperCase(),
+        'PRIX (FCFA)':     r.property?.prix || 0,
+        'SOUMIS LE':       r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—',
+      }));
 
-  // Charger les réservations avec filtres et pagination
-  const loadReservations = useCallback(async (page = 1, resetFilters = false) => {
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+          { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 18 },
+          { wch: 35 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Rapport Reservations');
+      XLSX.writeFile(wb, `SCIM_Reservations_${new Date().toISOString().slice(0,10)}.xlsx`);
+      toast.success(`${all.length} réservations exportées`);
+    } catch (e) {
+      toast.error('Erreur lors de l\'export Excel');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const load = async (page = 1, f = filters) => {
     try {
       setLoading(true);
       setError(null);
-
-      const params = {
-        page,
-        limit: pagination.limit,
-        ...(filters.search && { search: filters.search }),
-        ...(filters.status && { status: filters.status }),
-        ...(filters.propertyType && { propertyType: filters.propertyType }),
-        ...(filters.clientId && { clientId: filters.clientId }),
-        ...(filters.propertyId && { propertyId: filters.propertyId }),
-        ...(filters.dateRange && { dateRange: filters.dateRange })
-      };
-
+      const params = { page, limit: LIMIT, ...(f.search && { search: f.search }), ...(f.status && { status: f.status }) };
       const res = await adminAPI.getReservations(params);
-      const reservationsData = Array.isArray(res.data?.reservations) ? res.data.reservations : [];
-      
-      setReservations(reservationsData);
-      setPagination(prev => ({
-        ...prev,
-        page,
-        total: res.data?.total || reservationsData.length,
-        totalPages: Math.ceil((res.data?.total || reservationsData.length) / pagination.limit)
-      }));
-
-      if (resetFilters) {
-        setFilters({
-          search: '',
-          status: '',
-          dateRange: '',
-          propertyType: '',
-          clientId: '',
-          propertyId: ''
-        });
-      }
-
+      const data = res.data?.data || res.data;
+      const items = Array.isArray(data?.reservations) ? data.reservations : Array.isArray(data?.items) ? data.items : [];
+      setReservations(items);
+      const total = data?.total || items.length;
+      setPagination({ page, total, totalPages: Math.ceil(total / LIMIT) || 1 });
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || 'Erreur lors du chargement des réservations');
+      setError(e?.response?.data?.message || e?.message || 'Erreur lors du chargement');
       setReservations([]);
     } finally {
       setLoading(false);
     }
-  }, [pagination.limit]);
-
-  useEffect(() => {
-    loadReservations(1);
-  }, [loadReservations]);
-
-  // Gestion des changements de filtres
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const applyFilters = () => {
-    loadReservations(1);
+  useEffect(() => { load(1); }, []);
+
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      setStatusUpdatingId(id);
+      await adminAPI.updateReservationStatus(id, status);
+      setReservations(prev => prev.map(r => r._id === id ? { ...r, status } : r));
+      toast.success(status === 'confirmee' ? 'Réservation confirmée' : 'Réservation annulée');
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Mise à jour impossible');
+    } finally {
+      setStatusUpdatingId('');
+    }
   };
 
   const clearFilters = () => {
-    setFilters({
-      search: '',
-      status: '',
-      dateRange: '',
-      propertyType: '',
-      clientId: '',
-      propertyId: ''
-    });
-    loadReservations(1, true);
+    const reset = { search: '', status: '' };
+    setFilters(reset);
+    load(1, reset);
   };
 
-  // Gestion de la pagination
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= pagination.totalPages) {
-      loadReservations(newPage);
-    }
-  };
-
-  // Mise à jour du statut
-  const handleStatusUpdate = async (id, status) => {
-    try {
-      const res = await adminAPI.updateReservationStatus(id, status);
-      if (res.success) {
-        setReservations(prev => 
-          prev.map(r => r._id === id ? { ...r, status: res.data.status } : r)
-        );
-      }
-    } catch (e) {
-      alert(e?.response?.data?.message || 'Mise à jour du statut impossible');
-    }
-  };
-
-  // Réservations filtrées
-  const filteredReservations = useMemo(() => {
-    return reservations;
-  }, [reservations]);
-
-  // Statistiques
   const stats = useMemo(() => {
-    const total = reservations.length;
-    const enAttente = reservations.filter(r => r.status === 'en_attente').length;
-    const confirmees = reservations.filter(r => r.status === 'confirmee').length;
-    const annulees = reservations.filter(r => r.status === 'annulee').length;
-    const terminees = reservations.filter(r => r.status === 'terminee').length;
+    const total = pagination.total;
+    const enAttente  = reservations.filter(r => r.status === 'en_attente').length;
+    const confirmees = reservations.filter(r => r.status === 'confirmee' || r.status === 'confirmée').length;
+    return { total, enAttente, confirmees };
+  }, [reservations, pagination.total]);
 
-    return { total, enAttente, confirmees, annulees, terminees };
-  }, [reservations]);
-
-  // Fonction pour obtenir le style du statut
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'en_attente':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'confirmee':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'annulee':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'terminee':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const buildWhatsappUrl = (r) => {
+    const phone = r?.user?.telephone?.replace(/[^\d]/g, '');
+    if (!phone) return null;
+    const ref = r?.reference || r?._id?.slice(-6).toUpperCase() || '';
+    const txt = `Bonjour ${r?.user?.nom || 'Client'}, concernant votre visite SCIM (Réf: ${ref})...`;
+    return `https://wa.me/${phone.startsWith('242') ? phone : '242' + phone}?text=${encodeURIComponent(txt)}`;
   };
-
-  // Fonction pour obtenir l'icône du statut
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'en_attente':
-        return <Clock className="w-4 h-4" />;
-      case 'confirmee':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'annulee':
-        return <XCircle className="w-4 h-4" />;
-      case 'terminee':
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <AlertCircle className="w-4 h-4" />;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Réservations</h1>
-              <p className="text-sm text-gray-600 mt-1">Gestion des demandes de visite et réservations</p>
-            </div>
-            
-            {/* Boutons d'action */}
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => loadReservations(pagination.page)}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Actualiser
-              </Button>
-              <Button variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Exporter
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-zinc-50/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Statistiques */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                <div className="text-blue-600 font-bold text-lg">{stats.total}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Total</div>
-                <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              </div>
+        {/* ── Header Section ── */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white mb-4 shadow-lg shadow-zinc-900/10">
+              <Zap className="h-3.5 w-3.5 text-amber-400" />
+              Journal des Visites
             </div>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight">Réservations</h1>
+            <p className="mt-1 text-sm font-medium text-zinc-500">Gérez le planning des visites et la relation client.</p>
           </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg mr-3">
-                <Clock className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">En attente</div>
-                <div className="text-2xl font-bold text-yellow-600">{stats.enAttente}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg mr-3">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Confirmées</div>
-                <div className="text-2xl font-bold text-green-600">{stats.confirmees}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg mr-3">
-                <XCircle className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Annulées</div>
-                <div className="text-2xl font-bold text-red-600">{stats.annulees}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Terminées</div>
-                <div className="text-2xl font-bold text-blue-600">{stats.terminees}</div>
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+             <Button 
+               variant="outline" 
+               onClick={exportToExcel} 
+               loading={exporting}
+               className="h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-zinc-200 bg-white hover:bg-zinc-50 transition-all shadow-sm gap-2"
+             >
+               <Download className="h-4 w-4" /> Export Excel
+             </Button>
+             <Button 
+               onClick={() => load(1)} 
+               className="h-12 w-12 rounded-2xl bg-zinc-900 text-white shadow-xl shadow-zinc-900/10 flex items-center justify-center p-0"
+             >
+               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+             </Button>
           </div>
         </div>
 
-        {/* Filtres */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          <div className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Filter className="w-5 h-5 mr-2" />
-                Filtres avancés
-              </h2>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  {showFilters ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4" />}
-                  {showFilters ? 'Masquer' : 'Afficher'} les filtres
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={clearFilters}
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Réinitialiser
-                </Button>
-              </div>
-            </div>
+        {/* ── Stat Cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+           <StatCard label="Volume Total" value={stats.total} icon={CalendarDays} color="bg-zinc-100 text-zinc-900" />
+           <StatCard label="En Attente" value={stats.enAttente} icon={Clock} color="bg-amber-50 text-amber-600" />
+           <StatCard label="Confirmées" value={stats.confirmees} icon={CheckCircle} color="bg-emerald-50 text-emerald-600" />
+           <StatCard label="Taux d'Action" value={stats.total > 0 ? `${Math.round(((stats.confirmees) / stats.total) * 100)}%` : '0%'} icon={Zap} color="bg-blue-50 text-blue-600" />
+        </div>
 
-            {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
-                {/* Recherche */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      value={filters.search}
-                      onChange={(e) => handleFilterChange('search', e.target.value)}
-                      placeholder="Rechercher par référence, propriété, client..."
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
+        {/* ── Search & Filter Panel ── */}
+        <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm p-2 mb-8">
+           <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
+              <div className="flex-1 p-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-zinc-300" />
                   </div>
-                </div>
-
-                {/* Statut */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select
-                    value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {statusOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Type de propriété */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type de propriété</label>
-                  <select
-                    value={filters.propertyType}
-                    onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-                    className="w-full py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {propertyTypeOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Plage de dates */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Période</label>
-                  <select
-                    value={filters.dateRange}
-                    onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                    className="w-full py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Toutes les périodes</option>
-                    <option value="today">Aujourd'hui</option>
-                    <option value="week">Cette semaine</option>
-                    <option value="month">Ce mois</option>
-                    <option value="quarter">Ce trimestre</option>
-                    <option value="year">Cette année</option>
-                  </select>
-                </div>
-
-                {/* ID Client */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">ID Client</label>
                   <input
-                    type="text"
-                    value={filters.clientId}
-                    onChange={(e) => handleFilterChange('clientId', e.target.value)}
-                    placeholder="ID du client..."
-                    className="w-full py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    value={filters.search}
+                    onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                    onKeyDown={(e) => e.key === 'Enter' && load(1)}
+                    placeholder="Chercher client, référence, bien..."
+                    className="block w-full pl-12 pr-4 py-4 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all"
                   />
-                </div>
-
-                {/* ID Propriété */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">ID Propriété</label>
-                  <input
-                    type="text"
-                    value={filters.propertyId}
-                    onChange={(e) => handleFilterChange('propertyId', e.target.value)}
-                    placeholder="ID de la propriété..."
-                    className="w-full py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Boutons d'action */}
-                <div className="md:col-span-2 lg:col-span-3 flex items-end gap-2">
-                  <Button onClick={applyFilters} className="w-full">
-                    Appliquer les filtres
-                  </Button>
                 </div>
               </div>
-            )}
-          </div>
+              <div className="p-4 flex items-center gap-3 px-6">
+                 <select
+                    value={filters.status}
+                    onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                    className="h-12 rounded-xl border border-zinc-100 bg-zinc-50 px-4 text-xs font-black uppercase tracking-widest text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                 >
+                    <option value="">Tous les statuts</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="confirmee">Confirmées</option>
+                    <option value="annulee">Annulées</option>
+                 </select>
+                 <Button onClick={() => load(1)} className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[10px] bg-zinc-900 border-none text-white hover:bg-gold-primary hover:text-zinc-900 transition-all shadow-lg active:scale-95">Appliquer</Button>
+                 {(filters.search || filters.status) && (
+                   <Button variant="outline" onClick={clearFilters} className="h-12 w-12 rounded-xl border-zinc-200 p-0 text-zinc-400 hover:text-red-500 hover:bg-red-50">
+                      <X className="h-5 w-5" />
+                   </Button>
+                 )}
+              </div>
+           </div>
         </div>
 
-        {/* Tableau des réservations */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {error ? (
-            <div className="p-6 bg-red-50 border border-red-200">
-              <div className="flex items-center">
-                <XCircle className="w-5 h-5 text-red-600 mr-2" />
-                <div>
-                  <div className="font-semibold text-red-900">Erreur de chargement</div>
-                  <div className="text-sm text-red-700">{error}</div>
-                </div>
-              </div>
+        {/* ── Table Section ── */}
+        <div className="bg-white rounded-[2.5rem] border border-zinc-200 shadow-sm overflow-hidden mb-12">
+          {loading && pagination.page === 1 ? (
+            <div className="flex flex-col items-center justify-center py-24">
+              <LoadingSpinner size="lg" />
+              <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Scan des réservations...</p>
+            </div>
+          ) : reservations.length === 0 ? (
+            <div className="py-32 flex flex-col items-center justify-center text-zinc-400">
+               <CalendarDays className="h-12 w-12 opacity-20 mb-4" />
+               <p className="text-[10px] font-black uppercase tracking-widest">Aucune donnée trouvée</p>
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Propriété</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-zinc-50 bg-zinc-50/30">
+                      <th className="py-5 pl-10 pr-4 text-left text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Référence & Date</th>
+                      <th className="py-5 px-4 text-left text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Bien Immobilier</th>
+                      <th className="hidden sm:table-cell py-5 px-4 text-left text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Visiteur</th>
+                      <th className="py-5 px-4 text-left text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Statut</th>
+                      <th className="py-5 pl-4 pr-10 text-right text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredReservations.map((reservation) => (
-                      <tr key={reservation._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">#{reservation.reference}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 font-medium">{reservation.property?.titre || 'N/A'}</div>
-                          <div className="text-xs text-gray-500">{reservation.property?.categorie || ''}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{reservation.user?.nom || 'N/A'}</div>
-                          <div className="text-xs text-gray-500">{reservation.user?.email || ''}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{formatDate(reservation.startDate)}</div>
-                          <div className="text-xs text-gray-500">{formatDate(reservation.endDate)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(reservation.status)}`}>
-                            {getStatusIcon(reservation.status)}
-                            <span className="ml-1.5">{reservation.status}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedReservation(reservation)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            
-                            <select
-                              value={reservation.status}
-                              onChange={(e) => handleStatusUpdate(reservation._id, e.target.value)}
-                              className="rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
-                            >
-                              <option value="en_attente">En attente</option>
-                              <option value="confirmee">Confirmée</option>
-                              <option value="annulee">Annulée</option>
-                              <option value="terminee">Terminée</option>
-                            </select>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody className="divide-y divide-zinc-50">
+                    {reservations.map(r => {
+                      const isPending = /attente|pending/i.test(r.status || '');
+                      const waUrl = buildWhatsappUrl(r);
+                      return (
+                        <tr key={r._id} className="hover:bg-zinc-50/50 transition-colors group">
+                          <td className="py-5 pl-10 pr-4">
+                             <div className="text-xs font-black text-zinc-900 uppercase tracking-tight">#{r.reference || r._id?.slice(-8).toUpperCase()}</div>
+                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-400 uppercase mt-0.5">
+                                <Clock className="h-3 w-3" /> {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}
+                             </div>
+                          </td>
+                          <td className="py-5 px-4">
+                            <div className="flex items-center gap-3">
+                               <div className="h-12 w-12 shrink-0 rounded-2xl overflow-hidden bg-zinc-100 ring-1 ring-zinc-200 group-hover:ring-amber-400/30 transition-all">
+                                  <img src={r.property?.images?.[0]?.url || '/images/scim-logo.jpg'} alt="" className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                               </div>
+                               <div className="min-w-0">
+                                  <div className="text-sm font-black text-zinc-900 leading-tight line-clamp-2 group-hover:text-gold-dark truncate max-w-[200px] uppercase tracking-tight">{r.property?.titre || 'Bien supprimé'}</div>
+                                  <div className="text-[10px] font-bold text-zinc-400 mt-0.5 truncate max-w-[150px] uppercase tracking-wider">{r.property?.ville || '—'}</div>
+                               </div>
+                            </div>
+                          </td>
+                          <td className="hidden sm:table-cell py-5 px-4">
+                             <div className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate max-w-[150px]">{r.user?.nom || r.user?.name || 'Client'}</div>
+                             <div className="text-[10px] font-bold text-zinc-400 mt-0.5 truncate max-w-[150px]">{r.user?.email || '—'}</div>
+                          </td>
+                          <td className="py-5 px-4">
+                             <StatusBadge status={r.status} />
+                          </td>
+                          <td className="py-5 pl-4 pr-10">
+                             <div className="flex items-center justify-end gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300">
+                                {isPending ? (
+                                  <>
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => handleStatusUpdate(r._id, 'confirmee')}
+                                      className="h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-emerald-500 hover:bg-emerald-600 border-none text-white shadow-lg shadow-emerald-500/10"
+                                    >
+                                      Confirmer
+                                    </Button>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => handleStatusUpdate(r._id, 'annulee')}
+                                      className="h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-500 border-red-100 hover:bg-red-50"
+                                    >
+                                      Annuler
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => setSelectedReservation(r)}
+                                    className="h-9 w-9 p-0 rounded-xl border-zinc-200 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                {waUrl && (
+                                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="h-9 w-12 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all border border-emerald-100 shadow-sm">
+                                     <MousePointer2 className="h-4 w-4" />
+                                  </a>
+                                )}
+                             </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.page - 1)}
+              {/* ── Pagination ── */}
+              <div className="flex items-center justify-between px-10 py-6 bg-zinc-50 border-t border-zinc-100">
+                  <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                    Page <span className="text-zinc-900">{pagination.page}</span> / <span className="text-zinc-900">{pagination.totalPages}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => load(pagination.page - 1)} 
                       disabled={pagination.page <= 1}
+                      className="h-10 px-6 rounded-xl text-[10px] font-black uppercase border-zinc-200 bg-white"
                     >
-                      <ChevronLeft className="w-4 h-4" />
                       Précédent
                     </Button>
-                    
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                        const pageNum = i + 1;
-                        const isCurrentPage = pageNum === pagination.page;
-                        const showPage = pageNum === 1 || pageNum === pagination.totalPages || 
-                          (pageNum >= pagination.page - 2 && pageNum <= pagination.page + 2);
-                        
-                        if (!showPage && pageNum !== 1 && pageNum !== pagination.totalPages) {
-                          return <span key={pageNum} className="px-2">...</span>;
-                        }
-                        
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={isCurrentPage ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            disabled={!showPage}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.page + 1)}
+                    <Button 
+                      variant="outline" 
+                      onClick={() => load(pagination.page + 1)} 
                       disabled={pagination.page >= pagination.totalPages}
+                      className="h-10 px-6 rounded-xl text-[10px] font-black uppercase border-zinc-200 bg-white"
                     >
                       Suivant
-                      <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
-                  
-                  <div className="text-sm text-gray-700">
-                    Page {pagination.page} sur {pagination.totalPages} ({pagination.total} résultats)
-                  </div>
-                </div>
-              )}
-
-              {filteredReservations.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg">Aucune réservation trouvée</div>
-                  <div className="text-gray-400 text-sm mt-2">
-                    {filters.search || filters.status || filters.propertyType ? 
-                      'Essayez de modifier les filtres pour voir plus de résultats.' : 
-                      'Commencez par ajouter des réservations.'
-                    }
-                  </div>
-                </div>
-              )}
+              </div>
             </>
           )}
         </div>
-      </div>
 
-      {/* Modal de détails */}
-      {selectedReservation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Détails de la réservation</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedReservation(null)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Informations générales</h4>
-                  <div className="space-y-2">
-                    <div><span className="text-sm text-gray-600">Référence:</span> <span className="font-medium">#{selectedReservation.reference}</span></div>
-                    <div><span className="text-sm text-gray-600">Statut:</span> 
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(selectedReservation.status)}`}>
-                        {getStatusIcon(selectedReservation.status)}
-                        <span className="ml-1.5">{selectedReservation.status}</span>
-                      </span>
+        {/* ── Detail Modal ── */}
+        {selectedReservation && (
+           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-zinc-950/95" onClick={() => setSelectedReservation(null)} />
+              <div className="relative w-full max-w-2xl rounded-[2.5rem] bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                 <div className="flex items-center justify-between px-10 py-8 border-b border-zinc-100">
+                    <div>
+                        <h3 className="text-sm font-black text-zinc-900 uppercase tracking-[0.2em]">Détails du Rendez-vous</h3>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">Réf: {selectedReservation.reference || selectedReservation._id}</p>
                     </div>
-                    <div><span className="text-sm text-gray-600">Créée le:</span> <span className="font-medium">{formatDate(selectedReservation.createdAt)}</span></div>
-                    <div><span className="text-sm text-gray-600">Date de visite:</span> <span className="font-medium">{formatDate(selectedReservation.startDate)}</span></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Propriété</h4>
-                  <div className="space-y-2">
-                    <div><span className="text-sm text-gray-600">Titre:</span> <span className="font-medium">{selectedReservation.property?.titre || 'N/A'}</span></div>
-                    <div><span className="text-sm text-gray-600">Type:</span> <span className="font-medium">{selectedReservation.property?.categorie || 'N/A'}</span></div>
-                    <div><span className="text-sm text-gray-600">Prix:</span> <span className="font-medium">{formatPrice(selectedReservation.property?.prix)}</span></div>
-                    <div><span className="text-sm text-gray-600">Localisation:</span> <span className="font-medium">{selectedReservation.property?.ville || 'N/A'}</span></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Client</h4>
-                  <div className="space-y-2">
-                    <div><span className="text-sm text-gray-600">Nom:</span> <span className="font-medium">{selectedReservation.user?.nom || 'N/A'}</span></div>
-                    <div><span className="text-sm text-gray-600">Email:</span> <span className="font-medium">{selectedReservation.user?.email || 'N/A'}</span></div>
-                    <div><span className="text-sm text-gray-600">Téléphone:</span> <span className="font-medium">{selectedReservation.user?.telephone || 'N/A'}</span></div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">WhatsApp:</span> 
-                      <span className={`font-medium ${selectedReservation.isWhatsapp ? 'text-green-600' : 'text-gray-500'}`}>
-                        {selectedReservation.isWhatsapp ? 'Oui' : 'Non'}
-                      </span>
+                    <button onClick={() => setSelectedReservation(null)} className="h-11 w-11 rounded-2xl bg-zinc-50 flex items-center justify-center hover:bg-zinc-100 transition-colors">
+                       <X className="h-5 w-5 text-zinc-500" />
+                    </button>
+                 </div>
+                 <div className="p-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Property side */}
+                        <div className="space-y-6">
+                           <div className="aspect-video rounded-[1.5rem] overflow-hidden bg-zinc-100 border border-zinc-100 shadow-inner">
+                              <img src={selectedReservation.property?.images?.[0]?.url || '/images/scim-logo.jpg'} alt="" className="w-full h-full object-cover" />
+                           </div>
+                           <div>
+                              <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">{selectedReservation.property?.categorie}</div>
+                              <h4 className="text-xl font-black text-zinc-900 leading-tight uppercase tracking-tight">{selectedReservation.property?.titre}</h4>
+                              <p className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 mt-2 uppercase tracking-wide">
+                                 <MapPin className="h-3.5 w-3.5 text-amber-500" /> {selectedReservation.property?.ville}
+                              </p>
+                              <div className="mt-4 text-xl font-black text-zinc-900">{formatPrice(selectedReservation.property?.prix)}</div>
+                           </div>
+                        </div>
+                        {/* Client side */}
+                        <div className="space-y-8 bg-zinc-50/50 rounded-[2rem] p-8 border border-zinc-100">
+                           <div className="space-y-5">
+                              <div className="flex items-center gap-4">
+                                 <div className="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center text-amber-400 shadow-lg">
+                                    <User className="h-5 w-5" />
+                                 </div>
+                                 <div>
+                                    <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Visiteur</div>
+                                    <div className="text-sm font-black text-zinc-900 uppercase truncate">{selectedReservation.user?.nom || selectedReservation.user?.name || 'Inconnu'}</div>
+                                 </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                 <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-zinc-400 border border-zinc-100 shadow-sm">
+                                    <Mail className="h-4 w-4" />
+                                 </div>
+                                 <div className="min-w-0">
+                                    <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Email</div>
+                                    <div className="text-[11px] font-black text-zinc-900 truncate">{selectedReservation.user?.email || '—'}</div>
+                                 </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                 <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-zinc-400 border border-zinc-100 shadow-sm">
+                                    <Phone className="h-4 w-4" />
+                                 </div>
+                                 <div>
+                                    <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Téléphone</div>
+                                    <div className="text-[11px] font-black text-zinc-900 tracking-widest">{selectedReservation.user?.telephone || '—'}</div>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="pt-6 border-t border-zinc-200/50">
+                              <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Statut Actuel</div>
+                              <StatusBadge status={selectedReservation.status} />
+                           </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
+                 </div>
+                 <div className="px-10 py-8 border-t border-zinc-100 bg-zinc-50/50 flex justify-end gap-3">
+                    {buildWhatsappUrl(selectedReservation) && (
+                       <a href={buildWhatsappUrl(selectedReservation)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 h-12 px-8 rounded-2xl bg-[#25D366] text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:bg-[#128C7E] transition-all">
+                          <MousePointer2 className="h-4 w-4" /> Contacter
+                       </a>
+                    )}
+                    <Button onClick={() => setSelectedReservation(null)} className="h-12 px-8 rounded-2xl bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest border-none">Fermer</Button>
+                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+           </div>
+        )}
+      </div>
     </div>
   );
 };

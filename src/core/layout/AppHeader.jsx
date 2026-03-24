@@ -13,7 +13,7 @@ const AppHeader = () => {
     return p.startsWith('/admin');
   }, [location.pathname]);
 
-  if (isAdminContent) return <AdminHeader />;
+  if (isAdminContent) return null; // L'admin utilise maintenant son propre AdminLayout structuré
   return <ClientHeader />;
 };
 

@@ -1,44 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Trash2, User, Phone, Mail, MapPin, Building2, ClipboardList, Eye, ExternalLink } from 'lucide-react';
+import {
+  CheckCircle2, Trash2, User, Phone, Mail, MapPin, Building2,
+  ClipboardList, Eye, ExternalLink, Clock, XCircle, X, Save,
+  ArrowRight, Tag, Maximize2, Home, Bath, Bed, Layout, ShieldCheck, Zap, RefreshCw, AlertTriangle
+} from 'lucide-react';
 import { adminAPI, formatPrice, formatDate } from '../../../lib/api';
+import { cn } from '../../../lib/utils';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
+import { Input } from '../../../components/ui/Input';
 import toast from 'react-hot-toast';
+
+const LIMIT = 5;
+
+const StatusTab = ({ id, label, icon: Icon, active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "flex items-center gap-2.5 px-6 py-4 border-b-2 font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap",
+      active 
+      ? `border-gold-primary text-zinc-900 bg-gold-primary/5` 
+      : "border-transparent text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
+    )}
+  >
+    <Icon className={cn("h-4 w-4", active ? "text-gold-primary" : "text-zinc-400")} />
+    {label}
+  </button>
+);
 
 const AdminSubmissionsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [submissions, setSubmissions] = useState([]);
-    const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        totalPages: 1,
-        totalItems: 0,
-    });
+    const [pagination, setPagination] = useState({ page: 1, limit: LIMIT, totalPages: 1, totalItems: 0 });
+    const [statusFilter, setStatusFilter] = useState('pending');
+    
+    // Edit Modal State
+    const [selected, setSelected] = useState(null);
+    const [editOpen, setEditOpen] = useState(false);
+    const [draft, setDraft] = useState({});
+    const [saving, setSaving] = useState(false);
 
-    const loadSubmissions = async (page = 1) => {
+    const loadSubmissions = async (page = 1, currentStatus = statusFilter) => {
         try {
             setLoading(true);
             setError(null);
-            const res = await adminAPI.getPropertySubmissions({ page, limit: pagination.limit });
-            setSubmissions(Array.isArray(res.data?.submissions) ? res.data.submissions : []);
+            const res = await adminAPI.getPropertySubmissions({ page, limit: LIMIT, status: currentStatus });
+            const data = res.data?.data || res.data;
+            setSubmissions(Array.isArray(data?.items) ? data.items : []);
             setPagination({
-                page: res.data?.page || 1,
-                limit: res.data?.limit || 10,
-                totalPages: res.data?.totalPages || 1,
-                totalItems: res.data?.totalSubmissions || 0,
+                page: data?.page || 1,
+                limit: LIMIT,
+                totalPages: data?.totalPages || 1,
+                totalItems: data?.total || 0,
             });
         } catch (e) {
-            setError(e?.response?.data?.message || e?.message || 'Erreur lors du chargement des soumissions');
+            setError(e?.response?.data?.message || 'Erreur lors du chargement des soumissions');
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        loadSubmissions(1);
-    }, []);
+    useEffect(() => { loadSubmissions(1, statusFilter); }, [statusFilter]);
 
     const handleAction = async (id, status) => {
         const confirmMsg = status === 'approved' 
@@ -50,174 +74,328 @@ const AdminSubmissionsPage = () => {
         try {
             await adminAPI.updatePropertySubmissionStatus(id, status);
             toast.success(status === 'approved' ? 'Propriété approuvée et publiée !' : 'Soumission rejetée.');
-            loadSubmissions(pagination.page);
+            setSubmissions(prev => prev.filter(s => s._id !== id));
+            setPagination(prev => ({ ...prev, totalItems: Math.max(0, prev.totalItems - 1) }));
         } catch (e) {
             toast.error(e?.response?.data?.message || 'Action impossible');
         }
     };
 
-    if (loading && pagination.page === 1) {
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <LoadingSpinner size="lg" />
-            </div>
-        );
-    }
+    const handleSave = async () => {
+        try {
+            setSaving(true);
+            const payload = {
+                // Submitter info
+                nomComplet: draft.nomComplet,
+                email: draft.email,
+                telephone: draft.telephone,
+                
+                // Property info
+                titre: draft.titre,
+                description: draft.description,
+                prix: draft.prix ? Number(draft.prix) : undefined,
+                ville: draft.ville,
+                adresse: draft.adresse,
+                categorie: draft.categorie,
+                transactionType: draft.transactionType,
+                superficie: draft.superficie ? Number(draft.superficie) : undefined,
+                nombre_chambres: draft.nombre_chambres ? Number(draft.nombre_chambres) : undefined,
+                nombre_salles_bain: draft.nombre_salles_bain ? Number(draft.nombre_salles_bain) : undefined,
+                nombre_salons: draft.nombre_salons ? Number(draft.nombre_salons) : undefined,
+            };
+            await adminAPI.updatePropertySubmission(selected._id, payload);
+            toast.success("Modifications enregistrées");
+            loadSubmissions(pagination.page, statusFilter);
+            setEditOpen(false);
+        } catch (e) {
+            toast.error(e?.response?.data?.message || 'Erreur lors de la sauvegarde');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Supprimer DÉFINITIVEMENT cette soumission ?')) return;
+        try {
+            await adminAPI.deletePropertySubmission(id);
+            setSubmissions(prev => prev.filter(s => s._id !== id));
+            toast.success('Soumission supprimée');
+        } catch (e) { toast.error('Erreur suppression'); }
+    };
 
     return (
-        <div className="min-h-screen bg-zinc-50/50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
-                    <div>
-                        <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200 mb-3">
-                            <ClipboardList className="h-3 w-3" />
-                            Validation Administrative
-                        </div>
-                        <h1 className="text-3xl font-bold text-zinc-900">Soumissions de propriétés</h1>
-                        <p className="mt-1 text-sm text-zinc-500">Examinez et validez les biens soumis par les clients.</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-zinc-500 bg-white px-4 py-2 rounded-xl border border-zinc-200">
-                        <span className="font-bold text-zinc-900">{pagination.totalItems}</span> soumissions en attente
-                    </div>
-                </div>
+      <div className="min-h-screen bg-zinc-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-                {error && (
-                    <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-2xl mb-6 flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                            <Trash2 className="h-4 w-4" />
-                        </div>
-                        <p className="text-sm font-medium">{error}</p>
-                    </div>
-                )}
-
-                <div className="grid gap-6">
-                    {submissions.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-zinc-200 p-20 text-center shadow-sm">
-                            <div className="h-20 w-20 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-6">
-                                <CheckCircle2 className="h-10 w-10 text-zinc-300" />
-                            </div>
-                            <h3 className="text-xl font-bold text-zinc-900">Aucune soumission en attente</h3>
-                            <p className="mt-2 text-zinc-500 max-w-sm mx-auto">Toutes les demandes ont été traitées. Bon travail !</p>
-                        </div>
-                    ) : (
-                        submissions.map((sub) => (
-                            <div key={sub._id} className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                <div className="grid grid-cols-1 lg:grid-cols-4">
-                                    {/* Property Preview */}
-                                    <div className="lg:col-span-1 h-48 lg:h-full relative overflow-hidden bg-zinc-100 border-r border-zinc-100">
-                                        {sub.propertyDraft?.images?.[0]?.url ? (
-                                            <img src={sub.propertyDraft.images[0].url} alt={sub.propertyDraft.titre} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                                                <Building2 className="h-12 w-12" />
-                                            </div>
-                                        )}
-                                        <div className="absolute top-4 left-4">
-                                            <Badge className="bg-white/90 backdrop-blur-md text-zinc-900 border-none shadow-sm capitalize">
-                                                {sub.propertyDraft?.transactionType}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="lg:col-span-2 p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-zinc-900 mb-1">{sub.propertyDraft?.titre || 'Sans titre'}</h3>
-                                                <div className="flex items-center gap-2 text-sm text-zinc-500">
-                                                    <MapPin className="h-4 w-4 text-gold-primary" />
-                                                    {sub.propertyDraft?.adresse}, {sub.propertyDraft?.ville}
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-xl font-bold text-gold-primary">{formatPrice(sub.propertyDraft?.prix || 0)}</div>
-                                                <div className="text-xs text-zinc-400">Soumis le {formatDate(sub.createdAt)}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-zinc-100">
-                                            <div className="space-y-2">
-                                                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Informations Client</h4>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold text-xs">
-                                                        {sub.submitter?.nomComplet?.charAt(0) || 'C'}
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm font-bold text-zinc-900">{sub.submitter?.nomComplet}</div>
-                                                        <div className="flex items-center gap-3 text-xs text-zinc-500 mt-0.5">
-                                                            <span className="flex items-center gap-1.5"><Phone className="h-3 w-3" /> {sub.submitter?.telephone}</span>
-                                                            <span className="flex items-center gap-1.5"><Mail className="h-3 w-3" /> {sub.submitter?.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Détails Technique</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    <span className="bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded-lg text-xs font-medium">{sub.propertyDraft?.categorie}</span>
-                                                    {sub.propertyDraft?.superficie && <span className="bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded-lg text-xs font-medium">{sub.propertyDraft.superficie} m²</span>}
-                                                    {sub.propertyDraft?.nombre_chambres && <span className="bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded-lg text-xs font-medium">{sub.propertyDraft.nombre_chambres} Ch</span>}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="lg:col-span-1 bg-zinc-50 p-6 flex flex-col justify-center gap-3 border-l border-zinc-100">
-                                        <Button 
-                                            onClick={() => handleAction(sub._id, 'approved')}
-                                            className="w-full bg-zinc-900 hover:bg-zinc-800 text-white gap-2 h-11"
-                                        >
-                                            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                                            Approuver le bien
-                                        </Button>
-                                        <Button 
-                                            variant="outline"
-                                            onClick={() => handleAction(sub._id, 'rejected')}
-                                            className="w-full bg-white border-zinc-200 text-red-600 hover:bg-red-50 hover:border-red-200 gap-2 h-11"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                            Rejeter
-                                        </Button>
-                                        <div className="mt-2 text-center">
-                                            <button className="text-xs font-bold text-gold-primary hover:underline inline-flex items-center gap-1.5">
-                                                <Eye className="h-3 w-3" /> Examiner en détail
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-
-                {pagination.totalPages > 1 && (
-                    <div className="mt-10 flex items-center justify-center gap-2">
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            disabled={pagination.page <= 1}
-                            onClick={() => loadSubmissions(pagination.page - 1)}
-                            className="rounded-xl"
-                        >
-                            Précèdent
-                        </Button>
-                        <div className="px-4 text-sm text-zinc-500 font-medium">
-                            {pagination.page} / {pagination.totalPages}
-                        </div>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            disabled={pagination.page >= pagination.totalPages}
-                            onClick={() => loadSubmissions(pagination.page + 1)}
-                            className="rounded-xl"
-                        >
-                            Suivant
-                        </Button>
-                    </div>
-                )}
+          {/* ── Header Section ── */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white mb-4 shadow-lg shadow-zinc-900/10">
+                <Zap className="h-3.5 w-3.5 text-amber-400" />
+                Modération Editoriale
+              </div>
+              <h1 className="text-4xl font-black text-zinc-900 tracking-tight">Soumissions</h1>
+              <p className="mt-1 text-sm font-medium text-zinc-500">Examinez et approuvez les nouveaux biens soumis par les partenaires.</p>
             </div>
+            <div className="flex items-center gap-3">
+               <Button 
+                 variant="outline" 
+                 onClick={() => loadSubmissions(1)} 
+                 className="h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-zinc-200 bg-white hover:bg-zinc-50 transition-all shadow-sm"
+               >
+                 <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+                 Actualiser
+               </Button>
+            </div>
+          </div>
+
+          {/* ── Status Tabs ── */}
+          <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden mb-8">
+             <div className="flex items-center overflow-x-auto divide-x divide-zinc-50">
+                <StatusTab id="pending" label="En attente" icon={Clock} active={statusFilter === 'pending'} onClick={() => setStatusFilter('pending')} />
+                <StatusTab id="approved" label="Approuvées" icon={CheckCircle2} active={statusFilter === 'approved'} onClick={() => setStatusFilter('approved')} />
+                <StatusTab id="rejected" label="Rejetées" icon={XCircle} active={statusFilter === 'rejected'} onClick={() => setStatusFilter('rejected')} />
+                <div className="flex-1 px-8 py-4 text-right">
+                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                      <span className="text-zinc-900">{pagination.totalItems}</span> soumissions
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          {error && (
+            <div className="mb-8 p-5 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center gap-4 text-sm text-red-600 font-bold uppercase tracking-tight">
+               <AlertTriangle className="h-5 w-5" />
+               {error}
+            </div>
+          )}
+
+          {/* ── List Layout ── */}
+          {loading && pagination.page === 1 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-zinc-400">
+               <LoadingSpinner size="lg" />
+               <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em]">Chargement des flux...</p>
+            </div>
+          ) : submissions.length === 0 ? (
+            <div className="rounded-[2.5rem] bg-white border border-dashed border-zinc-200 py-32 text-center flex flex-col items-center justify-center">
+               <ClipboardList className="h-12 w-12 text-zinc-200 mb-4" />
+               <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest">Aucune soumission</h3>
+               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Tous les biens ont été modérés.</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+               {submissions.map((sub) => {
+                 const draft = sub.propertyDraft || {};
+                 return (
+                   <div key={sub._id} className="group overflow-hidden bg-white rounded-[2.5rem] border border-zinc-200/80 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex flex-col lg:flex-row">
+                      <div className="lg:w-80 h-64 lg:h-auto shrink-0 relative overflow-hidden bg-zinc-100 border-b lg:border-b-0 lg:border-r border-zinc-50">
+                         <img 
+                           src={draft.images?.[0]?.url || '/images/scim-logo.jpg'} 
+                           alt="" 
+                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                         />
+                         <div className="absolute top-6 left-6">
+                             <span className="inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-zinc-900 text-white">
+                                {sub.status === 'pending' ? 'À modérer' : sub.status}
+                             </span>
+                         </div>
+                      </div>
+
+                      <div className="flex-1 p-8 lg:p-10 flex flex-col justify-between gap-8">
+                         <div>
+                            <div className="flex items-center justify-between gap-4 mb-4">
+                               <div className="flex items-center gap-3">
+                                  <div className="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center text-amber-400 shadow-lg ring-1 ring-white/10 shrink-0">
+                                     <Building2 className="h-5 w-5" />
+                                  </div>
+                                  <div className="min-w-0">
+                                     <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{draft.categorie || 'S/C'}</div>
+                                     <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight leading-tight group-hover:text-gold-dark truncate max-w-[300px] mt-0.5">
+                                        {draft.titre || 'Bien sans titre'}
+                                     </h3>
+                                  </div>
+                               </div>
+                               <div className="text-right shrink-0">
+                                  <div className="text-2xl font-black text-zinc-900 tracking-tighter">{formatPrice(draft.prix)}</div>
+                                  <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">Montant Estimé</div>
+                               </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+                               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black text-zinc-600 uppercase tracking-tight">
+                                  <MapPin className="h-3.5 w-3.5 text-amber-500" /> {draft.ville || '—'}
+                               </span>
+                               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black text-zinc-600 uppercase tracking-tight">
+                                  <User className="h-3.5 w-3.5 text-blue-500" /> Soumis par : {sub.submitter?.nomComplet || 'Agent'}
+                               </span>
+                               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black text-zinc-400 uppercase tracking-tight italic">
+                                  <Clock className="h-3.5 w-3.5" /> {formatDate(sub.createdAt)}
+                               </span>
+                            </div>
+                         </div>
+
+                         <div className="flex items-center gap-3 pt-8 border-t border-zinc-50 sm:opacity-0 sm:translate-x-4 sm:group-hover:opacity-100 sm:group-hover:translate-x-0 transition-all duration-500">
+                            {sub.status === 'pending' && (
+                               <>
+                                 <Button 
+                                   onClick={() => handleAction(sub._id, 'approved')} 
+                                   className="h-11 px-8 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-500/20 border-none hover:bg-emerald-600 transition-all"
+                                 >
+                                    Approuver
+                                 </Button>
+                                 <Button 
+                                   onClick={() => handleAction(sub._id, 'rejected')} 
+                                   variant="outline"
+                                   className="h-11 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-red-100 text-red-500 hover:bg-red-50 transition-all"
+                                 >
+                                    Rejeter
+                                 </Button>
+                               </>
+                            )}
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setSelected(sub);
+                                setDraft({ 
+                                    ...sub.propertyDraft,
+                                    nomComplet: sub.submitter?.nomComplet,
+                                    email: sub.submitter?.email,
+                                    telephone: sub.submitter?.telephone
+                                });
+                                setEditOpen(true);
+                              }}
+                              className="h-11 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all shadow-sm"
+                            >
+                               <Eye className="h-4 w-4 mr-2" /> Examiner
+                            </Button>
+                            <Button 
+                               variant="outline" 
+                               onClick={() => handleDelete(sub._id)} 
+                               className="h-11 w-12 p-0 rounded-2xl border-zinc-200 text-red-500 hover:bg-red-50 transition-all shadow-sm shrink-0"
+                            >
+                               <Trash2 className="h-4.5 w-4.5" />
+                            </Button>
+                         </div>
+                      </div>
+                   </div>
+                 );
+               })}
+            </div>
+          )}
+
+          {/* ── Pagination ── */}
+          {!loading && submissions.length > 0 && (
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-6 px-10 py-6 bg-white rounded-[2rem] border border-zinc-200 shadow-sm">
+                <div className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                   Page <span className="text-zinc-900">{pagination.page}</span> / <span className="text-zinc-900">{pagination.totalPages}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                   <Button variant="outline" onClick={() => loadSubmissions(pagination.page - 1)} disabled={pagination.page <= 1} className="h-11 px-6 rounded-xl text-[10px] font-black uppercase border-zinc-200">Précédent</Button>
+                   <Button variant="outline" onClick={() => loadSubmissions(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages} className="h-11 px-6 rounded-xl text-[10px] font-black uppercase border-zinc-200">Suivant</Button>
+                </div>
+            </div>
+          )}
         </div>
+
+        {/* ── Edit/Review Modal ── */}
+        {editOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+             <div className="absolute inset-0 bg-zinc-950/95" onClick={() => setEditOpen(false)} />
+             <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-300 custom-scrollbar">
+                 <div className="flex items-center justify-between px-10 py-8 border-b border-zinc-100 sticky top-0 bg-white z-10">
+                    <div>
+                        <h3 className="text-sm font-black text-zinc-900 uppercase tracking-[0.2em]">Contrôle Editorial</h3>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">Réf Sub: {selected?._id}</p>
+                    </div>
+                    <button onClick={() => setEditOpen(false)} className="h-11 w-11 rounded-2xl bg-zinc-50 flex items-center justify-center hover:bg-zinc-100 transition-colors">
+                       <X className="h-5 w-5 text-zinc-500" />
+                    </button>
+                 </div>
+
+                 <div className="p-10 space-y-10">
+                    {/* Basic Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Appellation du bien</label>
+                          <input 
+                            value={draft.titre || ''} 
+                            onChange={(e) => setDraft({...draft, titre: e.target.value})}
+                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 text-sm font-black text-zinc-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-amber-400/5 transition-all"
+                          />
+                       </div>
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Valorisation (FCFA)</label>
+                          <input 
+                            type="number"
+                            value={draft.prix || 0} 
+                            onChange={(e) => setDraft({...draft, prix: Number(e.target.value)})}
+                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 text-sm font-black text-zinc-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-amber-400/5 transition-all"
+                          />
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Localisation VILLE</label>
+                          <input 
+                            value={draft.ville || ''} 
+                            onChange={(e) => setDraft({...draft, ville: e.target.value})}
+                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all"
+                          />
+                       </div>
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Catégorie</label>
+                          <select 
+                            value={draft.categorie || ''} 
+                            onChange={(e) => setDraft({...draft, categorie: e.target.value})}
+                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all"
+                          >
+                             <option value="Appartement">Appartement</option>
+                             <option value="Maison">Maison</option>
+                             <option value="Hôtel">Hôtel</option>
+                             <option value="Terrain">Terrain</option>
+                             <option value="Commercial">Commercial</option>
+                             <option value="Autre">Autre</option>
+                          </select>
+                       </div>
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Transaction</label>
+                          <select 
+                            value={draft.transactionType || ''} 
+                            onChange={(e) => setDraft({...draft, transactionType: e.target.value})}
+                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all"
+                          >
+                             <option value="vente">Vente</option>
+                             <option value="location">Location</option>
+                          </select>
+                       </div>
+                    </div>
+
+                    <div>
+                       <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-2">Descriptif Technique</label>
+                       <textarea 
+                          value={draft.description || ''} 
+                          onChange={(e) => setDraft({...draft, description: e.target.value})}
+                          rows={6}
+                          className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-8 py-6 text-sm font-medium text-zinc-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-amber-400/5 transition-all resize-none"
+                       />
+                    </div>
+                 </div>
+
+                 <div className="px-10 py-8 border-t border-zinc-100 bg-zinc-50/50 flex justify-end gap-3 sticky bottom-0 z-10">
+                    <Button variant="outline" onClick={() => setEditOpen(false)} className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-zinc-200">Annuler</Button>
+                    <Button 
+                       onClick={handleSave} 
+                       loading={saving}
+                       className="h-12 px-8 rounded-2xl bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-zinc-900/20 border-none hover:bg-zinc-800 flex items-center gap-2"
+                    >
+                       <Save className="h-4 w-4 text-amber-400" /> Sauvegarder les modifications
+                    </Button>
+                 </div>
+             </div>
+          </div>
+        )}
+      </div>
     );
 };
 

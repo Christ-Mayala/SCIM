@@ -22,8 +22,18 @@ const ClientHeader = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     const handleClickOutside = (e) => {
       if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
@@ -62,7 +72,7 @@ const ClientHeader = () => {
 
   return (
     <div className={cn(
-      "z-[100] w-full transition-all duration-500",
+      "z-[100] w-full transition-all duration-500 will-change-transform",
       isHome ? "fixed top-0 left-0 right-0" : "sticky top-0 bg-transparent mb-4"
     )}>
       <div className={cn(
@@ -72,9 +82,9 @@ const ClientHeader = () => {
         <div className={cn(
           "flex items-center justify-between gap-4 px-3 py-2 w-full max-w-6xl transition-all duration-700",
           isScrolled 
-            ? "bg-zinc-950/90 border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.5)]" 
-            : "bg-zinc-950/70 border-white/20 shadow-sm",
-          "backdrop-blur-xl border rounded-full ring-1 ring-white/5"
+            ? "bg-zinc-950/95 border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.5)]" 
+            : "bg-zinc-950/80 border-white/20 shadow-sm",
+          "backdrop-blur-sm border rounded-full ring-1 ring-white/5"
         )}>
           {/* Left: Logo */}
           <Link to="/home" className="flex items-center gap-2 pl-2 group">

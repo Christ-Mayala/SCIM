@@ -131,7 +131,7 @@ const EditPropertyPage = () => {
       id: makeImageId(),
       existing: false,
     }));
-    setImages((prev) => [...prev, ...newImages].slice(0, 10));
+    setImages((prev) => [...prev, ...newImages].slice(0, 25));
   };
 
   const handleImageUpload = (e) => {
@@ -204,17 +204,20 @@ const EditPropertyPage = () => {
   };
 
   const normalizePayload = () => {
-    const toNumberOrEmpty = (v) => (String(v ?? '').trim() === '' ? '' : Number(v));
+    const toNumberOrNull = (v) => {
+      const s = String(v ?? '').trim();
+      return s === '' ? null : Number(s);
+    };
 
     return {
       ...formData,
-      prix: toNumberOrEmpty(formData.prix),
-      prixOriginal: toNumberOrEmpty(formData.prixOriginal),
-      superficie: toNumberOrEmpty(formData.superficie),
-      nombre_chambres: toNumberOrEmpty(formData.nombre_chambres),
-      nombre_salles_bain: toNumberOrEmpty(formData.nombre_salles_bain),
-      nombre_salons: toNumberOrEmpty(formData.nombre_salons),
-      bonPlanExpiresAt: formData.bonPlanExpiresAt ? new Date(formData.bonPlanExpiresAt).toISOString() : '',
+      prix: toNumberOrNull(formData.prix),
+      prixOriginal: toNumberOrNull(formData.prixOriginal),
+      superficie: toNumberOrNull(formData.superficie),
+      nombre_chambres: toNumberOrNull(formData.nombre_chambres),
+      nombre_salles_bain: toNumberOrNull(formData.nombre_salles_bain),
+      nombre_salons: toNumberOrNull(formData.nombre_salons),
+      bonPlanExpiresAt: formData.bonPlanExpiresAt ? new Date(formData.bonPlanExpiresAt).toISOString() : null,
       images: images.filter((i) => !i.existing).map((i) => i.file),
     };
   };
@@ -275,6 +278,8 @@ const EditPropertyPage = () => {
                   onChange={handleChange}
                   error={errors.titre}
                   leftIcon={<Tag className="w-4 h-4" />}
+                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                  labelClassName="text-zinc-700"
                 />
               </div>
 
@@ -285,6 +290,8 @@ const EditPropertyPage = () => {
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
+                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                  labelClassName="text-zinc-700"
                 />
               </div>
 
@@ -295,6 +302,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 options={transactionOptions}
                 leftIcon={<Key className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                labelClassName="text-zinc-700"
               />
 
               <Select
@@ -304,6 +313,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 options={categoryOptions}
                 leftIcon={<Home className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                labelClassName="text-zinc-700"
               />
 
               <Select
@@ -313,6 +324,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 options={statusOptions}
                 leftIcon={<Eye className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                labelClassName="text-zinc-700"
               />
 
               <Input
@@ -323,6 +336,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 error={errors.prix}
                 leftIcon={<Banknote className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
 
               <Select
@@ -332,6 +347,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 options={deviseOptions}
                 leftIcon={<Coins className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                labelClassName="text-zinc-700"
               />
 
               {formData.isBonPlan ? (
@@ -343,6 +360,8 @@ const EditPropertyPage = () => {
                   onChange={handleChange}
                   error={errors.prixOriginal}
                   leftIcon={<Percent className="w-4 h-4" />}
+                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                  labelClassName="text-zinc-700"
                 />
               ) : (
                 <div />
@@ -361,6 +380,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 error={errors.ville}
                 leftIcon={<MapPin className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
 
               <Input
@@ -370,6 +391,8 @@ const EditPropertyPage = () => {
                 onChange={handleChange}
                 error={errors.adresse}
                 leftIcon={<MapPin className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
             </div>
           </div>
@@ -385,6 +408,8 @@ const EditPropertyPage = () => {
                 value={formData.superficie}
                 onChange={handleChange}
                 leftIcon={<Ruler className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
 
               <Input
@@ -394,6 +419,8 @@ const EditPropertyPage = () => {
                 value={formData.nombre_chambres}
                 onChange={handleChange}
                 leftIcon={<BedDouble className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
 
               <Input
@@ -403,6 +430,8 @@ const EditPropertyPage = () => {
                 value={formData.nombre_salles_bain}
                 onChange={handleChange}
                 leftIcon={<Bath className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
 
               <Input
@@ -412,6 +441,8 @@ const EditPropertyPage = () => {
                 value={formData.nombre_salons}
                 onChange={handleChange}
                 leftIcon={<Sofa className="w-4 h-4" />}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
+                labelClassName="text-zinc-700"
               />
             </div>
 
@@ -474,6 +505,8 @@ const EditPropertyPage = () => {
                     onChange={handleChange}
                     error={errors.bonPlanLabel}
                     leftIcon={<Tag className="w-4 h-4" />}
+                    className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
+                    labelClassName="text-zinc-700"
                   />
 
                   <Input
@@ -484,6 +517,8 @@ const EditPropertyPage = () => {
                     onChange={handleChange}
                     error={errors.bonPlanExpiresAt}
                     leftIcon={<CalendarClock className="w-4 h-4" />}
+                    className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
+                    labelClassName="text-zinc-700"
                   />
                   {reduction && (
                     <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">

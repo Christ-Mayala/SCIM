@@ -17,8 +17,8 @@ const PageHero = ({
     <section className={cn('relative overflow-hidden bg-zinc-950 text-white', className)}>
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-gold-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-[100px]" />
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] bg-gold-primary/5 rounded-full blur-[80px]" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-white/5 rounded-full blur-[60px]" />
         
         {backgroundImage && (
           <div

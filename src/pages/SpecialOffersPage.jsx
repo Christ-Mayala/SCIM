@@ -122,7 +122,7 @@ const SpecialOffersPage = () => {
           {offers.map((offer) => (
             <article
               key={offer.title}
-              className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6 shadow-xl hover:border-gold-primary/30 transition-all duration-300 backdrop-blur-xl"
+              className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6 shadow-xl hover:border-gold-primary/30 transition-all duration-300"
             >
               <div className="inline-flex items-center gap-1.5 rounded-full bg-gold-primary/10 border border-gold-primary/20 px-3 py-1 text-[10px] font-black text-gold-primary uppercase tracking-widest">
                 <BadgePercent className="h-3.5 w-3.5" />
@@ -141,7 +141,7 @@ const SpecialOffersPage = () => {
 
       <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <article className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6 shadow-xl backdrop-blur-xl">
+          <article className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6 shadow-xl">
             <div className="mb-4 flex items-center gap-3 text-white">
               <div className="p-2 bg-gold-primary/10 rounded-xl border border-gold-primary/20">
                 <Star className="h-5 w-5 text-gold-primary" />

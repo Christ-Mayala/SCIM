@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, MessageCircle, User, FileText, Calendar, CheckCircle, Shield, Building, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -59,6 +60,7 @@ const ContactPage = () => {
     setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
+      toast.success('Message envoyé avec succès ! Notre équipe vous répondra sous 24h.');
       setFormData({
         nom: '',
         email: '',
@@ -150,8 +152,8 @@ const ContactPage = () => {
       <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 -right-40 w-[600px] h-[600px] bg-gold-dark/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/4 -left-40 w-[600px] h-[600px] bg-gold-primary/10 rounded-full blur-[120px] will-change-transform" />
+          <div className="absolute bottom-1/4 -right-40 w-[600px] h-[600px] bg-gold-dark/5 rounded-full blur-[120px] will-change-transform" style={{ animationDelay: '2s' }} />
         </div>
 
         {/* Hero Section */}
@@ -171,7 +173,7 @@ const ContactPage = () => {
         {/* Success Message */}
         {submitted && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-            <div className="bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 text-emerald-400 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
                   <CheckCircle className="w-8 h-8 text-emerald-500" />
@@ -191,7 +193,7 @@ const ContactPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Form */}
             <div className="lg:sticky lg:top-32">
-              <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 lg:p-8 shadow-2xl">
+              <div className="bg-zinc-900 rounded-3xl border border-white/10 p-6 lg:p-8 shadow-2xl">
                 <div className="text-center lg:text-left mb-8">
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gold-primary/10 border border-gold-primary/20 rounded-xl mb-4">
                     <MessageCircle className="w-6 h-6 text-gold-primary" />
@@ -315,7 +317,7 @@ const ContactPage = () => {
                 {contactInfo.map((info, index) => (
                   <div 
                     key={index} 
-                    className="group bg-zinc-900/40 backdrop-blur-3xl rounded-[32px] border border-white/10 p-8 hover:border-gold-primary/30 transition-all duration-500 shadow-2xl"
+                    className="group bg-zinc-900 rounded-[32px] border border-white/10 p-8 hover:border-gold-primary/30 transition-all duration-500 shadow-2xl"
                   >
                     <div className="flex flex-col gap-6">
                       <div className={`w-14 h-14 rounded-2xl bg-gold-primary/10 border border-gold-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
@@ -377,7 +379,7 @@ const ContactPage = () => {
               </div>
 
               {/* Map Section */}
-              <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+              <div className="bg-zinc-900 rounded-3xl border border-white/10 p-6 shadow-xl">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 bg-gold-primary/10 rounded-xl flex items-center justify-center border border-gold-primary/20">
                     <MapPin className="w-5 h-5 text-gold-primary" />
@@ -432,7 +434,7 @@ const ContactPage = () => {
               {faqs.map((faq, index) => (
                 <div 
                   key={index} 
-                  className="group bg-zinc-900/30 backdrop-blur-xl rounded-3xl p-6 border border-white/5 hover:border-gold-primary/20 transition-all duration-500 hover:bg-zinc-900/50"
+                  className="group bg-zinc-900/30 rounded-3xl p-6 border border-white/5 hover:border-gold-primary/20 transition-all duration-500 hover:bg-zinc-900/50"
                 >
                   <div className="flex gap-5">
                     <div className="flex-shrink-0">

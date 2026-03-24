@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '../components/common/Toast';
+import toast from 'react-hot-toast';
 
 // Hook pour les appels API avec gestion d'état et d'erreurs
 export const useApi = (apiFunction, dependencies = [], options = {}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const toast = useToast();
+
 
   const {
     immediate = true,
@@ -45,7 +45,7 @@ export const useApi = (apiFunction, dependencies = [], options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [apiFunction, onSuccess, onError, showErrorToast, showSuccessToast, successMessage, toast]);
+  }, [apiFunction, onSuccess, onError, showErrorToast, showSuccessToast, successMessage]);
 
   useEffect(() => {
     if (immediate) {
@@ -70,7 +70,7 @@ export const useApi = (apiFunction, dependencies = [], options = {}) => {
 export const useMutation = (apiFunction, options = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const toast = useToast();
+
 
   const {
     onSuccess = () => {},
@@ -107,7 +107,7 @@ export const useMutation = (apiFunction, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [apiFunction, onSuccess, onError, showErrorToast, showSuccessToast, successMessage, toast]);
+  }, [apiFunction, onSuccess, onError, showErrorToast, showSuccessToast, successMessage]);
 
   return {
     mutate,
@@ -128,7 +128,7 @@ export const usePagination = (apiFunction, options = {}) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const toast = useToast();
+
 
   const {
     initialPage = 1,
@@ -169,7 +169,7 @@ export const usePagination = (apiFunction, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [apiFunction, limit, showErrorToast, toast]);
+  }, [apiFunction, limit, showErrorToast]);
 
   const nextPage = useCallback(() => {
     if (pagination.hasNextPage) {
@@ -212,7 +212,7 @@ export const useSearch = (apiFunction, options = {}) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const toast = useToast();
+
 
   const {
     debounceMs = 300,
@@ -246,7 +246,7 @@ export const useSearch = (apiFunction, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [apiFunction, minQueryLength, showErrorToast, toast]);
+  }, [apiFunction, minQueryLength, showErrorToast]);
 
   // Debounce de la recherche
   useEffect(() => {

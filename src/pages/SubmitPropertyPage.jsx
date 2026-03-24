@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, CheckCircle2, ClipboardList, Home, ImagePlus, Mail, MapPin, Phone, Send, User, Sparkles } from 'lucide-react';
 import SEO from '../components/layout/SEO';
@@ -10,6 +10,7 @@ import { Textarea } from '../components/ui/Textarea';
 import PageHero from '../components/layout/PageHero';
 import { propertyAPI } from '../lib/api';
 import { validateEmail } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 const categoryOptions = [
   { value: 'Appartement', label: 'Appartement' },
@@ -34,17 +35,17 @@ const submissionGuide = [
   {
     title: '2. Ajoutez les visuels',
     description:
-      "Selectionnez des photos nettes et representatives. Les images sont envoyees au backend puis hebergees sur Cloudinary.",
+      "Selectionnez des photos nettes et representatives. Les images sont envoyées sur nos serveurs.",
   },
   {
     title: '3. Validation administrative SCIM',
     description:
-      "L'administration verifie la conformite du dossier, peut corriger des champs, puis approuve ou rejette la publication.",
+      "L'administration vérifie la conformite du dossier, peut corriger des champs, puis approuvé ou rejetté la publication.",
   },
   {
     title: '4. Mise en ligne et mise en relation',
     description:
-      "Une fois approuve, le bien est publie dans la liste proprietes et SCIM reste l'intermediaire principal avec les clients.",
+      "Une fois approuve, le bien est publie dans la liste proprietés et SCIM reste l'intermediaire principal avec les clients.",
   },
 ];
 
@@ -84,6 +85,7 @@ const SubmitPropertyPage = () => {
     jardin: false,
   });
   const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -119,8 +121,19 @@ const SubmitPropertyPage = () => {
   const onImagesSelected = (e) => {
     const files = Array.from(e.target.files || []);
     setImageFiles(files);
+    
+    imagePreviews.forEach(p => URL.revokeObjectURL(p));
+    const previews = files.map(f => URL.createObjectURL(f));
+    setImagePreviews(previews);
+
     if (errors.images) setErrors((prev) => ({ ...prev, images: '' }));
   };
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(p => URL.revokeObjectURL(p));
+    };
+  }, [imagePreviews]);
 
   const validate = () => {
     const next = {};
@@ -180,6 +193,7 @@ const SubmitPropertyPage = () => {
       await propertyAPI.submitForPublication(payload);
 
       setSuccess(true);
+      toast.success('Votre bien a été soumis avec succès !');
       setForm({
         nomComplet: '',
         email: '',
@@ -202,8 +216,11 @@ const SubmitPropertyPage = () => {
         jardin: false,
       });
       setImageFiles([]);
+      setImagePreviews([]);
     } catch (err) {
-      setApiError(err.response.data.message || err.message || 'Erreur pendant la soumission');
+      const msg = err.response?.data?.message || err.message || 'Erreur pendant la soumission';
+      setApiError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -317,7 +334,7 @@ const SubmitPropertyPage = () => {
               </div>
               <div className="mt-4">
                 <Textarea
-                  label="Description detaillee *"
+                  label="Description detaillée *"
                   name="description"
                   rows={6}
                   value={form.description}
@@ -347,13 +364,20 @@ const SubmitPropertyPage = () => {
                   />
                 </label>
                 {imageFiles.length > 0 ? (
-                  <div className="rounded-2xl border border-white/10 bg-zinc-950/50 p-3 text-xs text-zinc-400">
-                    <div className="mb-2 font-black text-white uppercase tracking-widest text-[10px]">{imageFiles.length} image(s) sélectionnée(s)</div>
-                    <ul className="space-y-1">
-                      {imageFiles.map((f) => (
-                        <li key={`${f.name}-${f.size}`}>{f.name}</li>
+                  <div className="rounded-2xl border border-white/10 bg-zinc-950/50 p-4 mt-2">
+                    <div className="mb-4 flex items-center justify-between">
+                         <div className="font-black text-white uppercase tracking-widest text-[10px]">{imageFiles.length} image(s) sélectionnée(s)</div>
+                         <button type="button" onClick={() => { setImageFiles([]); setImagePreviews([]); }} className="text-xs text-rose-500 hover:text-rose-400 font-bold transition-colors">
+                            Tout supprimer
+                         </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                      {imagePreviews.map((src, idx) => (
+                        <div key={idx} className="relative aspect-square overflow-hidden rounded-xl border border-white/10 group bg-zinc-900">
+                            <img src={src} alt={`preview-${idx}`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ) : null}
               </div>
