@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Heart, Home, LogOut, Menu, Search, User, X, 
@@ -69,6 +70,92 @@ const ClientHeader = () => {
   };
 
   const isHome = ["/", "/home"].includes(location.pathname);
+
+  // Portal content for mobile menu
+  const mobileMenuOverlay = createPortal(
+    <div className={cn(
+      "fixed inset-0 z-[110] bg-zinc-950 transition-all duration-500",
+      mobileMenuOpen ? "translate-x-0 opacity-100 visible" : "translate-x-full opacity-0 invisible pointer-events-none"
+    )}>
+      {/* Sticky top bar */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+        <Link to="/home" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+          <img src="/images/scim-logo.jpg" alt="Logo" className="h-10 w-10 rounded-full ring-2 ring-gold-primary/20" />
+          <span className="font-black text-white text-2xl tracking-tighter italic uppercase">SCIM<span className="text-gold-primary">.</span></span>
+        </Link>
+        <button onClick={() => setMobileMenuOpen(false)} className="p-3 rounded-full bg-white/10 text-white">
+          <X className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Scrollable body */}
+      <div className="overflow-y-auto h-[calc(100%-73px)] px-6 py-6 flex flex-col gap-4">
+        {/* User info */}
+        {isAuthenticated && (
+          <div className="flex items-center gap-4 p-4 bg-white/5 rounded-3xl border border-white/10">
+            <div className="h-12 w-12 rounded-full bg-zinc-900 shadow-sm flex items-center justify-center text-gold-primary border border-white/10 shrink-0">
+              <User className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="font-bold text-white">{user?.nom || user?.name || user?.email}</p>
+              <p className="text-xs text-gold-primary uppercase font-black tracking-widest">Client Privilège</p>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation links */}
+        <nav className="flex flex-col gap-1">
+          {[...mainLinks, ...moreLinks].map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                "flex items-center gap-4 px-6 py-4 rounded-3xl text-lg font-bold transition-all",
+                isActive(l.to) ? "bg-gold-primary text-black" : "text-zinc-400 hover:bg-white/5 hover:text-white"
+              )}
+            >
+              <l.icon className={cn("h-5 w-5", isActive(l.to) ? "text-black" : "text-gold-primary")} />
+              {l.label}
+            </Link>
+          ))}
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-4 px-6 py-4 rounded-3xl text-lg font-bold text-gold-primary hover:bg-white/5"
+            >
+              <Shield className="h-5 w-5" />
+              Panel Administrateur
+            </Link>
+          )}
+        </nav>
+
+        {/* Auth actions */}
+        <div className="mt-auto pt-4 border-t border-white/10 flex flex-col gap-3">
+          {isAuthenticated ? (
+            <Button
+              onClick={onLogout}
+              variant="outline"
+              className="w-full h-14 rounded-3xl font-bold text-lg border-white/10 text-red-500 hover:bg-red-500/10"
+            >
+              Déconnexion
+            </Button>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full h-14 rounded-3xl font-bold text-base border-white/10 text-white">Log In</Button>
+              </Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full h-14 rounded-3xl bg-gold-primary hover:bg-gold-dark text-white font-bold text-base">Join US</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
 
   return (
     <div className={cn(
@@ -230,84 +317,10 @@ const ClientHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <div className={cn(
-        "fixed inset-0 z-[110] bg-zinc-950 transition-all duration-500 px-6 py-10 flex flex-col",
-        mobileMenuOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-      )}>
-        <div className="flex items-center justify-between mb-10">
-           <Link to="/home" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-              <img src="/images/scim-logo.jpg" alt="Logo" className="h-10 w-10 rounded-full ring-2 ring-gold-primary/20" />
-              <span className="font-black text-white text-2xl tracking-tighter italic uppercase">SCIM<span className="text-gold-primary">.</span></span>
-           </Link>
-           <button onClick={() => setMobileMenuOpen(false)} className="p-3 rounded-full bg-white/10 text-white">
-             <X className="h-6 w-6" />
-           </button>
-        </div>
-
-        <nav className="flex-1 space-y-2 overflow-y-auto">
-           {[...mainLinks, ...moreLinks].map((l) => (
-             <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setMobileMenuOpen(false)}
-              className={cn(
-                "flex items-center gap-4 px-6 py-4 rounded-3xl text-xl font-bold transition-all",
-                isActive(l.to) ? "bg-gold-primary text-black" : "text-zinc-400 hover:bg-white/5 hover:text-white"
-              )}
-             >
-               <l.icon className={cn("h-6 w-6", isActive(l.to) ? "text-black" : "text-gold-primary")} />
-               {l.label}
-             </Link>
-           ))}
-           {user?.role === 'admin' && (
-             <Link
-              to="/admin/dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-4 px-6 py-4 rounded-3xl text-xl font-bold text-gold-primary hover:bg-white/5"
-             >
-               <Shield className="h-6 w-6" />
-               Panel Administrateur
-             </Link>
-           )}
-        </nav>
-
-        <div className="pt-8 border-t border-white/10 mt-6 gap-4 flex flex-col">
-          {isAuthenticated ? (
-            <>
-              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-3xl border border-white/10">
-                <div className="h-14 w-14 rounded-full bg-zinc-900 shadow-sm flex items-center justify-center text-gold-primary border border-white/10">
-                  <User className="h-7 w-7" />
-                 </div>
-                <div>
-                   <p className="font-bold text-white">{user?.nom || user?.name || user?.email}</p>
-                   <p className="text-xs text-gold-primary uppercase font-black tracking-widest">Client Privilège</p>
-                </div>
-              </div>
-              <Button 
-                onClick={onLogout}
-                variant="outline"
-                className="w-full h-16 rounded-3xl font-bold text-xl border-white/10 text-red-500 hover:bg-red-500/10"
-              >
-                Déconnexion
-              </Button>
-            </>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-               <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                 <Button variant="outline" className="w-full h-16 rounded-3xl font-bold text-lg border-white/10 text-white">Log In</Button>
-               </Link>
-               <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                 <Button className="w-full h-16 rounded-3xl bg-gold-primary hover:bg-gold-dark text-white font-bold text-lg">Join US</Button>
-               </Link>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Rendu de l'overlay mobile via Portal */}
+      {mobileMenuOverlay}
     </div>
   );
 };
 
 export default ClientHeader;
-
-

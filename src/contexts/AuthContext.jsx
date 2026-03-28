@@ -16,23 +16,10 @@ const readStoredUser = () => {
   }
 };
 
-// Dual-mode : on lit le vrai token JWT s'il est en localStorage, sinon le sentinel cookie
-const initialToken = (() => {
-  try {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) return storedToken;
-    return localStorage.getItem('user') ? 'cookie_managed' : null;
-  } catch (_) {
-    return null;
-  }
-})();
-
-const initialUser = readStoredUser();
-
 const initialState = {
-  user: initialUser,
-  token: initialToken,
-  isAuthenticated: Boolean(initialToken && initialUser),
+  user: null,
+  token: null,
+  isAuthenticated: false,
   loading: true,
   error: null,
 };
@@ -74,7 +61,6 @@ export const AuthProvider = ({ children }) => {
   const persistSession = useCallback((token, user) => {
     try {
       if (user) localStorage.setItem('user', JSON.stringify(user));
-      // Stocker le vrai token JWT pour l'envoi en header en production (cross-domain)
       if (token && token !== 'cookie_managed') localStorage.setItem('token', token);
     } catch (_) {}
   }, []);
@@ -88,46 +74,52 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const run = async () => {
-      const token = initialToken;
-
+      // Lecture directe et fraîche du localStorage
+      const token = localStorage.getItem('token') || (localStorage.getItem('user') ? 'cookie_managed' : null);
       const cachedUser = readStoredUser();
 
-      if (token && cachedUser && !state.isAuthenticated) {
-        dispatch({ type: 'SET_USER', payload: { user: cachedUser, token } });
-      }
-
+      // Si on n'a rien en local, on arrête le chargement (on est déconnecté)
       if (!token) {
+        if (state.isAuthenticated) {
+            dispatch({ type: 'LOGOUT' });
+        }
         dispatch({ type: 'SET_LOADING', payload: false });
         return;
       }
 
+      // Sync initiale rapide avec le cache
+      if (cachedUser && !state.isAuthenticated) {
+        dispatch({ type: 'SET_USER', payload: { user: cachedUser, token } });
+      }
+
       try {
         const me = await authAPI.getProfile();
-        const profileUser = me.data;
-        persistSession(token, profileUser);
-        dispatch({ type: 'SET_USER', payload: { user: profileUser, token } });
+        let profileUser = me.data;
+        if (profileUser && profileUser.data && profileUser.success) {
+            profileUser = profileUser.data;
+        }
+        
+        if (profileUser) {
+          persistSession(token, profileUser);
+          dispatch({ type: 'SET_USER', payload: { user: profileUser, token } });
+        } else {
+          throw new Error('No profile data');
+        }
       } catch (error) {
         const msg = error?.response?.data?.message || error?.message || '';
-        const isNetwork = !error?.response;
         const isAuth = String(msg).toLowerCase().includes('non autorisé') || String(msg).toLowerCase().includes('token');
 
         if (isAuth) {
           clearSession();
           dispatch({ type: 'LOGOUT' });
-          return;
-        }
-
-        if (isNetwork) {
+        } else {
           dispatch({ type: 'SET_LOADING', payload: false });
-          return;
         }
-
-        dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
 
     run();
-  }, [clearSession, persistSession, state.isAuthenticated]);
+  }, [clearSession, persistSession]);
 
   const login = useCallback(
     async (email, password) => {
@@ -249,7 +241,7 @@ export const AuthProvider = ({ children }) => {
               profileUser = profileUser.data;
           }
           if (profileUser) {
-            persistSession(token, profileUser);
+            persistSession(safeToken, profileUser);
           }
         } catch (_) {}
 
@@ -274,12 +266,15 @@ export const AuthProvider = ({ children }) => {
   );
 
   const logout = useCallback(async () => {
+    // On vide le stockage local IMMÉDIATEMENT pour éviter les conflits
+    clearSession();
+    dispatch({ type: 'LOGOUT' });
+    
     try {
       await authAPI.logout?.();
     } catch (_) {
+      // On ignore l'erreur d'API si on a déjà tout vidé localement
     } finally {
-      clearSession();
-      dispatch({ type: 'LOGOUT' });
       toast.success('Déconnexion');
     }
   }, [clearSession]);
