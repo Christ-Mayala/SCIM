@@ -130,7 +130,7 @@ export const MessageProvider = ({ children }) => {
         setInboxPage(response.data?.page || page);
         setInboxTotalPages(response.data?.totalPages || 1);
       } catch (_) {
-        toast.error('Erreur lors du chargement de la boîte de réception');
+        // toast.error('Erreur lors du chargement de la boîte de réception');
       } finally {
         if (!silent) setInboxLoading(false);
       }

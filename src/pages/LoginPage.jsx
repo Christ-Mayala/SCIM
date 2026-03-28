@@ -72,12 +72,10 @@ const LoginPage = () => {
     const result = await login(formData.email, formData.password, rememberMe);
 
     if (result.success) {
-      toast.success('Connexion réussie ! Heureux de vous revoir.');
       navigate(from || '/dashboard', { replace: true });
     } else {
       const fieldErrors = result.fieldErrors || {};
       setErrors({ ...fieldErrors, general: result.message || '' });
-      toast.error(result.message || 'Identifiants invalides');
     }
   };
 

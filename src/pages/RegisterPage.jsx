@@ -112,12 +112,10 @@ const RegisterPage = () => {
       const result = await register(userData);
 
       if (result.success) {
-        toast.success('Compte créé avec succès ! Bienvenue chez SCIM.');
         navigate('/dashboard', { replace: true });
       } else {
         const fieldErrors = result.fieldErrors || {};
         setErrors({ ...fieldErrors, general: result.message || '' });
-        toast.error(result.message || 'Erreur lors de l\'inscription');
       }
     } catch (err) {
       console.error(err);

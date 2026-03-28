@@ -139,14 +139,15 @@ export const AuthProvider = ({ children }) => {
              }
         }
         
-        const { token, user } = data || {};
+        const { user } = data || {};
+        const safeToken = data?.token || 'cookie_managed';
 
-        if (!token || !user) {
-           console.error('Login failed: Token or User missing', { data });
+        if (!user) {
+           console.error('Login failed: User missing', { data });
            throw new Error('Réponse de connexion invalide');
         }
 
-        persistSession(token, user);
+        persistSession(safeToken, user);
 
         let profileUser = null;
         try {
@@ -164,7 +165,7 @@ export const AuthProvider = ({ children }) => {
           console.error('Erreur récupération profil après login:', err);
         }
 
-        dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token } });
+        dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token: safeToken } });
         toast.success('Connexion réussie');
         return { success: true };
       } catch (error) {
@@ -226,13 +227,14 @@ export const AuthProvider = ({ children }) => {
             data = data.data;
         }
         
-        const { token, user } = data || {};
+        const { user } = data || {};
+        const safeToken = data?.token || 'cookie_managed';
 
-        if (!token || !user) {
+        if (!user) {
              throw new Error("Réponse d'inscription invalide");
         }
 
-        persistSession(token, user);
+        persistSession(safeToken, user);
 
         let profileUser = null;
         try {
@@ -246,7 +248,7 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (_) {}
 
-        dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token } });
+        dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token: safeToken } });
         toast.success('Inscription réussie');
         return { success: true };
       } catch (error) {

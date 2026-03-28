@@ -135,7 +135,7 @@ const ClientDashboardPage = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Actions */}
-        <div className="bg-zinc-900 rounded-3xl border border-white/10 p-6 mb-8 shadow-xl">
+        <div className="bg-zinc-900 rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 mb-8 shadow-xl">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-1 h-5 bg-gold-primary rounded-full" />
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Actions Rapides</h2>
@@ -161,7 +161,7 @@ const ClientDashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Reservations */}
-          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 shadow-xl">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-gold-primary/10 rounded-xl border border-gold-primary/20">
                 <CalendarDays className="h-4 w-4 text-gold-primary" />
@@ -221,11 +221,11 @@ const ClientDashboardPage = () => {
                           Accusé le {acknowledgedAt}
                         </div>
                       )}
-                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
-                        <span className="font-black text-gold-primary text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-white/5">
+                        <span className="font-black text-gold-primary text-sm flex-shrink-0">
                           {r.property?.prix != null ? formatPrice(r.property.prix) : '-'}
                         </span>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end">
                           {showAckAction && (
                             <button
                               disabled={ackLoadingId === r._id}
@@ -280,7 +280,7 @@ const ClientDashboardPage = () => {
           </div>
 
           {/* Favorites */}
-          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 shadow-xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-red-500/10 rounded-xl border border-red-500/20">
@@ -329,7 +329,7 @@ const ClientDashboardPage = () => {
           </div>
 
           {/* Recently Visited */}
-          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 shadow-xl">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
                 <History className="h-4 w-4 text-blue-400" />

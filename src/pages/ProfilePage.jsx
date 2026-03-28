@@ -123,13 +123,13 @@ const ProfilePage = () => {
           </div>
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12">
-             <div className="flex flex-col md:flex-row items-end gap-8">
+             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 md:gap-8 text-center sm:text-left">
                 <div className="relative group">
-                   <div className="w-32 h-32 rounded-[40px] bg-zinc-800 border-4 border-zinc-950 overflow-hidden shadow-2xl flex items-center justify-center text-4xl font-black text-gold-primary transition-all duration-500 group-hover:scale-105">
+                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl sm:rounded-[40px] bg-zinc-800 border-4 border-zinc-950 overflow-hidden shadow-2xl flex items-center justify-center text-3xl sm:text-4xl font-black text-gold-primary transition-all duration-500 group-hover:scale-105">
                       {initials}
                    </div>
-                   <div className="absolute -bottom-2 -right-2 p-3 bg-gold-primary rounded-2xl shadow-xl text-zinc-950 group-hover:rotate-12 transition-all">
-                      <Save className="w-5 h-5" />
+                   <div className="absolute -bottom-2 -right-2 p-2 sm:p-3 bg-gold-primary rounded-xl sm:rounded-2xl shadow-xl text-zinc-950 group-hover:rotate-12 transition-all">
+                      <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                    </div>
                 </div>
                 
@@ -147,7 +147,7 @@ const ProfilePage = () => {
                    </p>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-4 w-full sm:w-auto mt-4 sm:mt-0">
                    {!isEditing ? (
                       <Button 
                         onClick={() => setIsEditing(true)} 
@@ -236,8 +236,8 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Security Section */}
-                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[40px] border border-white/5 p-10 shadow-2xl">
-                   <div className="flex items-center justify-between mb-8">
+                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[32px] md:rounded-[40px] border border-white/5 p-6 md:p-10 shadow-2xl">
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                       <div className="flex items-center gap-4">
                          <div className="p-3 bg-zinc-950 rounded-2xl text-gold-primary">
                             <Lock className="w-6 h-6" />
@@ -286,7 +286,7 @@ const ProfilePage = () => {
 
              {/* Right Column: Stats & Meta */}
              <div className="space-y-8">
-                <div className="bg-gradient-to-br from-gold-primary to-gold-dark rounded-[40px] p-10 shadow-2xl shadow-gold-primary/20 text-zinc-950">
+                <div className="bg-gradient-to-br from-gold-primary to-gold-dark rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-2xl shadow-gold-primary/20 text-zinc-950">
                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-60">Volume d'Activité</h4>
                    <div className="space-y-10">
                       <div className="flex items-end justify-between">
@@ -313,7 +313,7 @@ const ProfilePage = () => {
                    </div>
                 </div>
 
-                <div className="bg-zinc-900 border border-white/5 rounded-[40px] p-8">
+                <div className="bg-zinc-900 border border-white/5 rounded-[32px] md:rounded-[40px] p-6 md:p-8">
                    <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-6">Assistance Premium</h4>
                    <p className="text-zinc-400 text-sm font-medium leading-relaxed mb-8">
                       Bénéficiez d'une assistance prioritaire 24/7 pour toutes vos transactions et recherches exclusives.

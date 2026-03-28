@@ -768,17 +768,21 @@ const PropertyDetailPage = () => {
                       <div className="text-xs text-emerald-700">
                         {reservationAck.asyncNotice} (SLA cible: {reservationAck.expectedResponseMinutes} min)
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Link to="/dashboard" className="w-full sm:w-auto">
-                          <Button variant="outline" className="w-full">
-                            Suivre mes reservations
-                          </Button>
+                      <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                        <Link 
+                          to="/dashboard" 
+                          className="w-full sm:w-auto flex items-center justify-center px-4 py-3 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-100 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-colors"
+                        >
+                          Suivre mes réservations
                         </Link>
                         {reservationAck.whatsappUrl ? (
-                          <a href={reservationAck.whatsappUrl} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
-                            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
-                              Continuer sur WhatsApp
-                            </Button>
+                          <a 
+                            href={reservationAck.whatsappUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="w-full sm:w-auto flex items-center justify-center px-4 py-3 bg-emerald-600 border border-emerald-600 text-white hover:bg-emerald-700 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-colors shadow-lg shadow-emerald-600/20"
+                          >
+                            Continuer sur WhatsApp
                           </a>
                         ) : null}
                       </div>
