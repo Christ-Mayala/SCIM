@@ -25,7 +25,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     try {
-      // Le token est désormais géré automatiquement par les cookies HttpOnly (withCredentials: true)
+      // Dual-mode auth: cookie (local) + Authorization header (production cross-domain)
+      const storedToken = localStorage.getItem('token');
+      if (storedToken && storedToken !== 'cookie_managed') {
+        config.headers = config.headers || {};
+        config.headers['Authorization'] = `Bearer ${storedToken}`;
+      }
 
       const isFormData =
         typeof FormData !== 'undefined' &&

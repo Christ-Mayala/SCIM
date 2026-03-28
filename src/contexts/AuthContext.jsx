@@ -16,9 +16,11 @@ const readStoredUser = () => {
   }
 };
 
-// On n'utilise plus de token dans le localStorage (géré par cookie HttpOnly)
+// Dual-mode : on lit le vrai token JWT s'il est en localStorage, sinon le sentinel cookie
 const initialToken = (() => {
   try {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) return storedToken;
     return localStorage.getItem('user') ? 'cookie_managed' : null;
   } catch (_) {
     return null;
@@ -72,12 +74,15 @@ export const AuthProvider = ({ children }) => {
   const persistSession = useCallback((token, user) => {
     try {
       if (user) localStorage.setItem('user', JSON.stringify(user));
+      // Stocker le vrai token JWT pour l'envoi en header en production (cross-domain)
+      if (token && token !== 'cookie_managed') localStorage.setItem('token', token);
     } catch (_) {}
   }, []);
 
   const clearSession = useCallback(() => {
     try {
       localStorage.removeItem('user');
+      localStorage.removeItem('token');
     } catch (_) {}
   }, []);
 
