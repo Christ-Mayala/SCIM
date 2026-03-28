@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
           }
 
           if (profileUser) {
-             persistSession(token, profileUser);
+             persistSession(safeToken, profileUser);
           }
         } catch (err) {
           console.error('Erreur récupération profil après login:', err);
