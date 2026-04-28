@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { validateEmail } from '../lib/utils';
-import { API_BASE_URL } from '../lib/api';
+import { API_BASE_URL, ROOT_API_URL } from '../lib/api';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
@@ -261,7 +261,7 @@ const LoginPage = () => {
 
                 {/* Social Login Buttons */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
-                  <a href={API_BASE_URL + "/api/auth/google"} className="w-full inline-flex items-center justify-center gap-3 h-14 px-6 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white hover:bg-white/10 hover:border-white/20 transition-all tracking-widest uppercase">
+                  <a href={ROOT_API_URL + "/api/auth/google?app=SCIM"} className="w-full inline-flex items-center justify-center gap-3 h-14 px-6 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white hover:bg-white/10 hover:border-white/20 transition-all tracking-widest uppercase">
                     <svg className="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24">
                       <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.8 0-5.18-1.88-6.04-4.42H2.34v2.84C4.13 20.98 7.79 23 12 23z" />

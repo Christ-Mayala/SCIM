@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
+import { ROOT_API_URL } from '../lib/api';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
@@ -400,6 +401,31 @@ const RegisterPage = () => {
                 Initialiser mon Profil Prestige
               </Button>
             </form>
+
+            {/* Social Login Separator */}
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-zinc-900 text-zinc-500 text-[10px] font-black uppercase tracking-widest">Ou continuez avec</span>
+                </div>
+              </div>
+
+              {/* Social Login Buttons */}
+              <div className="mt-6">
+                <a href={ROOT_API_URL + "/api/auth/google?app=SCIM"} className="w-full inline-flex items-center justify-center gap-3 h-14 px-6 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white hover:bg-white/10 hover:border-white/20 transition-all tracking-widest uppercase">
+                  <svg className="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.8 0-5.18-1.88-6.04-4.42H2.34v2.84C4.13 20.98 7.79 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.96 14.25c-.14-.42-.22-.86-.22-1.31s.08-.89.22-1.31V8.79H2.34C1.5 10.33 1 12.09 1 14s.5 3.67 1.34 5.21l3.62-2.96z" />
+                    <path fill="#4285F4" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.79 1 4.13 3.02 2.34 6.21l3.62 2.96c.86-2.54 3.24-4.42 6.04-4.42z" />
+                  </svg>
+                  S'inscrire avec Google
+                </a>
+              </div>
+            </div>
 
             <div className="mt-10 text-center">
               <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px]">

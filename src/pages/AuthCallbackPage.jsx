@@ -10,11 +10,12 @@ const AuthCallbackPage = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
+        const refreshToken = params.get('refreshToken');
         const error = params.get('error');
 
         if (token) {
             // Utiliser une nouvelle fonction dans le contexte pour gérer le login social
-            socialLogin(token);
+            socialLogin(token, refreshToken);
             // Rediriger vers le tableau de bord ou la page d'accueil
             navigate('/dashboard', { replace: true });
         } else if (error) {

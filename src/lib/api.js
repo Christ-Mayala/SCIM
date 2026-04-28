@@ -14,6 +14,18 @@ const API_BASE_URL = (() => {
   return `${u}/api/v1/scim`;
 })();
 
+// On extrait l'origine (ex: http://localhost:5000) pour les routes globales comme /api/auth
+const ROOT_API_URL = (() => {
+  try {
+    const url = new URL(API_BASE_URL);
+    return url.origin;
+  } catch (_) {
+    // Fallback si l'URL est relative ou malformée
+    return '';
+  }
+})();
+
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -86,7 +98,13 @@ api.interceptors.response.use(
           try {
             const refreshResponse = await api.post('/users/refresh-token');
             // Le token est renouvelé et placé dans un cookie HttpOnly par le backend
+            // Mais on le met aussi à jour dans le localStorage pour le mode Authorization header
             if (refreshResponse && refreshResponse.status === 200) {
+              const newToken = refreshResponse.data?.token;
+              if (newToken) {
+                localStorage.setItem('token', newToken);
+                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+              }
               return api(originalRequest);
             }
           } catch (_) {}
@@ -243,6 +261,5 @@ export const patch = (url, data, config) => api.patch(url, data, config);
 export const del = (url, config) => api.delete(url, config);
 
 // Export API_BASE_URL pour l'utiliser dans d'autres composants
-export { API_BASE_URL };
-
+export { API_BASE_URL, ROOT_API_URL };
 export default api;

@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     try {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     } catch (_) {}
   }, []);
 
@@ -183,11 +184,18 @@ export const AuthProvider = ({ children }) => {
   );
 
   const socialLogin = useCallback(
-    async (token) => {
+    async (token, refreshToken) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Plus besoin de sauvegarder le token dans le localStorage ici
+        // Stocker les tokens avant de récupérer le profil
+        if (token && token !== 'cookie_managed') {
+            localStorage.setItem('token', token);
+        }
+        if (refreshToken) {
+            // Si vous avez un mécanisme pour le refresh token côté client
+            localStorage.setItem('refreshToken', refreshToken);
+        }
         
         const me = await authAPI.getProfile();
         const profileUser = me.data;

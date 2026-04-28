@@ -41,7 +41,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
       section: 'Communauté',
       items: [
         { to: '/admin/users', icon: Users, label: 'Utilisateurs' },
-        { to: '/admin/messages', icon: MessageSquare, label: 'Messagerie', badge: unreadCount },
+        // { to: '/admin/messages', icon: MessageSquare, label: 'Messagerie', badge: unreadCount },
       ],
     },
     {
