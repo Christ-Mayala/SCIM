@@ -12,15 +12,22 @@ import {
   ClipboardList,
   CalendarDays,
   ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  Bell,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMessage } from '../../contexts/MessageContext';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { unreadCount } = useMessage();
+  const { settings } = useSettings();
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -29,25 +36,21 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
 
   const navLinks = [
     {
-      section: 'Principal',
+      section: 'MENU PRINCIPAL',
       items: [
-        { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/admin/properties', icon: Building2, label: 'Annonces' },
-        { to: '/admin/submissions', icon: ClipboardList, label: 'Soumissions' },
-        { to: '/admin/reservations', icon: CalendarDays, label: 'Réservations' },
+        { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+        { to: '/admin/properties', icon: Building2, label: 'Annonces', dropdown: true },
+        { to: '/admin/submissions', icon: ClipboardList, label: 'Soumissions', dropdown: true },
+        { to: '/admin/reservations', icon: CalendarDays, label: 'Visites' },
+        { to: '/admin/analytics', icon: BarChart3, label: 'Statistiques', dropdown: true },
+        { to: '/admin/users', icon: Users, label: 'Utilisateurs', dropdown: true },
+        { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
       ],
     },
     {
-      section: 'Communauté',
+      section: 'COMPTE',
       items: [
-        { to: '/admin/users', icon: Users, label: 'Utilisateurs' },
-        // { to: '/admin/messages', icon: MessageSquare, label: 'Messagerie', badge: unreadCount },
-      ],
-    },
-    {
-      section: 'Configuration',
-      items: [
-        { to: '/admin/analytics', icon: BarChart3, label: 'Statistiques' },
+        { to: '/profile', icon: Users, label: 'Mon Profil' },
         { to: '/admin/settings', icon: Settings, label: 'Paramètres' },
       ],
     },
@@ -59,32 +62,46 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
   };
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-zinc-950 text-zinc-300">
+    <div className={cn(
+      "flex h-full flex-col bg-[#0d0d0d] text-zinc-400 transition-all duration-300",
+      collapsed ? "w-20" : "w-full"
+    )}>
       {/* Header / Logo */}
-      <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-white/5 bg-zinc-900/50">
-        <Link to="/admin/dashboard" className="flex items-center gap-3 group" onClick={() => setMobileOpen(false)}>
-          <div className="relative">
-             <div className="absolute -inset-1 bg-gold-primary/20 rounded-full blur group-hover:bg-gold-primary/40 transition duration-500" />
-             <img src="/images/scim-logo.jpg" alt="Admin" className="relative h-8 w-8 rounded-full object-cover ring-1 ring-gold-primary/30" />
+      <div className="flex h-24 shrink-0 items-center justify-between px-6 border-b border-white/5">
+        <Link to="/admin/dashboard" className={cn("flex items-center gap-3 transition-all", collapsed && "hidden")} onClick={() => setMobileOpen(false)}>
+          <div className="h-10 w-10 rounded-xl overflow-hidden ring-2 ring-gold-primary/20 shadow-lg shadow-gold-primary/10">
+             <img src="/images/scim-logo.jpg" alt="Logo" className="w-full h-full object-cover scale-110" />
           </div>
-          <span className="font-black text-white text-lg tracking-tight italic uppercase">
-            SCIM<span className="text-gold-primary">ADMIN</span>
+          <span className="font-black text-white text-xl tracking-tighter uppercase italic">
+            {settings.siteName.split(' ')[0]}
+            <span className="text-gold-primary">.</span>
           </span>
         </Link>
+        
+        <button 
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2.5 rounded-xl bg-zinc-900/50 text-zinc-500 hover:text-white transition-all border border-white/5"
+        >
+          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-500", collapsed && "rotate-180")} />
+        </button>
+
         {/* Mobile close button */}
-        <button className="lg:hidden text-zinc-400 hover:text-white" onClick={() => setMobileOpen(false)}>
+        <button className="lg:hidden p-2 rounded-xl bg-zinc-900/50 text-zinc-400 hover:text-white ml-2" onClick={() => setMobileOpen(false)}>
           <X className="h-5 w-5" />
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-thin scrollbar-thumb-zinc-800">
+      <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-10 custom-scrollbar">
         {navLinks.map((group) => (
-          <div key={group.section}>
-            <h3 className="mb-3 px-2 text-xs font-black uppercase tracking-wider text-zinc-500">
+          <div key={group.section} className="space-y-3">
+            <h3 className={cn(
+              "px-4 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600",
+              collapsed && "hidden"
+            )}>
               {group.section}
             </h3>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {group.items.map((item) => {
                 const active = isActive(item.to);
                 return (
@@ -93,25 +110,34 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
                     to={item.to}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      "group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200",
+                      "group flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
                       active
-                        ? "bg-gold-primary text-black font-semibold shadow-md shadow-gold-primary/10"
-                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                        ? "bg-gold-primary text-black font-black shadow-xl shadow-gold-primary/10"
+                        : "text-zinc-500 hover:text-white hover:bg-white/5"
                     )}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <item.icon
-                        className={cn("h-5 w-5", active ? "text-black" : "text-zinc-400 group-hover:text-gold-primary transition-colors")}
+                        className={cn("h-5 w-5 transition-transform group-hover:scale-110", active ? "text-black" : "text-zinc-500 group-hover:text-gold-primary")}
                       />
-                      <span className="text-sm">{item.label}</span>
+                      {!collapsed && <span className="text-[13px] font-bold tracking-wide uppercase">{item.label}</span>}
                     </div>
-                    {item.badge > 0 && (
-                      <span className={cn(
-                        "flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold",
-                        active ? "bg-black/20 text-black" : "bg-gold-primary text-black"
-                      )}>
-                        {item.badge}
-                      </span>
+                    
+                    {!collapsed && (
+                      <div className="flex items-center gap-2">
+                        {item.badge > 0 && (
+                          <span className={cn(
+                            "flex h-5 min-w-[20px] items-center justify-center rounded-lg px-1.5 text-[9px] font-black",
+                            active ? "bg-black text-gold-primary" : "bg-gold-primary text-black"
+                          )}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {active && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-r-full" />
                     )}
                   </Link>
                 );
@@ -121,22 +147,18 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
         ))}
       </nav>
 
-      {/* Footer / User Profile */}
-      <div className="p-4 border-t border-white/5 bg-zinc-900/50">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-black text-black text-sm uppercase">
-            {(user?.nom || user?.name || 'A').charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white leading-tight">{user?.nom || user?.name || 'Admin'}</p>
-            <p className="text-xs text-gold-primary/70 font-medium uppercase tracking-wider">Super Admin</p>
-          </div>
+      {/* Footer / Déconnexion */}
+      <div className="p-6 border-t border-white/5">
+        <div className="space-y-2">
           <button
             onClick={handleLogout}
-            className="p-2 rounded-lg text-zinc-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-            title="Déconnexion"
+            className={cn(
+              "w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-zinc-500 hover:text-red-500 hover:bg-red-500/5 transition-all group",
+              collapsed && "justify-center px-0"
+            )}
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+            {!collapsed && <span className="text-[13px] font-black tracking-widest uppercase">Déconnexion</span>}
           </button>
         </div>
       </div>
@@ -157,8 +179,9 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
       {/* Sidebar (Desktop + Mobile Drawer) */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-[110] w-72 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-64 xl:w-72 lg:shrink-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-[110] transform transition-all duration-300 lg:translate-x-0 lg:static lg:shrink-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+          collapsed ? "w-20" : "w-72"
         )}
       >
         <SidebarContent />

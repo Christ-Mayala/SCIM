@@ -1,15 +1,16 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const SEOHead = ({
-  title = 'SCIM - Plateforme Immobilière',
-  description = 'SCIM - Plateforme immobilière pour la recherche, la gestion et la location de biens',
+  title,
+  description,
   keywords = 'immobilier, luxe, propriétés, achat, vente, location, maison, appartement',
   image = '/images/og/og-default.jpg',
   url = window.location.href,
   type = 'website',
-  author = 'SCIM',
-  siteName = 'SCIM',
+  author,
+  siteName,
   locale = 'fr_FR',
   twitterHandle = '@scim',
   structuredData = null,
@@ -17,7 +18,13 @@ const SEOHead = ({
   noIndex = false,
   article = null
 }) => {
-  const fullTitle = title.includes('SCIM') ? title : `${title} | SCIM`;
+  const { settings } = useSettings();
+  
+  const currentSiteName = siteName || settings.siteName || 'SCIM';
+  const currentAuthor = author || settings.siteName || 'SCIM';
+  const currentDescription = description || settings.siteDescription || 'SCIM - Plateforme immobilière pour la recherche, la gestion et la location de biens';
+  const currentTitle = title ? (title.includes(currentSiteName) ? title : `${title} | ${currentSiteName}`) : `${currentSiteName} - Plateforme Immobilière`;
+
   const canonicalUrl = canonical || url;
   const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
   const toUrlString = (img) => {
@@ -39,10 +46,10 @@ const SEOHead = ({
   return (
     <Helmet>
       {/* Métadonnées de base */}
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
+      <title>{currentTitle}</title>
+      <meta name="description" content={currentDescription} />
       <meta name="keywords" content={keywords} />
-      <meta name="author" content={author} />
+      <meta name="author" content={currentAuthor} />
       <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
       <link rel="canonical" href={canonicalUrl} />
 
@@ -51,15 +58,15 @@ const SEOHead = ({
       <meta name="language" content="French" />
 
       {/* Open Graph optimisé */}
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
+      <meta property="og:title" content={currentTitle} />
+      <meta property="og:description" content={currentDescription} />
       <meta property="og:image" content={fullImageUrl} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
-      <meta property="og:image:alt" content={`${title} - SCIM Immobilier`} />
+      <meta property="og:image:alt" content={`${title || currentSiteName} - ${currentSiteName}`} />
       <meta property="og:image:secure_url" content={fullImageUrl} />
-      <meta property="og:site_name" content={siteName} />
+      <meta property="og:site_name" content={currentSiteName} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content={type} />
       <meta property="og:locale" content={locale} />
@@ -69,10 +76,10 @@ const SEOHead = ({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
       <meta name="twitter:creator" content={twitterHandle} />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:title" content={currentTitle} />
+      <meta name="twitter:description" content={currentDescription} />
       <meta name="twitter:image" content={fullImageUrl} />
-      <meta name="twitter:image:alt" content={fullTitle} />
+      <meta name="twitter:image:alt" content={currentTitle} />
       <meta name="twitter:domain" content="scim.app" />
 
       {/* Métadonnées spécifiques aux articles */}

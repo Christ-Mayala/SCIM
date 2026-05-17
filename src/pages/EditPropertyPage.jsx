@@ -1,6 +1,10 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { UploadCloud, X, Plus, Save, Tag, CalendarClock, Banknote, Percent, Ruler, BedDouble, Bath, Sofa, MapPin, Building2, Home, Key, Eye, Coins } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { 
+  UploadCloud, X, Plus, Save, Tag, CalendarClock, Banknote, Percent, 
+  Ruler, BedDouble, Bath, Sofa, MapPin, Building2, Home, Key, Eye, 
+  Coins, Trash2, Image as ImageIcon, ChevronLeft, Layout, Database, CheckCircle2
+} from 'lucide-react';
 import { useProperty } from '../contexts/PropertyContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -8,6 +12,8 @@ import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { Checkbox } from '../components/ui/checkbox';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { cn } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 const EditPropertyPage = () => {
   const { id } = useParams();
@@ -19,44 +25,32 @@ const EditPropertyPage = () => {
   const [formData, setFormData] = useState(null);
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
-  const [dragActive, setDragActive] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const categoryOptions = useMemo(
-    () => [
-      { value: 'Appartement', label: 'Appartement' },
-      { value: 'Maison', label: 'Maison' },
-      { value: 'Hôtel', label: 'Hôtel' },
-      { value: 'Terrain', label: 'Terrain' },
-      { value: 'Commercial', label: 'Commercial' },
-      { value: 'Autre', label: 'Autre' },
-    ],
-    [],
-  );
+  const categoryOptions = useMemo(() => [
+    { value: 'Appartement', label: 'Appartement' },
+    { value: 'Maison', label: 'Maison' },
+    { value: 'Hôtel', label: 'Hôtel' },
+    { value: 'Terrain', label: 'Terrain' },
+    { value: 'Commercial', label: 'Commercial' },
+    { value: 'Autre', label: 'Autre' },
+  ], []);
 
-  const transactionOptions = useMemo(
-    () => [
-      { value: 'location', label: 'Location' },
-      { value: 'vente', label: 'Vente' },
-    ],
-    [],
-  );
+  const transactionOptions = useMemo(() => [
+    { value: 'location', label: 'Location' },
+    { value: 'vente', label: 'Vente' },
+  ], []);
 
-  const statusOptions = useMemo(
-    () => [
-      { value: 'active', label: 'Actif (visible)' },
-      { value: 'inactive', label: 'Inactif (caché)' },
-    ],
-    [],
-  );
+  const statusOptions = useMemo(() => [
+    { value: 'active', label: 'En ligne (Visible)' },
+    { value: 'inactive', label: 'Hors ligne (Masqué)' },
+  ], []);
 
-  const deviseOptions = useMemo(
-    () => [
-      { value: 'XAF', label: 'XAF' },
-      { value: 'EUR', label: 'EUR' },
-      { value: 'USD', label: 'USD' },
-    ],
-    [],
-  );
+  const deviseOptions = useMemo(() => [
+    { value: 'XAF', label: 'XAF (FCFA)' },
+    { value: 'EUR', label: 'EUR (€)' },
+    { value: 'USD', label: 'USD ($)' },
+  ], []);
 
   useEffect(() => {
     if (id) fetchPropertyById(id);
@@ -76,18 +70,15 @@ const EditPropertyPage = () => {
       ville: currentProperty.ville || '',
       adresse: currentProperty.adresse || '',
       status: currentProperty.status || 'active',
-
       isBonPlan: Boolean(currentProperty.isBonPlan),
       bonPlanLabel: currentProperty.bonPlanLabel || '',
       bonPlanExpiresAt: currentProperty.bonPlanExpiresAt
         ? new Date(currentProperty.bonPlanExpiresAt).toISOString().slice(0, 16)
         : '',
-
       superficie: currentProperty.superficie ?? '',
       nombre_chambres: currentProperty.nombre_chambres ?? '',
       nombre_salles_bain: currentProperty.nombre_salles_bain ?? '',
       nombre_salons: currentProperty.nombre_salons ?? '',
-
       garage: Boolean(currentProperty.garage),
       piscine: Boolean(currentProperty.piscine),
       jardin: Boolean(currentProperty.jardin),
@@ -96,65 +87,12 @@ const EditPropertyPage = () => {
     });
 
     const existing = Array.isArray(currentProperty.images) ? currentProperty.images : [];
-    setImages(
-      existing.map((img) => ({
-        id: img.public_id || img._id || Math.random().toString(36).slice(2),
-        url: img.url,
-        existing: true,
-      })),
-    );
+    setImages(existing.map((img) => ({
+      id: img.public_id || img._id || Math.random().toString(36).slice(2),
+      url: img.url,
+      existing: true,
+    })));
   }, [currentProperty?._id]);
-
-  const onPickFiles = () => {
-    if (fileInputRef.current) fileInputRef.current.click();
-  };
-
-  const isImageFile = (f) => {
-    if (!f) return false;
-    const type = String(f.type || '');
-    const name = String(f.name || '');
-    if (type.startsWith('image/')) return true;
-    return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(name);
-  };
-
-  const makeImageId = () => {
-    const c = globalThis?.crypto;
-    if (c && typeof c.randomUUID === 'function') return c.randomUUID();
-    return `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  };
-
-  const addFiles = (files) => {
-    const allowed = (files || []).filter(isImageFile);
-    const newImages = allowed.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      id: makeImageId(),
-      existing: false,
-    }));
-    setImages((prev) => [...prev, ...newImages].slice(0, 25));
-  };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    addFiles(files);
-    e.target.value = '';
-  };
-
-  const removeImage = (imageId) => {
-    setImages((prev) => {
-      const removed = prev.find((img) => img.id === imageId);
-      if (removed?.preview) URL.revokeObjectURL(removed.preview);
-      return prev.filter((img) => img.id !== imageId);
-    });
-  };
-
-  const onDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    const files = Array.from(e.dataTransfer?.files || []);
-    addFiles(files);
-  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -165,290 +103,215 @@ const EditPropertyPage = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const reduction = useMemo(() => {
-    if (!formData?.isBonPlan || !Number(formData?.prixOriginal) || !Number(formData?.prix)) return null;
-    const p = Number(formData.prix);
-    const o = Number(formData.prixOriginal);
-    if (o <= p) return null;
-    return Math.round(((o - p) / o) * 100);
-  }, [formData?.isBonPlan, formData?.prix, formData?.prixOriginal]);
-
   const validateForm = () => {
     const next = {};
-
     if (!String(formData?.titre || '').trim()) next.titre = 'Le titre est requis';
-    if (!Number(formData?.prix) || Number(formData.prix) <= 0) next.prix = 'Le prix doit être un nombre positif';
-    if (!String(formData?.ville || '').trim()) next.ville = 'La ville est requise';
-    if (!String(formData?.adresse || '').trim()) next.adresse = "L'adresse est requise";
-
-    if (formData?.isBonPlan) {
-      if (!Number(formData.prixOriginal) || Number(formData.prixOriginal) <= 0) {
-        next.prixOriginal = 'Le prix original est requis pour un bon plan';
-      } else if (Number(formData.prixOriginal) <= Number(formData.prix || 0)) {
-        next.prixOriginal = 'Le prix original doit être supérieur au prix actuel';
-      }
-      
-      if (!String(formData.bonPlanLabel || '').trim()) {
-        next.bonPlanLabel = 'Le libellé est requis (ex: -20%)';
-      }
-
-      if (!formData.bonPlanExpiresAt) {
-        next.bonPlanExpiresAt = 'La date de fin est requise';
-      } else if (new Date(formData.bonPlanExpiresAt) <= new Date()) {
-        next.bonPlanExpiresAt = 'La date de fin doit être dans le futur';
-      }
-    }
-
+    if (!Number(formData?.prix) || Number(formData.prix) <= 0) next.prix = 'Prix invalide';
+    if (!String(formData?.ville || '').trim()) next.ville = 'Ville requise';
+    
     setErrors(next);
     return Object.keys(next).length === 0;
-  };
-
-  const normalizePayload = () => {
-    const toNumberOrNull = (v) => {
-      const s = String(v ?? '').trim();
-      return s === '' ? null : Number(s);
-    };
-
-    return {
-      ...formData,
-      prix: toNumberOrNull(formData.prix),
-      prixOriginal: toNumberOrNull(formData.prixOriginal),
-      superficie: toNumberOrNull(formData.superficie),
-      nombre_chambres: toNumberOrNull(formData.nombre_chambres),
-      nombre_salles_bain: toNumberOrNull(formData.nombre_salles_bain),
-      nombre_salons: toNumberOrNull(formData.nombre_salons),
-      bonPlanExpiresAt: formData.bonPlanExpiresAt ? new Date(formData.bonPlanExpiresAt).toISOString() : null,
-      images: images.filter((i) => !i.existing).map((i) => i.file),
-    };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const result = await updateProperty(id, normalizePayload());
-    if (result.success) {
-      navigate(`/properties/${id}`);
+    setSaving(true);
+    try {
+      const payload = {
+        ...formData,
+        images: images.filter(img => !img.existing).map(img => img.file)
+      };
+      const result = await updateProperty(id, payload);
+      if (result.success) {
+        toast.success('Annonce mise à jour avec succès');
+        navigate('/admin/properties');
+      }
+    } catch (err) {
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading && !currentProperty) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  if (loading && !currentProperty) return (
+    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
+      <LoadingSpinner size="lg" />
+    </div>
+  );
 
-  if (!currentProperty || !formData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg font-semibold text-zinc-900">Bien introuvable</div>
-          <div className="mt-3">
-            <Button onClick={() => navigate('/dashboard')}>Retour</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!formData) return null;
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gold-light/30 px-3 py-1 text-xs text-zinc-800 ring-1 ring-gold-primary/25">
-            <Building2 className="w-4 h-4" />
-            Édition
+    <div className="min-h-screen bg-[#0d0d0d] text-white p-4 lg:p-8 font-sans">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+              Administration <span className="opacity-30">/</span> <span className="text-zinc-300">Édition</span>
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tighter italic uppercase">
+              Modifier l'Annonce<span className="text-gold-primary">.</span>
+            </h1>
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-zinc-900">Modifier un bien</h1>
-          <p className="mt-1 text-zinc-600">Si vous ajoutez de nouvelles photos, l’API remplacera les anciennes.</p>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/admin/properties')}
+              className="h-12 px-6 rounded-2xl bg-zinc-900/50 border border-white/5 text-zinc-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" /> Annuler
+            </button>
+            <Button 
+              onClick={handleSubmit} 
+              loading={saving}
+              className="h-12 px-8 rounded-2xl bg-gold-primary text-black font-black uppercase tracking-widest text-[10px] shadow-xl shadow-gold-primary/20 transition-all hover:-translate-y-1"
+            >
+              <Save className="h-4 w-4 mr-2" /> Enregistrer les modifications
+            </Button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Informations générales</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <Input
-                  label="Titre de l'annonce"
-                  name="titre"
-                  value={formData.titre}
-                  onChange={handleChange}
-                  error={errors.titre}
-                  leftIcon={<Tag className="w-4 h-4" />}
-                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                  labelClassName="text-zinc-700"
-                />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          
+          {/* Main Form Area */}
+          <div className="xl:col-span-2 space-y-8">
+            
+            {/* General Info */}
+            <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 lg:p-10">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary shadow-lg">
+                  <Tag className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-black text-white uppercase tracking-widest">Informations Générales</h2>
               </div>
 
-              <div className="md:col-span-2">
-                <Textarea
-                  label="Description (optionnel)"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                  labelClassName="text-zinc-700"
-                />
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Titre de l'annonce</label>
+                  <input
+                    name="titre"
+                    value={formData.titre}
+                    onChange={handleChange}
+                    placeholder="Ex: Villa de luxe avec piscine à Pointe-Noire"
+                    className={cn(
+                      "w-full bg-zinc-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all",
+                      errors.titre && "border-red-500/50 ring-1 ring-red-500/20"
+                    )}
+                  />
+                  {errors.titre && <p className="mt-2 text-[9px] font-bold text-red-500 uppercase tracking-widest">{errors.titre}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Description détaillée</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={6}
+                    placeholder="Décrivez les atouts majeurs de ce bien..."
+                    className="w-full bg-zinc-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm font-medium text-zinc-300 outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Transaction</label>
+                    <select
+                      name="transactionType"
+                      value={formData.transactionType}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all appearance-none"
+                    >
+                      {transactionOptions.map(opt => <option key={opt.value} value={opt.value} className="bg-zinc-900">{opt.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Catégorie</label>
+                    <select
+                      name="categorie"
+                      value={formData.categorie}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all appearance-none"
+                    >
+                      {categoryOptions.map(opt => <option key={opt.value} value={opt.value} className="bg-zinc-900">{opt.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pricing & Status */}
+            <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 lg:p-10">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary shadow-lg">
+                  <Banknote className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-black text-white uppercase tracking-widest">Prix & Visibilité</h2>
               </div>
 
-              <Select
-                label="Type de transaction"
-                name="transactionType"
-                value={formData.transactionType}
-                onChange={handleChange}
-                options={transactionOptions}
-                leftIcon={<Key className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900"
-                labelClassName="text-zinc-700"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Prix du bien</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="prix"
+                      value={formData.prix}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-2xl pl-6 pr-16 py-4 text-sm font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+                    />
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-gold-primary">{formData.devise}</div>
+                  </div>
+                </div>
 
-              <Select
-                label="Catégorie"
-                name="categorie"
-                value={formData.categorie}
-                onChange={handleChange}
-                options={categoryOptions}
-                leftIcon={<Home className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900"
-                labelClassName="text-zinc-700"
-              />
-
-              <Select
-                label="Statut de publication"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                options={statusOptions}
-                leftIcon={<Eye className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900"
-                labelClassName="text-zinc-700"
-              />
-
-              <Input
-                label="Prix"
-                type="number"
-                name="prix"
-                value={formData.prix}
-                onChange={handleChange}
-                error={errors.prix}
-                leftIcon={<Banknote className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-
-              <Select
-                label="Devise"
-                name="devise"
-                value={formData.devise}
-                onChange={handleChange}
-                options={deviseOptions}
-                leftIcon={<Coins className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900"
-                labelClassName="text-zinc-700"
-              />
-
-              {formData.isBonPlan ? (
-                <Input
-                  label="Prix original (barré)"
-                  type="number"
-                  name="prixOriginal"
-                  value={formData.prixOriginal}
-                  onChange={handleChange}
-                  error={errors.prixOriginal}
-                  leftIcon={<Percent className="w-4 h-4" />}
-                  className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                  labelClassName="text-zinc-700"
-                />
-              ) : (
-                <div />
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Localisation</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Ville"
-                name="ville"
-                value={formData.ville}
-                onChange={handleChange}
-                error={errors.ville}
-                leftIcon={<MapPin className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-
-              <Input
-                label="Adresse"
-                name="adresse"
-                value={formData.adresse}
-                onChange={handleChange}
-                error={errors.adresse}
-                leftIcon={<MapPin className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Détails</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Input
-                label="Superficie (m²)"
-                type="number"
-                name="superficie"
-                value={formData.superficie}
-                onChange={handleChange}
-                leftIcon={<Ruler className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-
-              <Input
-                label="Chambres"
-                type="number"
-                name="nombre_chambres"
-                value={formData.nombre_chambres}
-                onChange={handleChange}
-                leftIcon={<BedDouble className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-
-              <Input
-                label="Salles de bain"
-                type="number"
-                name="nombre_salles_bain"
-                value={formData.nombre_salles_bain}
-                onChange={handleChange}
-                leftIcon={<Bath className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
-
-              <Input
-                label="Salons"
-                type="number"
-                name="nombre_salons"
-                value={formData.nombre_salons}
-                onChange={handleChange}
-                leftIcon={<Sofa className="w-4 h-4" />}
-                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
-                labelClassName="text-zinc-700"
-              />
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Statut de l'annonce</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full bg-zinc-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all appearance-none"
+                  >
+                    {statusOptions.map(opt => <option key={opt.value} value={opt.value} className="bg-zinc-900">{opt.label}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6">
-              <div className="text-sm font-medium text-zinc-900 mb-3">Équipements</div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Features & Details */}
+            <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 lg:p-10">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary shadow-lg">
+                  <Layout className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-black text-white uppercase tracking-widest">Détails & Équipements</h2>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                {[
+                  { name: 'superficie', label: 'Superficie (m²)', icon: Ruler },
+                  { name: 'nombre_chambres', label: 'Chambres', icon: BedDouble },
+                  { name: 'nombre_salles_bain', label: 'Salles de bain', icon: Bath },
+                  { name: 'nombre_salons', label: 'Salons', icon: Sofa },
+                ].map((item) => (
+                  <div key={item.name}>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">{item.label}</label>
+                    <input
+                      type="number"
+                      name={item.name}
+                      value={formData[item.name]}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all text-center"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                   { key: 'garage', label: 'Garage' },
                   { key: 'piscine', label: 'Piscine' },
@@ -456,165 +319,171 @@ const EditPropertyPage = () => {
                   { key: 'balcon', label: 'Balcon' },
                   { key: 'gardien', label: 'Gardien' },
                 ].map(({ key, label }) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Checkbox
-                      id={key}
-                      checked={Boolean(formData[key])}
-                      onCheckedChange={(checked) =>
-                        handleChange({ target: { name: key, type: 'checkbox', checked } })
-                      }
-                      className="border-gray-300 data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-                    />
-                    <label htmlFor={key} className="text-sm text-zinc-700 cursor-pointer select-none">
-                      {label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Bon plan</h2>
-
-            <div className="rounded-xl bg-gold-light/30 p-4 ring-1 ring-gold-primary/25">
-              <label className="flex items-center gap-3 cursor-pointer select-none">
-                <Checkbox
-                  id="isBonPlan"
-                  checked={Boolean(formData.isBonPlan)}
-                  onCheckedChange={(checked) =>
-                    handleChange({ target: { name: 'isBonPlan', type: 'checkbox', checked } })
-                  }
-                  className="border-gold-primary data-[state=checked]:bg-gold-primary data-[state=checked]:text-white"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-zinc-900 inline-flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-gold-primary" />
-                    Marquer comme "Bon Plan"
-                  </div>
-                  <div className="text-xs text-zinc-700">Affiche un badge spécial et un prix barré.</div>
-                </div>
-              </label>
-
-              {formData.isBonPlan ? (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gold-primary/25 pt-4">
-                  <Input
-                    label="Libellé (ex: Promo Flash)"
-                    name="bonPlanLabel"
-                    value={formData.bonPlanLabel}
-                    onChange={handleChange}
-                    error={errors.bonPlanLabel}
-                    leftIcon={<Tag className="w-4 h-4" />}
-                    className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white"
-                    labelClassName="text-zinc-700"
-                  />
-
-                  <Input
-                    label="Date de fin"
-                    type="datetime-local"
-                    name="bonPlanExpiresAt"
-                    value={formData.bonPlanExpiresAt}
-                    onChange={handleChange}
-                    error={errors.bonPlanExpiresAt}
-                    leftIcon={<CalendarClock className="w-4 h-4" />}
-                    className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:bg-white"
-                    labelClassName="text-zinc-700"
-                  />
-                  {reduction && (
-                    <div className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gold-primary/15 text-gold-dark font-semibold text-sm p-3">
-                      <Percent className="w-4 h-4" />
-                      <span>Réduction calculée : {reduction}%</span>
+                  <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                    <div className={cn(
+                      "h-5 w-5 rounded border border-white/10 flex items-center justify-center transition-all",
+                      formData[key] ? "bg-gold-primary border-gold-primary" : "bg-zinc-950/50 group-hover:border-gold-primary/30"
+                    )}>
+                      {formData[key] && <CheckCircle2 className="h-3 w-3 text-black" />}
+                      <input 
+                        type="checkbox" 
+                        name={key} 
+                        checked={formData[key]} 
+                        onChange={handleChange} 
+                        className="hidden"
+                      />
                     </div>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 mb-4">Photos (max 10)</h2>
-
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={onPickFiles}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onPickFiles();
-                }
-              }}
-              onDragEnter={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(true);
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(false);
-              }}
-              onDrop={onDrop}
-              className={`rounded-2xl border-2 border-dashed p-6 text-center transition cursor-pointer ${
-                dragActive ? 'border-gold-primary bg-gold-light/20' : 'border-zinc-300'
-              }`}
-            >
-              <UploadCloud className="w-12 h-12 text-zinc-400 mx-auto mb-3" />
-              <div className="text-sm text-zinc-700">Glissez-déposez des images ici</div>
-              <div className="text-xs text-zinc-500 mt-1">ou cliquez sur le bouton ci-dessous</div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-
-              <div className="mt-4">
-                <Button type="button" variant="outline" onClick={onPickFiles} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Sélectionner des images
-                </Button>
-              </div>
-            </div>
-
-            {images.length > 0 ? (
-              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                {images.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <img src={image.preview || image.url} alt="Aperçu" className="w-full h-32 object-cover rounded-xl" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(image.id)}
-                      className="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Retirer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    {image.existing ? (
-                      <div className="absolute bottom-2 left-2 text-[10px] bg-black/60 text-white px-2 py-1 rounded-full">Existante</div>
-                    ) : null}
-                  </div>
+                    <span className={cn(
+                      "text-[10px] font-black uppercase tracking-widest transition-colors",
+                      formData[key] ? "text-white" : "text-zinc-500 group-hover:text-zinc-300"
+                    )}>{label}</span>
+                  </label>
                 ))}
               </div>
-            ) : null}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button type="submit" loading={loading} className="gap-2">
-              <Save className="w-4 h-4" />
-              Enregistrer
-            </Button>
-            <Button type="button" variant="outline" onClick={() => navigate(`/properties/${id}`)}>Annuler</Button>
+          {/* Right Sidebar */}
+          <div className="space-y-8">
+            
+            {/* Media Gallery */}
+            <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8">
+               <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <ImageIcon className="h-5 w-5 text-gold-primary" />
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Photos</h4>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-8 w-8 rounded-xl bg-gold-primary/10 border border-gold-primary/20 text-gold-primary flex items-center justify-center hover:bg-gold-primary hover:text-black transition-all"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                 {images.map((img, idx) => (
+                   <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-white/5 group">
+                      <img src={img.url || img.preview} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <button 
+                           type="button"
+                           onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
+                           className="h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all scale-75 group-hover:scale-100"
+                         >
+                           <X className="h-4 w-4" />
+                         </button>
+                      </div>
+                   </div>
+                 ))}
+                 {images.length === 0 && (
+                   <div className="col-span-2 py-10 border-2 border-dashed border-white/5 rounded-[2rem] flex flex-col items-center justify-center text-zinc-600">
+                      <UploadCloud className="h-10 w-10 mb-2 opacity-20" />
+                      <p className="text-[10px] font-black uppercase tracking-widest">Aucune photo</p>
+                   </div>
+                 )}
+               </div>
+               <input 
+                 type="file" 
+                 ref={fileInputRef} 
+                 multiple 
+                 className="hidden" 
+                 onChange={(e) => {
+                    const files = Array.from(e.target.files);
+                    const newImgs = files.map(f => ({
+                      id: Math.random().toString(36).slice(2),
+                      file: f,
+                      preview: URL.createObjectURL(f),
+                      existing: false
+                    }));
+                    setImages(prev => [...prev, ...newImgs]);
+                 }}
+               />
+            </div>
+
+            {/* Bon Plan Module */}
+            <div className={cn(
+              "bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 transition-all",
+              formData.isBonPlan && "ring-1 ring-gold-primary/30 bg-gold-primary/[0.02]"
+            )}>
+              <div className="flex items-center justify-between mb-8">
+                 <div className="flex items-center gap-3">
+                   <Percent className="h-5 w-5 text-gold-primary" />
+                   <h4 className="text-sm font-black text-white uppercase tracking-widest">Bon Plan</h4>
+                 </div>
+                 <button 
+                   type="button"
+                   onClick={() => setFormData(d => ({ ...d, isBonPlan: !d.isBonPlan }))}
+                   className={cn(
+                     "w-10 h-5 rounded-full transition-all relative",
+                     formData.isBonPlan ? "bg-gold-primary" : "bg-zinc-800"
+                   )}
+                 >
+                   <div className={cn(
+                     "h-3 w-3 rounded-full bg-white absolute top-1 transition-all",
+                     formData.isBonPlan ? "right-1" : "left-1"
+                   )} />
+                 </button>
+              </div>
+
+              {formData.isBonPlan && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">Prix Original (XAF)</label>
+                    <input
+                      type="number"
+                      name="prixOriginal"
+                      value={formData.prixOriginal}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">Libellé Badge</label>
+                    <input
+                      name="bonPlanLabel"
+                      value={formData.bonPlanLabel}
+                      onChange={handleChange}
+                      placeholder="Ex: OFFRE LIMITÉE"
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black text-gold-primary uppercase tracking-widest outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">Expire le</label>
+                    <input
+                      type="datetime-local"
+                      name="bonPlanExpiresAt"
+                      value={formData.bonPlanExpiresAt}
+                      onChange={handleChange}
+                      className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black text-white uppercase outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+              {!formData.isBonPlan && (
+                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed italic">
+                  Activez cette option pour mettre en avant ce bien avec un prix barré et un badge promotionnel.
+                </p>
+              )}
+            </div>
+
+            {/* Quick Audit Info */}
+            <div className="bg-[#0d0d0d] border border-white/5 rounded-[2.5rem] p-8 text-center">
+               <div className="h-14 w-14 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary mx-auto mb-6">
+                  <Database className="h-7 w-7" />
+               </div>
+               <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Données Système</h4>
+               <p className="text-[11px] text-zinc-600 leading-relaxed mb-6 font-medium italic">
+                 Dernière modification par vous le {new Date().toLocaleDateString('fr-FR')}. 
+               </p>
+               <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 w-full animate-pulse" />
+               </div>
+            </div>
+
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

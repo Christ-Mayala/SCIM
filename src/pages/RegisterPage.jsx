@@ -7,9 +7,11 @@ import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
 import { ROOT_API_URL } from '../lib/api';
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
+  const { settings, loading: settingsLoading } = useSettings();
   const [formData, setFormData] = useState({
     nom: '',
     email: '',
@@ -138,6 +140,28 @@ const RegisterPage = () => {
     { label: 'Un chiffre', met: /[0-9]/.test(formData.password) },
     { label: 'Un caractère spécial', met: /[^A-Za-z0-9]/.test(formData.password) },
   ];
+
+  if (!settingsLoading && settings.allowRegistration === false) {
+    return (
+      <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6 text-center">
+        <div className="relative z-10 max-w-md p-10 bg-zinc-900 rounded-[40px] border border-white/10 shadow-2xl">
+           <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mx-auto mb-8">
+              <Shield className="w-10 h-10" />
+           </div>
+           <h1 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter italic">Inscriptions Suspendues<span className="text-gold-primary">.</span></h1>
+           <p className="text-zinc-400 font-medium mb-10 leading-relaxed">
+             Les nouvelles inscriptions sont temporairement désactivées sur {settings.siteName}. 
+             Veuillez revenir plus tard ou contacter le support pour plus d'informations.
+           </p>
+           <Link to="/home">
+              <Button className="w-full h-14 rounded-2xl bg-gold-primary text-black font-black uppercase tracking-widest text-[11px]">
+                Retour à l'accueil
+              </Button>
+           </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-zinc-950 flex items-center justify-center p-6">

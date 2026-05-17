@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { MessageProvider } from './contexts/MessageContext';
 import { Toaster } from 'react-hot-toast';
@@ -16,17 +17,19 @@ function App() {
       <ErrorBoundary>
         <>
           <Toaster position="top-right" reverseOrder={false} />
-          <AuthProvider>
-            <PropertyProvider>
-              <MessageProvider>
-                <Router>
-                  <Routes>
-                    <Route path="/*" element={<AppShell />} />
-                  </Routes>
-                </Router>
-              </MessageProvider>
-            </PropertyProvider>
-          </AuthProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              <PropertyProvider>
+                <MessageProvider>
+                  <Router>
+                    <Routes>
+                      <Route path="/*" element={<AppShell />} />
+                    </Routes>
+                  </Router>
+                </MessageProvider>
+              </PropertyProvider>
+            </AuthProvider>
+          </SettingsProvider>
         </>
       </ErrorBoundary>
     </HelmetProvider>

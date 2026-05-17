@@ -70,10 +70,12 @@ export const getImageUrl = (imagePath) => {
   if (!imagePath) return '/images/og/og-property.jpg';
   if (String(imagePath).startsWith('http')) return imagePath;
 
+  // Si c'est un chemin relatif commençant par /uploads ou similaire, on ajoute l'origine
   const raw = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   let origin = raw;
   try {
-    origin = new URL(raw).origin;
+    const urlObj = new URL(raw);
+    origin = urlObj.origin;
   } catch (_) {
     origin = String(raw).replace(/\/api\/.*$/i, '') || raw;
   }

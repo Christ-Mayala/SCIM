@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { formatPrice, formatDate } from './utils';
 
 const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const API_BASE_URL = (() => {
@@ -237,22 +238,7 @@ export const adminAPI = {
   updateSettings: (payload) => api.put('/admin/settings', payload),
 };
 
-export const formatPrice = (price) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
-export const formatDate = (date) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(date));
-};
+export { formatPrice, formatDate };
 
 export const get = (url, config) => api.get(url, config);
 export const post = (url, data, config) => api.post(url, data, config);

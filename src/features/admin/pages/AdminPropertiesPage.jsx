@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Trash2, Pencil, CheckCircle2, PauseCircle, Building2, Plus, Eye, Zap, RefreshCw, MapPin, Tag, TrendingUp, XCircle } from 'lucide-react';
+import { 
+  Search, Trash2, Pencil, CheckCircle2, PauseCircle, Building2, Plus, 
+  Eye, Zap, RefreshCw, MapPin, Tag, TrendingUp, XCircle, Filter, 
+  ChevronDown, MoreHorizontal, Calendar, ArrowRight
+} from 'lucide-react';
 import { adminAPI, formatPrice } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
@@ -14,43 +18,77 @@ const AdminPropertiesPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
   const [pagination, setPagination] = useState({ page: 1, limit: 10, totalPages: 1, totalItems: 0 });
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const load = async (page = 1, currentStatus = statusFilter, q = search) => {
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const load = async (page = 1, currentStatus = statusFilter, q = debouncedSearch) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await adminAPI.getProperties({ page, limit: 5, search: q || undefined, status: currentStatus });
-      const data = res.data?.data || res.data;
-      setItems(Array.isArray(data?.properties) ? data.properties : Array.isArray(data?.items) ? data.items : []);
+      
+      // On vide les items avant de charger pour éviter de voir les anciens
+      setItems([]);
+      
+      const apiStatus = (!currentStatus || currentStatus === 'all') ? undefined : currentStatus;
+      
+      const res = await adminAPI.getProperties({ 
+        page, 
+        limit: 10, 
+        search: q || undefined, 
+        status: apiStatus 
+      });
+      
+      const responseData = res.data?.data || res.data;
+      const properties = responseData?.properties || responseData?.items || [];
+      
+      if (Array.isArray(properties)) {
+        setItems(properties);
+      } else {
+        setItems([]);
+      }
+
       setPagination({
-        page: data?.page || 1,
-        limit: 5,
-        totalPages: data?.totalPages || 1,
-        totalItems: data?.totalProperties || data?.total || 0,
+        page: responseData?.page || 1,
+        limit: 10,
+        totalPages: responseData?.totalPages || 1,
+        totalItems: responseData?.total || responseData?.totalProperties || 0,
       });
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || 'Erreur');
+      setError(e?.response?.data?.message || e?.message || 'Erreur de chargement');
       setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(1, statusFilter, search); }, [statusFilter]);
+  const handleStatusChange = (newStatus) => {
+    // Si on clique sur le filtre déjà actif, on ne fait rien pour éviter des doubles appels
+    if (statusFilter === newStatus) return;
+    
+    // Normalisation du statut pour l'API
+    const status = newStatus === 'all' ? '' : newStatus;
+    setStatusFilter(newStatus); // On garde l'ID original pour l'UI
+    
+    // On force le rechargement immédiat à la page 1 avec le nouveau statut
+    load(1, newStatus, debouncedSearch);
+  };
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((p) => `${p.titre || ''} ${p.ville || ''} ${p.categorie || ''}`.toLowerCase().includes(q));
-  }, [items, search]);
+  useEffect(() => { load(1, statusFilter, debouncedSearch); }, [statusFilter, debouncedSearch]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette annonce définitivement ?')) return;
     try {
       await adminAPI.deleteProperty(id);
-      setItems((prev) => prev.filter((p) => p._id !== id));
-      setPagination(prev => ({ ...prev, totalItems: Math.max(0, prev.totalItems - 1) }));
       toast.success('Annonce supprimée');
+      // Recharger la page actuelle pour recalculer la pagination
+      load(pagination.page, statusFilter, debouncedSearch);
     } catch (e) { toast.error(e?.response?.data?.message || 'Suppression impossible'); }
   };
 
@@ -59,246 +97,249 @@ const AdminPropertiesPage = () => {
     const next = active ? 'inactive' : 'active';
     try {
       await adminAPI.updatePropertyStatus(p._id, next);
-      setItems((prev) => prev.map((x) => (x._id === p._id ? { ...x, status: next } : x)));
+      
+      // Si on filtre par un statut spécifique, on retire l'élément de la liste
+      if (statusFilter && statusFilter !== 'all') {
+        setItems((prev) => prev.filter((x) => x._id !== p._id));
+      } else {
+        // Sinon on met juste à jour le statut visuellement
+        setItems((prev) => prev.map((x) => (x._id === p._id ? { ...x, status: next } : x)));
+      }
+      
       toast.success(next === 'active' ? 'Annonce publiée' : 'Annonce suspendue');
     } catch (e) { toast.error(e?.response?.data?.message || 'Mise à jour impossible'); }
   };
 
-  const StatusTab = ({ id, label, icon: Icon }) => {
-    const active = statusFilter === id;
-    return (
-      <button
-        onClick={() => setStatusFilter(id)}
-        className={cn(
-          "flex items-center gap-2.5 px-6 py-4 border-b-2 font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap",
-          active 
-          ? `border-gold-primary text-zinc-900 bg-gold-primary/5` 
-          : "border-transparent text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
-        )}
-      >
-        <Icon className={cn("h-4 w-4", active ? "text-gold-primary" : "text-zinc-400")} />
-        {label}
-      </button>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-zinc-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
-        {/* ── Header Section ── */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white mb-4 shadow-lg shadow-zinc-900/10">
-              <Zap className="h-3.5 w-3.5 text-amber-400" />
-              Pilotage Immobilier
-            </div>
-            <h1 className="text-4xl font-black text-zinc-900 tracking-tight">Annonces</h1>
-            <p className="mt-1 text-sm font-medium text-zinc-500">Supervisez et maintenez votre catalogue de biens d'exception.</p>
+    <div className="p-4 lg:p-8 max-w-full text-white">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+            Administration <span className="opacity-30">/</span> <span className="text-zinc-300">Annonces</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to="/admin/properties/new">
-              <Button className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-gold-primary/20 bg-gold-primary hover:bg-amber-300 text-zinc-900 gap-2 hover:-translate-y-1 transition-all">
-                <Plus className="h-4 w-4" /> Nouvelle annonce
-              </Button>
-            </Link>
-          </div>
+          <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tighter italic uppercase">Catalogue Immobilière<span className="text-gold-primary">.</span></h1>
         </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="hidden xl:flex items-center gap-4 bg-zinc-900/50 border border-white/5 rounded-2xl px-6 py-3 mr-4">
+            <div className="flex flex-col items-end border-r border-white/10 pr-4 mr-4">
+               <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Total Biens</span>
+               <span className="text-sm font-black text-white leading-none">{pagination.totalItems}</span>
+            </div>
+            <div className="flex flex-col items-end">
+               <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Statut Actuel</span>
+               <span className="text-[10px] font-black text-gold-primary uppercase leading-none">{statusFilter || 'Tous'}</span>
+            </div>
+          </div>
+          <Button onClick={() => load(1)} className="h-12 w-12 rounded-2xl bg-zinc-900/50 border border-white/5 text-zinc-400 hover:text-white flex items-center justify-center p-0 transition-all">
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          </Button>
+          <Link to="/admin/properties/new">
+            <Button className="h-12 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-gold-primary/20 transition-all hover:-translate-y-1">
+              <Plus className="h-4 w-4 mr-2" /> Nouvelle annonce
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-        {/* ── Search & Filter Panel ── */}
-        <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden mb-8">
-          <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
-            {/* Search Part */}
-            <div className="flex-1 p-6">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-zinc-300" />
-                </div>
+      {/* Main Grid Layout */}
+      <div className="flex flex-col gap-8">
+        
+        {/* Full Width Table Section */}
+        <div className="w-full space-y-8">
+          <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] overflow-hidden">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between px-8 py-6 gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && load(1, statusFilter, search)}
-                  placeholder="Rechercher par titre, ville, catégorie..."
-                  className="block w-full pl-12 pr-4 py-4 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm text-zinc-900 placeholder:text-zinc-400 placeholder:font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium"
+                  placeholder="Rechercher un bien..."
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-950/50 border border-white/5 rounded-2xl text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
                 />
               </div>
-            </div>
-            
-            {/* Tabs Part */}
-            <div className="flex items-center overflow-x-auto min-w-[300px]">
-              <StatusTab id="active" label="Actives" icon={CheckCircle2} />
-              <StatusTab id="inactive" label="Désactivées" icon={PauseCircle} />
-              <div className="flex-1 px-8 py-4 text-right">
-                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                    <span className="text-zinc-900">{pagination.totalItems}</span> annonces
-                 </div>
+              <div className="flex items-center gap-2">
+                {[
+                  { id: 'all', label: 'Toutes' },
+                  { id: 'pending', label: 'En attente' },
+                  { id: 'active', label: 'Publiées' },
+                  { id: 'inactive', label: 'Suspendues' }
+                ].map((f) => (
+                  <button 
+                    key={f.id}
+                    onClick={() => handleStatusChange(f.id)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                      (statusFilter === f.id || (f.id === 'all' && !statusFilter) || (f.id === '' && !statusFilter)) ? "bg-gold-primary text-black" : "text-zinc-500 hover:text-white"
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </div>
+
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse table-auto">
+                <thead>
+                  <tr className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-white/5">
+                    <th className="px-6 py-6">Bien</th>
+                    <th className="px-6 py-6">Localisation</th>
+                    <th className="px-6 py-6">Prix</th>
+                    <th className="px-6 py-6">Vues</th>
+                    <th className="px-6 py-6">Statut</th>
+                    <th className="px-6 py-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {loading ? (
+                    <tr><td colSpan="6" className="py-20 text-center"><LoadingSpinner size="md" /></td></tr>
+                  ) : items.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="py-32 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-4">
+                          <div className="h-16 w-16 rounded-3xl bg-zinc-900/50 flex items-center justify-center text-zinc-700">
+                             <Building2 className="h-8 w-8" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-black text-white uppercase tracking-widest">Aucune donnée trouvée</p>
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Essayez d'ajuster vos filtres ou votre recherche</p>
+                          </div>
+                          <Button onClick={() => { setSearch(''); setStatusFilter('active'); }} variant="outline" className="h-9 rounded-xl border-white/5 bg-zinc-950/50 text-[9px] font-black uppercase tracking-widest">Réinitialiser</Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    items.map((p) => (
+                      <tr key={p._id} className="group hover:bg-white/[0.02] transition-colors">
+                        <td className="px-6 py-6">
+                          <div className="flex items-center gap-5">
+                            <div className="h-14 w-14 rounded-2xl overflow-hidden bg-zinc-800 shrink-0 border border-white/5 shadow-lg">
+                              <img src={p.images?.[0]?.url || '/images/scim-logo.jpg'} alt={p.titre} className="h-full w-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-black text-white truncate uppercase tracking-tight">{p.titre}</div>
+                              <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{p.categorie}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-6">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
+                            <MapPin className="h-3.5 w-3.5 text-gold-primary" /> {p.ville}
+                          </div>
+                        </td>
+                        <td className="px-6 py-6 text-xs font-black text-white whitespace-nowrap">
+                          {formatPrice(p.prix)}
+                        </td>
+                        <td className="px-6 py-6 text-[10px] font-bold text-zinc-500">
+                          {p.views || 0} vues
+                        </td>
+                        <td className="px-6 py-6">
+                          <span className={cn(
+                            "px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em]",
+                            p.status === 'active' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                          )}>
+                            {p.status === 'active' ? 'Publiée' : 'Suspendue'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-6 text-right">
+                          <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                            <Link to={`/properties/${p._id}`} className="p-2.5 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white transition-all border border-white/5">
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                            <Link to={`/admin/properties/${p._id}/edit`} className="p-2.5 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white transition-all border border-white/5">
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                            <button 
+                              onClick={() => handleToggleStatus(p)}
+                              className={cn(
+                                "p-2.5 rounded-xl transition-all border border-white/5",
+                                p.status === 'active' ? "bg-zinc-800 text-amber-500 hover:text-amber-400" : "bg-zinc-800 text-emerald-500 hover:text-emerald-400"
+                              )}
+                            >
+                              {p.status === 'active' ? <PauseCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(p._id)}
+                              className="p-2.5 rounded-xl bg-zinc-800 text-zinc-400 hover:text-red-500 transition-all border border-white/5"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {!loading && items.length > 0 && (
+              <div className="px-8 py-6 border-t border-white/5 flex items-center justify-between">
+                <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+                  Page {pagination.page} / {pagination.totalPages}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    disabled={pagination.page <= 1}
+                    onClick={() => load(pagination.page - 1)}
+                    className="p-2 rounded-lg bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-white disabled:opacity-30 transition-all"
+                  >
+                    Précédent
+                  </button>
+                  <button 
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => load(pagination.page + 1)}
+                    className="p-2 rounded-lg bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-white disabled:opacity-30 transition-all"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {error && (
-          <div className="mb-8 p-5 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center gap-4 text-sm text-red-600 font-bold uppercase tracking-tight">
-            <XCircle className="h-5 w-5" />
-            {error}
-          </div>
-        )}
-
-        {/* ── List Layout ── */}
-        {loading && pagination.page === 1 ? (
-          <div className="flex flex-col items-center justify-center py-24">
-            <LoadingSpinner size="lg" />
-            <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Scan du catalogue...</p>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="rounded-[2.5rem] bg-white border border-dashed border-zinc-200 py-32 text-center flex flex-col items-center justify-center">
-            <div className="h-20 w-20 rounded-[2rem] bg-zinc-50 flex items-center justify-center mb-6 ring-1 ring-zinc-100">
-              <Building2 className="h-10 w-10 text-zinc-200" />
-            </div>
-            <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
-              {statusFilter === 'active' ? 'Aucune annonce active' : 'Aucune annonce désactivée'}
-            </h3>
-            <p className="mt-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-              Votre sélection est actuellement vide.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {items.map((p) => {
-              const isActive = p.status === 'active';
-              return (
-                <div key={p._id} className="group overflow-hidden bg-white rounded-[2.5rem] border border-zinc-200/80 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex flex-col lg:flex-row">
-                  {/* Image Side */}
-                  <div className="lg:w-80 h-64 lg:h-auto shrink-0 relative overflow-hidden bg-zinc-100 border-b lg:border-b-0 lg:border-r border-zinc-100">
-                    <img
-                      src={p.images?.[0]?.url || '/images/scim-logo.jpg'}
-                      alt={p.titre}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute top-6 left-6 flex items-center gap-2">
-                      <span className={cn(
-                        "inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg",
-                        isActive ? 'bg-emerald-500 text-white' : 'bg-zinc-900 text-white'
-                      )}>
-                        {isActive ? 'En ligne' : 'Suspendue'}
-                      </span>
-                    </div>
-                    {p.transactionType && (
-                       <div className="absolute bottom-6 left-6">
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-white text-zinc-900 shadow-lg border border-white/20">
-                           {p.transactionType}
-                        </span>
-                       </div>
-                    )}
+        {/* Right: Summary Side */}
+        <div className="w-full xl:w-[360px] space-y-8 shrink-0">
+          <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8">
+            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-8">Statistiques Annonces</h4>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center text-gold-primary">
+                    <Building2 className="h-5 w-5" />
                   </div>
-
-                  {/* Content Side */}
-                  <div className="flex-1 p-8 lg:p-10 flex flex-col justify-between gap-8">
-                    <div>
-                      <div className="flex items-center justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-3">
-                           <div className="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center shadow-lg ring-1 ring-white/10 shrink-0">
-                              <Building2 className="h-5 w-5 text-amber-400" />
-                           </div>
-                           <div>
-                              <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{p.categorie}</div>
-                              <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight leading-tight group-hover:text-gold-dark transition-colors line-clamp-2 mt-0.5">
-                                {p.titre}
-                              </h3>
-                           </div>
-                        </div>
-                        <div className="text-right shrink-0">
-                           <div className="text-2xl font-black text-zinc-900 tracking-tighter">{formatPrice(p.prix)}</div>
-                           {p.views > 0 && (
-                             <div className="flex items-center justify-end gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-400 mt-1">
-                                <Eye className="h-3 w-3" /> {p.views} vues
-                             </div>
-                           )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-                         <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black text-zinc-600 uppercase tracking-tight">
-                            <MapPin className="h-3.5 w-3.5 text-amber-500" /> {p.ville}
-                         </span>
-                         <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black text-zinc-600 uppercase tracking-tight">
-                            <Tag className="h-3.5 w-3.5 text-blue-500" /> Réf: {p._id.slice(-6).toUpperCase()}
-                         </span>
-                         {p.status === 'active' && (
-                           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-100 text-[10px] font-black text-emerald-600 uppercase tracking-tight">
-                              <TrendingUp className="h-3.5 w-3.5" /> Performance : Optimale
-                           </span>
-                         )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 sm:opacity-0 sm:translate-x-4 sm:group-hover:opacity-100 sm:group-hover:translate-x-0 transition-all duration-500 pt-8 border-t border-zinc-50">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleToggleStatus(p)}
-                        className={cn(
-                          "h-11 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border-zinc-200",
-                          isActive 
-                            ? "hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200" 
-                            : "hover:bg-emerald-500 hover:text-white hover:border-emerald-500 shadow-emerald-500/10"
-                        )}
-                      >
-                        {isActive ? <PauseCircle className="h-4 w-4 mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                        {isActive ? 'Suspendre' : 'Publier'}
-                      </Button>
-                      
-                      <Link to={`/admin/properties/${p._id}/edit`} className="flex-1 lg:flex-none">
-                        <Button 
-                          variant="outline" 
-                          className="w-full h-11 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all shadow-sm flex items-center justify-center gap-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          Editer
-                        </Button>
-                      </Link>
-
-                      <Button 
-                        variant="outline" 
-                        onClick={() => handleDelete(p._id)} 
-                        className="h-11 w-12 p-0 rounded-2xl border-zinc-200 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm shrink-0 flex items-center justify-center"
-                      >
-                        <Trash2 className="h-4.5 w-4.5" />
-                      </Button>
-                    </div>
-                  </div>
+                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Total Actifs</span>
                 </div>
-              );
-            })}
+                <span className="text-lg font-black text-white">{pagination.totalItems}</span>
+              </div>
+              
+              <div className="pt-6 border-t border-white/5">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Taux d'occupation</span>
+                  <span className="text-xs font-black text-emerald-500">82%</span>
+                </div>
+                <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="h-full w-[82%] bg-gold-primary rounded-full shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* ── Pagination ── */}
-        {!loading && items.length > 0 && (
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-6 px-10 py-6 bg-white rounded-[2rem] border border-zinc-200 shadow-sm">
-            <div className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
-              Page <span className="text-zinc-900">{pagination.page}</span> <span className="mx-2 opacity-30">/</span> <span className="text-zinc-900">{pagination.totalPages}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => load(pagination.page - 1, statusFilter, search)} 
-                disabled={pagination.page <= 1} 
-                className="h-11 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border-zinc-200 bg-white shadow-sm"
-              >
-                Précédent
-              </Button>
-              <Button 
-                variant="outline" size="sm" 
-                onClick={() => load(pagination.page + 1, statusFilter, search)} 
-                disabled={pagination.page >= pagination.totalPages} 
-                className="h-11 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border-zinc-200 bg-white shadow-sm"
-              >
-                Suivant
-              </Button>
-            </div>
+          <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8">
+            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Aide Rapide</h4>
+            <p className="text-[11px] text-zinc-500 leading-relaxed mb-8 font-medium">
+              Les annonces suspendues ne sont plus visibles sur le site public mais restent accessibles ici pour modification.
+            </p>
+            <Button variant="outline" className="w-full h-12 rounded-2xl border-white/5 bg-zinc-950/50 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">
+              Guide de publication
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

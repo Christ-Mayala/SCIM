@@ -18,7 +18,10 @@ const PropertyCard = ({ property, className, onFavoriteChange }) => {
   const [ratingLoading, setRatingLoading] = useState(false);
 
   const isFavorite = favorites.includes(property._id);
-  const mainImage = property.images?.[0]?.url || '/images/og/og-property.jpg';
+  
+  // Utiliser property.images[0].url s'il existe, sinon fallback
+  const mainImage = property.images?.[0]?.url || property.images?.[0] || '/images/og/og-property.jpg';
+  
   const isListView = className?.includes('flex-row');
 
   const handleCardRating = async (rating) => {

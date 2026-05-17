@@ -52,7 +52,15 @@ const PropertyDetailPage = () => {
   const [reservationLoading, setReservationLoading] = useState(false);
   const [reservationAck, setReservationAck] = useState(null);
 
-  const images = property?.images || [];
+  // Normalisation des images : gérer à la fois {url: '...'} et '...'
+  const images = useMemo(() => {
+    if (!property?.images) return [];
+    return property.images.map(img => {
+      if (typeof img === 'string') return { url: img };
+      return img;
+    });
+  }, [property?.images]);
+
   const owner = property?.utilisateur || property?.proprietaire || null;
 
   useEffect(() => {
@@ -426,15 +434,15 @@ const PropertyDetailPage = () => {
                   
                   {images.length > 1 && (
                     <div className="p-4 bg-zinc-950 border-t border-white/5 overflow-hidden">
-                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-1 justify-start md:justify-center">
                         {images.map((image, index) => (
                           <button
                             key={index}
                             onClick={() => setSelectedImageIndex(index)}
                             className={cn(
-                              'relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden transition-all duration-500',
+                              'relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden transition-all duration-500 border border-white/5',
                               selectedImageIndex === index 
-                                ? 'ring-2 ring-gold-primary ring-offset-2 ring-offset-zinc-950 opacity-100 scale-105 shadow-xl' 
+                                ? 'ring-2 ring-gold-primary ring-offset-2 ring-offset-zinc-950 opacity-100 scale-105 shadow-xl z-10' 
                                 : 'opacity-40 hover:opacity-80 hover:scale-105'
                             )}
                           >
