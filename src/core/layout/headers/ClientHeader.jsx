@@ -165,10 +165,10 @@ const ClientHeader = () => {
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full h-14 rounded-3xl font-bold text-base border-white/10 text-white">Log In</Button>
+                <Button variant="outline" className="w-full h-14 rounded-3xl font-bold text-base border-white/10 text-white">Connexion</Button>
               </Link>
               <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full h-14 rounded-3xl bg-gold-primary hover:bg-gold-dark text-white font-bold text-base">Join US</Button>
+                <Button className="w-full h-14 rounded-3xl bg-gold-primary hover:bg-gold-dark text-white font-bold text-base">Inscription</Button>
               </Link>
             </div>
           )}
@@ -332,12 +332,12 @@ const ClientHeader = () => {
               <div className="flex items-center gap-1">
                 <Link to="/login">
                   <Button variant="ghost" size="sm" className="hidden sm:flex rounded-full text-zinc-300 hover:text-white font-bold px-5 h-9">
-                    Log In
+                    Connexion
                   </Button>
                 </Link>
                 <Link to="/register">
                   <Button size="sm" className="rounded-full bg-gold-primary hover:bg-gold-dark text-white font-bold px-6 h-9 shadow-lg shadow-gold-primary/20">
-                    Join SCIM
+                    Inscription
                   </Button>
                 </Link>
               </div>

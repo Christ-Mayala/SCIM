@@ -44,7 +44,7 @@ const AdminHeader = () => {
   const isActive = (to) => location.pathname === to || location.pathname.startsWith(`${to}/`);
 
   const mainLinks = [
-    { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { to: '/admin/properties', label: 'Annonces', icon: Building2 },
     { to: '/admin/submissions', label: 'Soumissions', icon: ClipboardList },
   ];
@@ -249,7 +249,7 @@ const AdminHeader = () => {
 
              <div className="flex items-center gap-2 pl-1">
                 <div className="hidden md:block text-right mr-1">
-                   <p className="text-[10px] font-black text-white uppercase tracking-tighter">Master Admin</p>
+                   <p className="text-[10px] font-black text-white uppercase tracking-tighter">Administrateur Principal</p>
                    <p className="text-[9px] text-gold-primary/70 font-bold uppercase truncate max-w-[80px]">
                       {user?.nom || 'Admin'}
                    </p>

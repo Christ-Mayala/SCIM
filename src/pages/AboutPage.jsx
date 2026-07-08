@@ -259,7 +259,7 @@ const AboutPage = () => {
                   {milestones.map((item, idx) => (
                     <div key={idx} className="group relative flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-zinc-800 border border-white/10 flex flex-col items-center justify-center group-hover:bg-gold-primary group-hover:border-gold-primary transition-all duration-300">
-                        <span className="text-[10px] font-black text-zinc-400 group-hover:text-zinc-950 leading-none mb-0.5">Year</span>
+                        <span className="text-[10px] font-black text-zinc-400 group-hover:text-zinc-950 leading-none mb-0.5">Année</span>
                         <span className="text-xs font-black text-white leading-none">{item.year}</span>
                       </div>
                       <div>

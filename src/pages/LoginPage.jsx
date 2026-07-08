@@ -244,7 +244,7 @@ const LoginPage = () => {
                 loading={loading}
                 className="w-full h-16 bg-gold-primary hover:bg-amber-300 text-zinc-950 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-[0_20px_40px_rgba(201,162,39,0.2)] hover:shadow-[0_25px_50px_rgba(201,162,39,0.3)] transition-all duration-500 hover:-translate-y-1 active:scale-95"
               >
-                Accéder au Dashboard
+                Accéder au Tableau de bord
               </Button>
             </form>
 

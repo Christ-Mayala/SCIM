@@ -71,7 +71,7 @@ const isAuthEndpoint = (url = '') =>
   url.includes('/users/refresh-token') || url.includes('/users/login') || url.includes('/users/register');
 
 const makeApiError = ({ payload, response, originalRequest }) => {
-  const err = new Error(payload?.message || 'Request failed');
+  const err = new Error(payload?.message || 'Une erreur est survenue. Veuillez réessayer.');
   err.response = {
     ...response,
     data: payload,

@@ -88,7 +88,7 @@ const HomePage = () => {
   ];
 
   const testimonials = [
-    { name: 'Marie K.',      role: 'Acheteuse Prestige',  content: "SCIM a su comprendre mes exigences les plus élevées. Un service d'exception.", rating: 5, date: 'Jan 2024' },
+    { name: 'Marie K.',      role: 'Acheteuse Prestige',  content: "SCIM a su comprendre mes exigences les plus élevées. Un service d'exception.", rating: 5, date: 'Janv 2024' },
     { name: 'Jean-Paul M.',  role: 'Investisseur',        content: 'Une plateforme qui redéfinit le haut de gamme au Congo. Transparence inégalée.', rating: 5, date: 'Déc 2023' },
     { name: 'Sarah D.',      role: 'Propriétaire',        content: "La gestion immobilière n'a jamais été aussi sereine. Un partenaire luxe.",       rating: 5, date: 'Nov 2023' },
   ];
@@ -118,24 +118,24 @@ const HomePage = () => {
           </div>
 
           {/* headline */}
-          <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tighter mb-8">
+          <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[0.95] sm:leading-[0.9] tracking-tight sm:tracking-tighter mb-6 sm:mb-8 break-words">
             Votre Patrimoine<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary via-amber-200 to-amber-500">
               D'Exception
             </span>
           </h1>
-          <p className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 text-base sm:text-lg text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
+          <p className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 text-sm sm:text-lg text-zinc-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed font-medium px-2">
             Accédez à une sélection exclusive de propriétés luxueuses et d'opportunités d'investissement uniques au Congo-Brazzaville.
           </p>
 
           {/* transaction toggle + search */}
-          <div className="animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300 max-w-2xl mx-auto mb-10">
+          <div className="animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300 max-w-2xl mx-auto mb-8 sm:mb-10 px-2 sm:px-0">
             {/* tabs */}
-            <div className="flex items-center justify-center gap-1 mb-4">
+            <div className="flex items-center justify-center gap-1 mb-4 flex-wrap">
               {[{ v: '', l: 'Tous les biens' }, { v: 'location', l: 'Location' }, { v: 'vente', l: 'Vente' }].map(t => (
                 <button key={t.v} onClick={() => handleTransaction(t.v)}
                   className={cn(
-                    'px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all',
+                    'px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wide sm:tracking-widest transition-all whitespace-nowrap',
                     activeTransaction === t.v
                       ? 'bg-gold-primary text-black shadow-lg shadow-gold-primary/30'
                       : 'bg-white/5 text-zinc-400 hover:text-white border border-white/10'
@@ -147,13 +147,15 @@ const HomePage = () => {
             {/* search bar */}
             <form onSubmit={handleSearch} className="relative group">
               <div className="absolute inset-0 bg-gold-primary/10 rounded-3xl blur-xl group-focus-within:bg-gold-primary/15 transition-all pointer-events-none" />
-              <div className="relative flex items-center gap-2 bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-2 group-focus-within:border-gold-primary/30 transition-all">
-                <Search className="w-5 h-5 text-zinc-500 ml-4 shrink-0" />
-                <input type="text" placeholder="Quartier, ville, type de bien..."
-                  value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 h-14 bg-transparent text-white placeholder-zinc-500 outline-none font-bold text-base" />
+              <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-2 group-focus-within:border-gold-primary/30 transition-all">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Search className="w-5 h-5 text-zinc-500 ml-3 sm:ml-4 shrink-0" />
+                  <input type="text" placeholder="Quartier, ville, type de bien..."
+                    value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 min-w-0 h-12 sm:h-14 bg-transparent text-white placeholder-zinc-500 outline-none font-bold text-sm sm:text-base" />
+                </div>
                 <Button type="submit"
-                  className="h-12 px-8 rounded-2xl bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black uppercase tracking-widest text-xs shadow-xl shadow-gold-primary/30 shrink-0 transition-all hover:-translate-y-0.5">
+                  className="h-11 sm:h-12 px-6 sm:px-8 rounded-2xl bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black uppercase tracking-widest text-xs shadow-xl shadow-gold-primary/30 shrink-0 transition-all hover:-translate-y-0.5">
                   Découvrir
                 </Button>
               </div>
@@ -161,11 +163,11 @@ const HomePage = () => {
           </div>
 
           {/* category chips */}
-          <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500 flex flex-wrap justify-center gap-3">
+          <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500 flex flex-wrap justify-center gap-2 sm:gap-3 px-2">
             {categories.map((cat) => (
               <button key={cat.value} onClick={() => handleCategory(cat.value)}
                 className={cn(
-                  'group flex items-center gap-2.5 px-5 py-3 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1',
+                  'group flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-5 py-2 sm:py-3 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1',
                   `bg-gradient-to-br ${cat.color} ${cat.border} hover:border-opacity-60`
                 )}>
                 <cat.icon className={cn('w-4 h-4', cat.text)} />

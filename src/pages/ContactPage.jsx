@@ -140,7 +140,7 @@ const ContactPage = () => {
     "Estimation de bien",
     "Visite immobilière",
     "Support technique",
-    "Partnership",
+    "Partenariat",
     "Autre"
   ];
 

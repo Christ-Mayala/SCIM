@@ -107,11 +107,11 @@ const AdminPropertiesPage = () => {
 
   // Charts (données statiques illustratives)
   const publicationTrendData = useMemo(() => [
-    { name: 'Jan', value: 12 }, { name: 'Fév', value: 18 }, { name: 'Mar', value: 15 },
+    { name: 'Janv', value: 12 }, { name: 'Fév', value: 18 }, { name: 'Mar', value: 15 },
     { name: 'Avr', value: 22 }, { name: 'Mai', value: 28 }, { name: 'Juin', value: 25 },
   ], []);
   const viewsTrendData = useMemo(() => [
-    { name: 'Jan', value: 320 }, { name: 'Fév', value: 480 }, { name: 'Mar', value: 560 },
+    { name: 'Janv', value: 320 }, { name: 'Fév', value: 480 }, { name: 'Mar', value: 560 },
     { name: 'Avr', value: 720 }, { name: 'Mai', value: 980 }, { name: 'Juin', value: 850 },
   ], []);
   const categoryData = useMemo(() => [
@@ -195,7 +195,7 @@ const AdminPropertiesPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                <Link to="/admin/dashboard" className="hover:text-zinc-300 transition-colors">Dashboard</Link>
+                <Link to="/admin/dashboard" className="hover:text-zinc-300 transition-colors">Tableau de bord</Link>
                 <ChevronRight className="h-3 w-3 opacity-30" />
                 <span className="text-zinc-300">Annonces</span>
               </div>

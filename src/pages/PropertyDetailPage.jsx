@@ -649,7 +649,7 @@ const PropertyDetailPage = () => {
                 <div className="mt-8 flex items-center justify-center gap-4 py-4 border-t border-white/5 opacity-50">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-gold-primary shadow-[0_0_8px_rgba(201,162,39,0.5)]" />
-                      <span className="text-[9px] font-black text-white uppercase tracking-widest">SLA &lt; 30min</span>
+                      <span className="text-[9px] font-black text-white uppercase tracking-widest">Réponse &lt; 30min</span>
                     </div>
                 </div>
               </div>

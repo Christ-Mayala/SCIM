@@ -107,7 +107,7 @@ const AdminAnalyticsPage = () => {
         <div>
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Rapports & Analyses</p>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight uppercase italic">
-            Analytics<span className="text-gold-primary">.</span>
+            Statistiques<span className="text-gold-primary">.</span>
           </h1>
           <p className="text-xs text-zinc-500 mt-1 capitalize">{today.str}</p>
         </div>

@@ -141,7 +141,7 @@ const ForgotPasswordPage = () => {
                 <img src="/images/scim-logo.jpg" alt="SCIM" className="h-12 w-12 rounded-full object-cover" />
               </div>
             </Link>
-            <h1 className="text-3xl font-black text-white tracking-tight text-center">SCIM <span className="text-gold-primary">RECOVERY</span></h1>
+            <h1 className="text-3xl font-black text-white tracking-tight text-center">SCIM <span className="text-gold-primary">RÉCUPÉRATION</span></h1>
           </div>
 
           <div className="max-w-md mx-auto w-full">
