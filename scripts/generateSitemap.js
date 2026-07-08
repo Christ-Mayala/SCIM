@@ -91,6 +91,7 @@ async function fetchProperties() {
     
     let properties = [];
     if (Array.isArray(response.data)) properties = response.data;
+    else if (Array.isArray(response.data?.data?.properties)) properties = response.data.data.properties;
     else if (Array.isArray(response.data?.data)) properties = response.data.data;
     else if (Array.isArray(response.data?.items)) properties = response.data.items;
     else if (Array.isArray(response.data?.data?.items)) properties = response.data.data.items;

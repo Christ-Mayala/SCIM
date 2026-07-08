@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Heart, Home, LogOut, Menu, Search, User, X, 
   LayoutDashboard, Shield, Sparkles, ChevronDown, 
-  PlusCircle, Info, Phone, MoreHorizontal
+  PlusCircle, Info, Phone, MoreHorizontal, MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useMessage } from '../../../contexts/MessageContext';
@@ -19,6 +19,7 @@ const ClientHeader = () => {
   const moreMenuRef = useRef(null);
   
   const { user, isAuthenticated, logout } = useAuth();
+  const { unreadCount } = useMessage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -119,6 +120,26 @@ const ClientHeader = () => {
               {l.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <Link
+              to="/messages"
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                "flex items-center justify-between gap-4 px-6 py-4 rounded-3xl text-lg font-bold transition-all",
+                isActive('/messages') ? "bg-gold-primary text-black" : "text-zinc-400 hover:bg-white/5 hover:text-white"
+              )}
+            >
+              <div className="flex items-center gap-4">
+                <MessageCircle className={cn("h-5 w-5", isActive('/messages') ? "text-black" : "text-gold-primary")} />
+                Demandes & Notifications
+              </div>
+              {unreadCount > 0 && (
+                <span className="h-6 min-w-[24px] px-1.5 bg-gold-primary text-black text-xs font-black rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
           {user?.role === 'admin' && (
             <Link
               to="/admin/dashboard"
@@ -269,6 +290,22 @@ const ClientHeader = () => {
                   title="Favoris"
                 >
                   <Heart className="h-4.5 w-4.5" />
+                </Link>
+                {/* Demandes & Notifications */}
+                <Link
+                  to="/messages"
+                  className={cn(
+                    "relative p-2 rounded-full transition-all",
+                    isActive('/messages') ? "bg-white/10 text-gold-primary" : "text-zinc-400 hover:text-gold-primary"
+                  )}
+                  title="Demandes & Notifications"
+                >
+                  <MessageCircle className="h-4.5 w-4.5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-0.5 bg-gold-primary text-black text-[8px] font-black rounded-full flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <Link
                   to="/profile"

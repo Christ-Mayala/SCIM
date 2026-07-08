@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Save, Settings, Globe, Shield, Bell, User,
-  Lock, Layout, Mail, Database, AlertTriangle, RefreshCw
+import { 
+  Save, Settings, Globe, Shield, Bell, User, 
+  Lock, Layout, Mail, Database, AlertTriangle, RefreshCw 
 } from 'lucide-react';
 import { adminAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
@@ -64,30 +64,30 @@ const AdminSettingsPage = () => {
 
   return (
     <div className="p-4 lg:p-8 max-w-full text-white">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-            Administration <span className="opacity-30">/</span> <span className="text-zinc-300">Paramètres</span>
-          </div>
-          <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tighter italic uppercase">Configuration Système<span className="text-gold-primary">.</span></h1>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Button onClick={onSave} loading={saving} className="h-12 px-8 rounded-2xl bg-gold-primary text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/10 transition-all">
-            <Save className="h-4 w-4 mr-2" /> Enregistrer
-          </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         
-        {/* Main Settings Form */}
-        <div className="xl:col-span-2 space-y-8">
+        {/* Section Principale - 2/3 de la largeur */}
+        <div className="xl:col-span-2 space-y-8 min-w-0">
           
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+                Administration <span className="opacity-30">/</span> <span className="text-zinc-300">Paramètres</span>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tighter italic uppercase">Configuration Système<span className="text-gold-primary">.</span></h1>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <Button onClick={onSave} loading={saving} className="h-12 px-8 rounded-2xl bg-gold-primary text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/10 transition-all">
+                <Save className="h-4 w-4 mr-2" /> Enregistrer
+              </Button>
+            </div>
+          </div>
+
           {/* Identity Section */}
           <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 lg:p-10">
-            <div className="flex items-center gap-4 mb-10">
+            <div className="flex items-center gap-4 mb-8">
               <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary shadow-lg">
                 <Globe className="h-6 w-6" />
               </div>
@@ -116,7 +116,7 @@ const AdminSettingsPage = () => {
 
           {/* Security Section */}
           <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 lg:p-10">
-            <div className="flex items-center gap-4 mb-10">
+            <div className="flex items-center gap-4 mb-8">
               <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary shadow-lg">
                 <Shield className="h-6 w-6" />
               </div>
@@ -150,11 +150,12 @@ const AdminSettingsPage = () => {
               ))}
             </div>
           </div>
-
         </div>
 
-        {/* Right Sidebar Info */}
+        {/* Barre Latérale Droite - 1/3 de la largeur */}
         <div className="space-y-8">
+          
+          {/* Database Backup */}
           <div className="bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 text-center">
             <div className="h-14 w-14 rounded-2xl bg-zinc-800 flex items-center justify-center text-gold-primary mx-auto mb-6">
               <Database className="h-7 w-7" />
@@ -168,18 +169,18 @@ const AdminSettingsPage = () => {
             </Button>
           </div>
 
+          {/* Notifications & System Info */}
           <div className="bg-gradient-to-br from-gold-primary/10 to-transparent border border-white/5 rounded-[2.5rem] p-8">
              <div className="flex items-center gap-3 mb-6">
                 <Bell className="h-5 w-5 text-gold-primary" />
                 <h4 className="text-sm font-black text-white uppercase tracking-widest">Notifications</h4>
              </div>
-             <p className="text-[11px] text-zinc-500 leading-relaxed font-medium mb-6">
+             <p className="text-[11px] text-zinc-500 leading-relaxed mb-6 font-medium">
                Les administrateurs reçoivent des alertes pour chaque nouvelle soumission et réservation.
              </p>
              <div className="text-[9px] font-black text-gold-primary uppercase tracking-[0.2em] italic">Version Système 2.0.4</div>
           </div>
         </div>
-
       </div>
     </div>
   );

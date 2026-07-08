@@ -147,12 +147,12 @@ const AboutPage = () => {
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="group relative bg-white p-8 rounded-[32px] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(201,162,39,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+                  className="group relative bg-zinc-900/80 p-8 rounded-[32px] border border-white/10 hover:shadow-[0_20px_50px_rgba(212,175,55,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
                 >
                   <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gold-primary/5 rounded-full blur-2xl group-hover:bg-gold-primary/10 transition-colors" />
                   
                   <div className="flex flex-col items-center text-center">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-zinc-950 rounded-2xl shadow-lg mb-6 group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/10">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-zinc-800 rounded-2xl shadow-lg mb-6 group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/10">
                       {(() => {
                         const Icon = stat.icon;
                         return <Icon className="w-7 h-7 text-gold-primary" />;
@@ -160,7 +160,7 @@ const AboutPage = () => {
                     </div>
                     
                     <div className="flex items-baseline justify-center mb-1">
-                      <span className="text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">{stat.value}</span>
+                      <span className="text-3xl lg:text-4xl font-black text-white tracking-tight">{stat.value}</span>
                       <span className="text-lg text-gold-primary font-bold ml-0.5">{stat.suffix}</span>
                     </div>
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-3">{stat.label}</h3>
@@ -173,10 +173,10 @@ const AboutPage = () => {
         </section>
 
         {/* Story Section */}
-        <section className="py-24 bg-white overflow-hidden relative">
+        <section className="py-24 bg-zinc-950 overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-gold-primary/5 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-zinc-100 rounded-full blur-[100px]" />
+            <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-zinc-800 rounded-full blur-[100px]" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -202,17 +202,17 @@ const AboutPage = () => {
                 </div>
                 
                 {/* Floating Stats Card */}
-                <div className="absolute -bottom-10 -right-6 w-72 bg-white p-8 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.12)] border border-zinc-100 z-20 hidden md:block">
+                <div className="absolute -bottom-10 -right-6 w-72 bg-zinc-900 p-8 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 z-20 hidden md:block">
                   <div className="flex items-center gap-5 mb-5">
                     <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 bg-gold-primary rounded-2xl text-zinc-950 shadow-lg shadow-gold-primary/20">
                       <TrendingUp className="w-7 h-7" />
                     </div>
                     <div>
                       <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Croissance</p>
-                      <p className="text-xl text-zinc-950 font-black">+125% <span className="text-xs font-bold text-green-500">↑</span></p>
+                      <p className="text-xl text-white font-black">+125% <span className="text-xs font-bold text-emerald-500">↑</span></p>
                     </div>
                   </div>
-                  <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-gold-primary to-amber-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(201,162,39,0.3)]" />
                   </div>
                 </div>
@@ -235,35 +235,35 @@ const AboutPage = () => {
                     <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">Notre Histoire</span>
                   </div>
                   
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-zinc-950 tracking-tighter leading-[0.9] mb-8">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tighter leading-[0.9] mb-8">
                     Une vision <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">
                       sans limites.
                     </span>
                   </h2>
                   
-                  <blockquote className="relative p-8 rounded-[32px] bg-zinc-50 border border-zinc-100 italic">
+                  <blockquote className="relative p-8 rounded-[32px] bg-zinc-900 border border-white/10 italic">
                     <div className="absolute -top-4 -left-2 text-6xl text-gold-primary/20 font-serif leading-none">"</div>
-                    <p className="text-lg text-zinc-600 leading-relaxed font-semibold">
+                    <p className="text-lg text-zinc-300 leading-relaxed font-semibold">
                       Nous ne vendons pas seulement des biens immobiliers, nous bâtissons des futurs et concrétisons des rêves durables.
                     </p>
                   </blockquote>
                 </div>
 
-                <p className="text-lg text-zinc-500 leading-relaxed">
-                  Fondée sur la conviction que l'immobilier est avant tout une aventure humaine, SCIM a su s'imposer par son <span className="text-zinc-950 font-bold">intégrité</span> et sa <span className="text-gold-primary font-bold">maîtrise technique</span> unique sur le marché.
+                <p className="text-lg text-zinc-400 leading-relaxed">
+                  Fondée sur la conviction que l'immobilier est avant tout une aventure humaine, SCIM a su s'imposer par son <span className="text-white font-bold">intégrité</span> et sa <span className="text-gold-primary font-bold">maîtrise technique</span> unique sur le marché.
                 </p>
 
                 {/* Timeline Stylisée */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                   {milestones.map((item, idx) => (
                     <div key={idx} className="group relative flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex flex-col items-center justify-center group-hover:bg-gold-primary group-hover:border-gold-primary transition-all duration-300">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-zinc-800 border border-white/10 flex flex-col items-center justify-center group-hover:bg-gold-primary group-hover:border-gold-primary transition-all duration-300">
                         <span className="text-[10px] font-black text-zinc-400 group-hover:text-zinc-950 leading-none mb-0.5">Year</span>
-                        <span className="text-xs font-black text-zinc-950 leading-none">{item.year}</span>
+                        <span className="text-xs font-black text-white leading-none">{item.year}</span>
                       </div>
                       <div>
-                        <h4 className="text-sm font-black text-zinc-950 uppercase tracking-tight mb-1 group-hover:text-gold-primary transition-colors">{item.title}</h4>
+                        <h4 className="text-sm font-black text-white uppercase tracking-tight mb-1 group-hover:text-gold-primary transition-colors">{item.title}</h4>
                         <p className="text-xs text-zinc-500 leading-snug">{item.description}</p>
                       </div>
                     </div>
@@ -276,7 +276,7 @@ const AboutPage = () => {
         </section>
 
         {/* Values Section */}
-        <section className="py-32 bg-zinc-50 relative overflow-hidden">
+        <section className="py-32 bg-zinc-900/30 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-gold-primary/5 blur-[120px] -z-10" />
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -286,10 +286,10 @@ const AboutPage = () => {
                 <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">Notre ADN</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-black text-zinc-950 tracking-tighter mb-6">
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-6">
                 Les Valeurs qui <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">Nous Guident</span>
               </h2>
-              <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
                 Notre succès repose sur des principes fondamentaux qui définissent notre approche et notre engagement.
               </p>
             </div>
@@ -298,24 +298,24 @@ const AboutPage = () => {
               {values.map((value, index) => (
                 <div 
                   key={index} 
-                  className="group relative bg-white border border-zinc-100 rounded-[32px] p-10 hover:shadow-[0_30px_60px_rgba(0,0,0,0.06)] transition-all duration-500 hover:border-gold-primary/30 overflow-hidden"
+                  className="group relative bg-zinc-900/80 border border-white/10 rounded-[32px] p-10 hover:shadow-[0_30px_60px_rgba(0,0,0,0.3)] transition-all duration-500 hover:border-gold-primary/30 overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-2 h-full bg-gold-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
                   
                   <div className="flex flex-col sm:flex-row items-start gap-8">
                     <div className="flex-shrink-0">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-zinc-950 rounded-2xl group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/5 shadow-xl">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-zinc-800 rounded-2xl group-hover:scale-110 transition-transform duration-500 ring-4 ring-gold-primary/5 shadow-xl">
                         <value.icon className="w-8 h-8 text-gold-primary" />
                       </div>
                     </div>
                     
                     <div className="flex-1">
-                      <h3 className="text-2xl font-black text-zinc-950 tracking-tight mb-4">{value.title}</h3>
-                      <p className="text-zinc-500 mb-8 leading-relaxed font-medium">{value.description}</p>
+                      <h3 className="text-2xl font-black text-white tracking-tight mb-4">{value.title}</h3>
+                      <p className="text-zinc-400 mb-8 leading-relaxed font-medium">{value.description}</p>
                       
                       <div className="flex flex-wrap gap-3">
                         {value.features.map((feature, idx) => (
-                          <div key={idx} className="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-100 text-xs font-bold text-zinc-600 group-hover:bg-gold-primary/5 group-hover:border-gold-primary/10 transition-colors">
+                          <div key={idx} className="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-800 border border-white/10 text-xs font-bold text-zinc-300 group-hover:bg-gold-primary/10 group-hover:border-gold-primary/20 transition-colors">
                             <div className="w-1.5 h-1.5 bg-gold-primary rounded-full mr-2.5 shadow-[0_0_5px_rgba(201,162,39,0.5)]" />
                             {feature}
                           </div>
@@ -330,47 +330,45 @@ const AboutPage = () => {
         </section>
 
         {/* Team Section */}
-        <section className="py-32 bg-white relative overflow-hidden">
+        <section className="py-32 bg-zinc-950 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
                <div className="inline-flex items-center gap-3 mb-6">
                 <div className="h-[1px] w-12 bg-gold-primary/30" />
                 <span className="text-gold-primary font-black uppercase tracking-[0.3em] text-[10px]">L'ÉQUIPE</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-zinc-950 tracking-tighter mb-4">
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4">
                 Rencontrez <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-500">Nos Experts</span>
               </h2>
-              <p className="text-zinc-500 font-medium">Des professionnels passionnés au service de votre patrimoine.</p>
+              <p className="text-zinc-400 font-medium">Des professionnels passionnés au service de votre patrimoine.</p>
             </div>
 
-            <div className="scrolling-container overflow-hidden">
-              <div className="scrolling-wrapper">
-                {[...team, ...team].map((member, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 w-64 mx-6 group"
-                  >
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-gold-primary rounded-[32px] rotate-6 scale-95 opacity-0 group-hover:opacity-20 transition-all duration-500" />
-                      <div className="relative aspect-square rounded-[32px] overflow-hidden border-4 border-white shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
-                        <img className="w-full h-full object-cover" src={member.image} alt={member.name} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-lg font-black text-zinc-950 tracking-tight leading-none mb-1">{member.name}</h3>
-                      <p className="text-gold-primary font-black uppercase tracking-widest text-[10px]">{member.role}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {team.map((member, index) => (
+                <div
+                  key={index}
+                  className="group"
+                >
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gold-primary rounded-[32px] rotate-6 scale-95 opacity-0 group-hover:opacity-20 transition-all duration-500" />
+                    <div className="relative aspect-square rounded-[32px] overflow-hidden border-4 border-zinc-800 shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
+                      <img className="w-full h-full object-cover" src={member.image} alt={member.name} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-black text-white tracking-tight leading-none mb-1">{member.name}</h3>
+                    <p className="text-gold-primary font-black uppercase tracking-widest text-[10px]">{member.role}</p>
+                  </div>
+                </div>
+              ))}
             </div>
             
             <div className="text-center mt-20">
               <Link to="/contact">
                 <Button
                   size="lg"
-                  className="bg-zinc-950 text-white hover:bg-black px-10 py-7 rounded-[20px] text-base font-black uppercase tracking-widest shadow-2xl hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] group"
+                  className="bg-zinc-900 text-white hover:bg-zinc-800 border border-white/10 px-10 py-7 rounded-[20px] text-base font-black uppercase tracking-widest shadow-2xl hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] group"
                 >
                   Réserver une consultation
                   <ChevronRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -417,7 +415,7 @@ const AboutPage = () => {
                   title: "Garantir le Succès",
                   content: "Votre réussite est notre unique mesure de performance. Nous déployons tous nos actifs pour sécuriser vos investissements.",
                   items: ['Négociation de haut vol', 'Gestion de processus', 'Suivi long terme']
-                }
+                },
               ].map((box, idx) => (
                 <div key={idx} className="relative group p-10 rounded-[40px] bg-zinc-900 border border-white/5 hover:border-gold-primary/30 transition-all duration-500">
                   <div className="absolute -top-5 -left-5 w-14 h-14 bg-zinc-950 border border-gold-primary/20 rounded-2xl flex items-center justify-center shadow-2xl">
@@ -502,6 +500,3 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
-
-
-

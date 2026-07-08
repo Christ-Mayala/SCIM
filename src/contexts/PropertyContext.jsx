@@ -75,29 +75,44 @@ const reducer = (state, action) => {
 const toApiFilters = (filters = {}) => {
   const apiFilters = {};
 
-  if (filters?.search) apiFilters.search = filters.search;
-  if (filters?.city) apiFilters.ville = filters.city;
-  if (filters?.category) apiFilters.categorie = filters.category;
-  if (filters?.minPrice) apiFilters.prixMin = filters.minPrice;
-  if (filters?.maxPrice) apiFilters.prixMax = filters.maxPrice;
+  // Recherche texte — le backend cherche dans titre, description, ville, categorie
+  if (filters?.search?.trim()) apiFilters.search = filters.search.trim();
 
+  // Localisation
+  if (filters?.city?.trim())   apiFilters.ville = filters.city.trim();
+
+  // Type de bien
+  if (filters?.category)       apiFilters.categorie = filters.category;
+
+  // Prix
+  if (filters?.minPrice)       apiFilters.prixMin = filters.minPrice;
+  if (filters?.maxPrice)       apiFilters.prixMax = filters.maxPrice;
+
+  // Transaction
   if (filters?.transactionType) apiFilters.transactionType = filters.transactionType;
+
+  // Bon Plan
   if (filters?.isBonPlan !== undefined && filters?.isBonPlan !== '') apiFilters.isBonPlan = filters.isBonPlan;
 
-  if (filters?.bedrooms) apiFilters.nombre_chambres = filters.bedrooms;
-  if (filters?.bathrooms) apiFilters.nombre_salles_bain = filters.bathrooms;
+  // Pièces — le backend accepte bedrooms et nombre_chambres (alias)
+  if (filters?.bedrooms)       apiFilters.bedrooms = filters.bedrooms;
+  if (filters?.bathrooms)      apiFilters.bathrooms = filters.bathrooms;
 
-  if (filters?.minSurface) apiFilters.superficieMin = filters.minSurface;
-  if (filters?.maxSurface) apiFilters.superficieMax = filters.maxSurface;
-  if (filters?.sortBy) apiFilters.sortBy = filters.sortBy;
+  // Superficie — le backend accepte minSurface/maxSurface et superficieMin/superficieMax
+  if (filters?.minSurface)     apiFilters.superficieMin = filters.minSurface;
+  if (filters?.maxSurface)     apiFilters.superficieMax = filters.maxSurface;
 
-  if (filters?.limit) apiFilters.limit = filters.limit;
+  // Tri
+  if (filters?.sortBy)         apiFilters.sortBy = filters.sortBy;
+
+  // Pagination custom
+  if (filters?.limit)          apiFilters.limit = filters.limit;
 
   return apiFilters;
 };
 
 export const PropertyProvider = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const favoritesRef = useRef(state.favorites);
@@ -229,7 +244,7 @@ export const PropertyProvider = ({ children }) => {
   }, []);
 
   const fetchFavorites = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || authLoading) {
       dispatch({ type: 'SET_FAVORITES', payload: [] });
       return [];
     }
@@ -244,7 +259,7 @@ export const PropertyProvider = ({ children }) => {
       dispatch({ type: 'SET_FAVORITES', payload: [] });
       return [];
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
 
   useEffect(() => {
     fetchFavorites();

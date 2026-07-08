@@ -167,7 +167,7 @@ const ContactPage = () => {
             </>
           }
           description="Notre équipe d'experts vous accompagne à chaque étape. Discutons de votre projet et trouvons ensemble la meilleure solution."
-          backgroundImage="https://images.unsplash.com/photo-1558036117-15e82a2c9a9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+          backgroundImage="/images/contact/image.png"
         />
 
         {/* Success Message */}

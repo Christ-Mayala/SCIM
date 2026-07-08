@@ -16,12 +16,18 @@ export const validatePhone = (phone) => {
 };
 
 export const formatPrice = (price) => {
+  const n = Number(price);
+  if (!n || isNaN(n)) return '0 XAF';
+  // Compact: ≥1B → 1,2G | ≥1M → 1,5M | ≥1K → 150K | sinon normal
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1).replace(/\.0$/, '')} G XAF`;
+  if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')} M XAF`;
+  if (n >= 10_000)        return `${(n / 1_000).toFixed(0)} K XAF`;
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'XAF',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price);
+  }).format(n);
 };
 
 export const formatDate = (date) => {
@@ -101,33 +107,19 @@ export const getPropertyTypeIcon = (category) => {
 
 export const getPropertyFeatures = (property) => {
   const features = [];
-
-  if (property.nombre_chambres) {
-    features.push(
-      `${property.nombre_chambres} chambre${
-        property.nombre_chambres > 1 ? 's' : ''
-      }`
-    );
-  }
-
-  if (property.nombre_salles_bain) {
-    features.push(
-      `${property.nombre_salles_bain} salle${
-        property.nombre_salles_bain > 1 ? 's' : ''
-      } de bain`
-    );
-  }
-
-  if (property.superficie) {
-    features.push(`${property.superficie} m²`);
-  }
-
-  if (property.garage) features.push('Garage');
-  if (property.piscine) features.push('Piscine');
-  if (property.jardin) features.push('Jardin');
-  if (property.balcon) features.push('Balcon');
-  if (property.gardien) features.push('Gardien');
-
+  if (property.nombre_chambres)   features.push(`${property.nombre_chambres} ch.`);
+  if (property.nombre_salles_bain) features.push(`${property.nombre_salles_bain} sdb.`);
+  if (property.superficie)        features.push(`${property.superficie} m²`);
+  if (property.garage)            features.push('Garage');
+  if (property.piscine)           features.push('Piscine');
+  if (property.jardin)            features.push('Jardin');
+  if (property.balcon)            features.push('Balcon');
+  if (property.gardien)           features.push('Gardien');
+  if (property.climatisation)     features.push('Clim.');
+  if (property.wifi)              features.push('Wi-Fi');
+  if (property.ascenseur)         features.push('Ascenseur');
+  if (property.parking)           features.push('Parking');
+  if (property.groupe_electrogene) features.push('Groupe élec.');
   return features;
 };
 

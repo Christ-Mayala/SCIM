@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { favoritesAPI, formatDate, formatPrice, reservationAPI, userAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../contexts/AuthContext';
+import { IncompleteProfileBanner } from '../../../components/features/IncompleteProfileBanner';
 
 const ClientDashboardPage = () => {
   const { user } = useAuth();
@@ -112,52 +113,56 @@ const ClientDashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      {/* Ambient BG */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gold-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-gold-dark/5 rounded-full blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <IncompleteProfileBanner />
 
-      {/* Header Banner */}
-      <div className="relative bg-zinc-900 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
+      {/* ── Hero ── */}
+      <div className="relative bg-zinc-900/60 border-b border-white/5 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-gold-primary/8 rounded-full blur-[80px]" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <span className="inline-flex items-center gap-2 px-3 py-1 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest text-gold-primary mb-3">
             <Sparkles className="h-3 w-3" />
             Espace Membre
-          </div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight italic uppercase">
-            Bonjour{user?.prenom ? `, ${user.prenom}` : ''}
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight italic uppercase text-white">
+            Bonjour{user?.nom ? `, ${user.nom.split(' ')[0]}` : ''}<span className="text-gold-primary">.</span>
           </h1>
-          <p className="text-zinc-400 font-medium mt-1">Gérez vos favoris, visites et réservations depuis votre espace personnel.</p>
+          <p className="text-zinc-400 text-sm font-medium mt-1">
+            Gérez vos favoris, visites et réservations depuis votre espace personnel.
+          </p>
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick Actions */}
-        <div className="bg-zinc-900 rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 mb-8 shadow-xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        {/* ── Quick actions ── */}
+        <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-1 h-5 bg-gold-primary rounded-full" />
-            <h2 className="text-sm font-black text-white uppercase tracking-widest">Actions Rapides</h2>
+            <div className="h-1 w-6 bg-gold-primary rounded-full" />
+            <h2 className="text-xs font-black text-white uppercase tracking-widest">Actions Rapides</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { to: '/favorites', icon: Heart, label: 'Favoris', color: 'text-red-400' },
-              { to: '/profile', icon: User, label: 'Mon Profil', color: 'text-blue-400' },
-              { to: '/properties', icon: Search, label: 'Rechercher', color: 'text-gold-primary' },
-              { to: '/contact', icon: MessageCircle, label: 'Contact', color: 'text-emerald-400' },
-            ].map(({ to, icon: Icon, label, color }) => (
-              <Link key={to} to={to}>
-                <div className="flex flex-col items-center justify-center gap-2 p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-gold-primary/30 hover:bg-white/10 transition-all group cursor-pointer">
-                  <Icon className={`w-5 h-5 ${color} group-hover:scale-110 transition-transform`} />
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{label}</span>
+              { to: '/favorites', icon: Heart,          label: 'Favoris',    color: 'text-red-400',      bg: 'bg-red-500/10' },
+              { to: '/profile',   icon: User,           label: 'Mon Profil', color: 'text-blue-400',     bg: 'bg-blue-500/10' },
+              { to: '/properties',icon: Search,         label: 'Rechercher', color: 'text-gold-primary', bg: 'bg-gold-primary/10' },
+              { to: '/contact',   icon: MessageCircle,  label: 'Contact',    color: 'text-emerald-400',  bg: 'bg-emerald-500/10' },
+            ].map(({ to, icon: Icon, label, color, bg }) => (
+              <Link key={to} to={to}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-zinc-950/40 rounded-2xl border border-white/5 hover:border-gold-primary/25 hover:bg-zinc-900/60 transition-all group"
+              >
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${bg} ${color} group-hover:scale-110 transition-transform`}>
+                  <Icon className="h-5 w-5" />
                 </div>
+                <span className="text-[9px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors">{label}</span>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Main Grid */}
+        {/* ── Main grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Reservations */}

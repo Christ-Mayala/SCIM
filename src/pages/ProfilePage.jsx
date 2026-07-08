@@ -1,34 +1,51 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { User, Mail, Phone, Lock, Save, Star, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import {
+  User, Mail, Phone, Lock, Save, Star, Eye, MessageSquare,
+  Settings, Calendar, Heart, Shield, Award, Sparkles, ArrowRight,
+  Home, Bell, History, LogOut, UserCircle, Camera, Edit3,
+  Building2, TrendingUp, CheckCircle, AlertCircle, ChevronRight,
+  Key, EyeOff
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
+import toast from 'react-hot-toast';
+import { IncompleteProfileBanner } from '../components/features/IncompleteProfileBanner';
+
+/* ── small helpers ── */
+const StatCard = ({ icon: Icon, label, value, color, bg }) => (
+  <div className={cn('flex items-center justify-between p-4 rounded-2xl border border-white/[0.06] transition-all hover:border-white/10 group', bg || 'bg-zinc-950/50')}>
+    <div className="flex items-center gap-3">
+      <div className={cn('p-2.5 rounded-xl', `bg-${color}-500/10`)}>
+        <Icon className={cn('w-4 h-4', `text-${color}-400`)} />
+      </div>
+      <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">{label}</span>
+    </div>
+    <span className="text-2xl font-black text-white">{value}</span>
+  </div>
+);
+
+const FieldLabel = ({ children }) => (
+  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-2">{children}</label>
+);
 
 const ProfilePage = () => {
-  const { user, updateProfile, loading } = useAuth();
-
-  const [formData, setFormData] = useState({
-    nom: user?.nom || '',
-    email: user?.email || '',
-    telephone: user?.telephone || '',
-  });
-  const [errors, setErrors] = useState({});
+  const { user, updateProfile, loading, logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
+  const [showPwd, setShowPwd] = useState({ current: false, new: false, confirm: false });
 
-  const [pwdOpen, setPwdOpen] = useState(false);
+  const [formData, setFormData] = useState({ nom: user?.nom || '', email: user?.email || '', telephone: user?.telephone || '' });
+  const [errors, setErrors] = useState({});
   const [pwdData, setPwdData] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [pwdErrors, setPwdErrors] = useState({});
-
-  const [stats, setStats] = useState({ favoritesCount: 0, visitedCount: 0, ratingsCount: 0, avgGiven: 0 });
+  const [stats, setStats] = useState({ favoritesCount: 0, visitedCount: 0, ratingsCount: 0 });
 
   useEffect(() => {
-    setFormData({
-      nom: user?.nom || '',
-      email: user?.email || '',
-      telephone: user?.telephone || '',
-    });
+    setFormData({ nom: user?.nom || '', email: user?.email || '', telephone: user?.telephone || '' });
   }, [user?._id]);
 
   useEffect(() => {
@@ -44,60 +61,44 @@ const ProfilePage = () => {
   const initials = useMemo(() => {
     const n = user?.nom || user?.name || user?.email || '';
     const parts = String(n).trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return 'U';
-    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
-    return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+    if (!parts.length) return 'U';
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }, [user?.nom, user?.name, user?.email]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+    setFormData(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
   };
 
   const validateForm = () => {
-    const next = {};
-
-    if (!formData.nom.trim()) next.nom = 'Le nom est requis';
-
-    if (!formData.email) next.email = "L'email est requis";
-    else if (!validateEmail(formData.email)) next.email = "Format d'email invalide";
-
-    if (!formData.telephone) next.telephone = 'Le téléphone est requis';
-    else if (!validatePhone(formData.telephone)) next.telephone = 'Format de téléphone invalide';
-
-    setErrors(next);
-    return Object.keys(next).length === 0;
+    const n = {};
+    if (!formData.nom.trim()) n.nom = 'Le nom est requis';
+    if (!formData.email) n.email = "L'email est requis";
+    else if (!validateEmail(formData.email)) n.email = "Email invalide";
+    if (!formData.telephone) n.telephone = 'Le téléphone est requis';
+    else if (!validatePhone(formData.telephone)) n.telephone = 'Format invalide';
+    setErrors(n);
+    return !Object.keys(n).length;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
-    const result = await updateProfile({ ...formData, _id: user?._id || user?.id });
-    if (result.success) setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setFormData({
-      nom: user?.nom || '',
-      email: user?.email || '',
-      telephone: user?.telephone || '',
-    });
-    setErrors({});
-    setIsEditing(false);
+    const res = await updateProfile({ ...formData, _id: user?._id || user?.id });
+    if (res.success) setIsEditing(false);
   };
 
   const validatePwd = () => {
     const e = {};
-    if (!pwdData.currentPassword) e.currentPassword = 'Mot de passe actuel requis';
-    if (!pwdData.newPassword) e.newPassword = 'Nouveau mot de passe requis';
-    else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwdData.newPassword)) {
-      e.newPassword = 'Doit contenir majuscule, minuscule, chiffre et symbole';
-    }
-    if (pwdData.newPassword !== pwdData.confirm) e.confirm = 'Les mots de passe ne correspondent pas';
+    if (!pwdData.currentPassword) e.currentPassword = 'Requis';
+    if (!pwdData.newPassword) e.newPassword = 'Requis';
+    else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwdData.newPassword))
+      e.newPassword = 'Doit contenir MAJ, min, chiffre et symbole (8+ cars)';
+    if (pwdData.newPassword !== pwdData.confirm) e.confirm = 'Mots de passe différents';
     setPwdErrors(e);
-    return Object.keys(e).length === 0;
+    return !Object.keys(e).length;
   };
 
   const handlePwdSave = async () => {
@@ -105,226 +106,313 @@ const ProfilePage = () => {
     try {
       const { userAPI } = await import('../lib/api');
       await userAPI.changePassword(user?._id || user?.id, pwdData.currentPassword, pwdData.newPassword);
-      setPwdOpen(false);
       setPwdData({ currentPassword: '', newPassword: '', confirm: '' });
-    } catch (_) {}
+      toast.success('Mot de passe mis à jour !');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Erreur');
+    }
   };
 
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    : 'récemment';
+
+  const tabs = [
+    { id: 'profile',   label: 'Profil',   icon: UserCircle },
+    { id: 'security',  label: 'Sécurité', icon: Shield },
+    { id: 'activity',  label: 'Activité', icon: History },
+  ];
+
+  const quickLinks = [
+    { label: 'Tableau de bord', icon: Home,         to: '/dashboard',  color: 'gold',    colorHex: 'text-gold-primary', bg: 'bg-gold-primary/10'  },
+    { label: 'Mes favoris',     icon: Heart,        to: '/favorites',  color: 'rose',    colorHex: 'text-rose-400',     bg: 'bg-rose-500/10'      },
+    { label: 'Messages',        icon: MessageSquare,to: '/messages',   color: 'blue',    colorHex: 'text-blue-400',     bg: 'bg-blue-500/10'      },
+    { label: 'Soumettre un bien',icon: Building2,   to: '/soumettre-bien', color:'emerald', colorHex:'text-emerald-400', bg:'bg-emerald-500/10'  },
+  ];
+
   return (
-    <div className="min-h-screen bg-zinc-950 pb-32">
-       {/* Premium Hero Header */}
-       <div className="relative h-80 overflow-hidden">
-          <div className="absolute inset-0 bg-zinc-900">
-             <div className="absolute inset-0 opacity-20" style={{
-                backgroundImage: `radial-gradient(circle at 2px 2px, rgba(201,162,39,0.2) 1px, transparent 0)`,
-                backgroundSize: '32px 32px'
-             }} />
-             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+    <div className="min-h-screen bg-zinc-950 pb-24">
+      <IncompleteProfileBanner />
+
+      {/* ── Hero Header ── */}
+      <div className="relative overflow-hidden">
+        {/* bg */}
+        <div className="absolute inset-0 bg-zinc-900">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold-primary/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-[100px] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/30 to-zinc-950" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-8">
+            {/* avatar */}
+            <div className="relative group shrink-0">
+              <div className="absolute inset-0 bg-gold-primary/20 rounded-[36px] blur-3xl group-hover:bg-gold-primary/30 transition-colors" />
+              <div className="relative w-32 h-32 rounded-[36px] bg-gradient-to-br from-gold-primary via-amber-300 to-amber-600 border-4 border-zinc-950 flex items-center justify-center text-5xl font-black text-black shadow-2xl shadow-gold-primary/30 transition-all group-hover:scale-105">
+                {initials}
+              </div>
+              {/* role badge */}
+              <div className="absolute -bottom-2 -right-2 px-2.5 py-1 bg-zinc-950 border border-gold-primary/30 rounded-lg text-[8px] font-black text-gold-primary uppercase tracking-widest">
+                {user?.role === 'admin' ? 'Admin' : 'Membre'}
+              </div>
+            </div>
+
+            {/* info */}
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black text-gold-primary uppercase tracking-[0.25em] mb-4">
+                <Sparkles className="w-3 h-3" /> Profil SCIM
+              </div>
+              <h1 className="text-4xl font-black text-white tracking-tighter italic mb-2">
+                {user?.nom || user?.name || 'Utilisateur'}<span className="text-gold-primary">.</span>
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-zinc-400">
+                <span className="flex items-center gap-2 text-sm"><Mail className="w-4 h-4 text-gold-primary" />{user?.email}</span>
+                {user?.telephone && <span className="flex items-center gap-2 text-sm"><Phone className="w-4 h-4 text-gold-primary" />{user.telephone}</span>}
+                <span className="flex items-center gap-2 text-sm"><Calendar className="w-4 h-4 text-gold-primary" />Membre depuis {memberSince}</span>
+              </div>
+            </div>
+
+            {/* action */}
+            <div className="shrink-0">
+              {!isEditing ? (
+                <button onClick={() => { setActiveTab('profile'); setIsEditing(true); }}
+                  className="flex items-center gap-2.5 h-12 px-7 bg-gold-primary hover:bg-amber-300 text-black rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-gold-primary/20 hover:-translate-y-0.5">
+                  <Edit3 className="w-4 h-4" /> Modifier le profil
+                </button>
+              ) : (
+                <button onClick={() => setIsEditing(false)}
+                  className="h-12 px-7 border border-white/10 bg-zinc-900 text-zinc-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
+                  Annuler
+                </button>
+              )}
+            </div>
           </div>
-          
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12">
-             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 md:gap-8 text-center sm:text-left">
-                <div className="relative group">
-                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl sm:rounded-[40px] bg-zinc-800 border-4 border-zinc-950 overflow-hidden shadow-2xl flex items-center justify-center text-3xl sm:text-4xl font-black text-gold-primary transition-all duration-500 group-hover:scale-105">
-                      {initials}
-                   </div>
-                   <div className="absolute -bottom-2 -right-2 p-2 sm:p-3 bg-gold-primary rounded-xl sm:rounded-2xl shadow-xl text-zinc-950 group-hover:rotate-12 transition-all">
-                      <Save className="w-4 h-4 sm:w-5 sm:h-5" />
-                   </div>
-                </div>
-                
-                <div className="flex-1 space-y-2">
-                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black text-gold-primary uppercase tracking-widest">
-                      Profil Prestige
-                   </div>
-                   <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                      {user?.nom || user?.name || 'Utilisateur'}
-                   </h1>
-                   <p className="text-zinc-400 font-medium flex items-center gap-4">
-                      <span>{user?.email}</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                      <span>Membre depuis {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : 'récemment'}</span>
-                   </p>
-                </div>
+        </div>
+      </div>
 
-                <div className="flex flex-wrap justify-center sm:justify-start gap-4 w-full sm:w-auto mt-4 sm:mt-0">
-                   {!isEditing ? (
-                      <Button 
-                        onClick={() => setIsEditing(true)} 
-                        className="h-14 px-8 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl text-xs font-black uppercase tracking-widest transition-all"
-                      >
-                        Paramètres
-                      </Button>
-                   ) : (
-                      <Button 
-                        onClick={handleCancel} 
-                        variant="outline"
-                        className="h-14 px-8 bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800 rounded-2xl text-xs font-black uppercase tracking-widest"
-                      >
-                        Annuler
-                      </Button>
-                   )}
-                </div>
-             </div>
+      {/* ── Body ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+          {/* ─ Sidebar ─ */}
+          <div className="lg:col-span-4 space-y-5">
+            {/* quick links */}
+            <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-white/[0.07] p-6">
+              <h3 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-5">Accès Rapide</h3>
+              <div className="space-y-1.5">
+                {quickLinks.map((l, i) => (
+                  <Link key={i} to={l.to}
+                    className="group flex items-center gap-3 p-3.5 rounded-2xl hover:bg-zinc-950/60 transition-all">
+                    <div className={cn('p-2.5 rounded-xl', l.bg)}>
+                      <l.icon className={cn('w-4 h-4', l.colorHex)} />
+                    </div>
+                    <span className="font-bold text-zinc-300 group-hover:text-white text-sm transition-colors flex-1">{l.label}</span>
+                    <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* stats */}
+            <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-white/[0.07] p-6">
+              <h3 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-5">Vue d'ensemble</h3>
+              <div className="space-y-3">
+                <StatCard icon={Heart} label="Favoris" value={stats.favoritesCount ?? 0} color="rose" />
+                <StatCard icon={Eye} label="Biens visités" value={stats.visitedCount ?? 0} color="blue" />
+                <StatCard icon={Star} label="Avis postés" value={stats.ratingsCount ?? 0} color="yellow" />
+              </div>
+            </div>
+
+            {/* logout */}
+            <button onClick={() => { logout(); navigate('/'); }}
+              className="w-full flex items-center justify-center gap-3 p-4 bg-red-500/5 border border-red-500/10 text-red-400 rounded-3xl hover:bg-red-500/10 hover:border-red-500/20 transition-all group">
+              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <span className="font-black uppercase tracking-widest text-xs">Déconnexion</span>
+            </button>
           </div>
-       </div>
 
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-             {/* Left Column: Form & Security */}
-             <div className="lg:col-span-2 space-y-8">
-                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[40px] border border-white/5 p-10 shadow-2xl">
-                   <div className="flex items-center justify-between mb-12">
-                      <h3 className="text-xl font-black text-white tracking-tight">Identité Numérique</h3>
-                      <div className="w-12 h-1 bg-gold-primary/20 rounded-full" />
-                   </div>
+          {/* ─ Main ─ */}
+          <div className="lg:col-span-8 space-y-5">
+            {/* tabs */}
+            <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-white/[0.07] p-2">
+              <div className="flex gap-2">
+                {tabs.map(t => (
+                  <button key={t.id} onClick={() => setActiveTab(t.id)}
+                    className={cn(
+                      'flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all',
+                      activeTab === t.id
+                        ? 'bg-gold-primary text-black shadow-xl shadow-gold-primary/20'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    )}>
+                    <t.icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                   <form onSubmit={handleSubmit} className="space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Nom Patronyme</label>
-                            <Input
-                              type="text"
-                              name="nom"
-                              value={formData.nom}
-                              onChange={handleChange}
-                              error={errors.nom}
-                              disabled={!isEditing}
-                              className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
-                              leftIcon={<User className="w-5 h-5 text-gold-primary/40" />}
-                            />
-                         </div>
-                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Communication Professionnelle</label>
-                            <Input
-                              type="email"
-                              name="email"
-                              value={formData.email}
-                              onChange={handleChange}
-                              error={errors.email}
-                              disabled={!isEditing}
-                              className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
-                              leftIcon={<Mail className="w-5 h-5 text-gold-primary/40" />}
-                            />
-                         </div>
+            {/* tab content */}
+            <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-white/[0.07] p-7 sm:p-9">
+
+              {/* ── Profile tab ── */}
+              {activeTab === 'profile' && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-2xl font-black text-white tracking-tight italic">Informations Personnelles</h3>
+                    <p className="text-zinc-500 text-sm mt-1">Gérez vos coordonnées et votre profil public.</p>
+                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                      <FieldLabel>Nom complet</FieldLabel>
+                      <Input type="text" name="nom" value={formData.nom} onChange={handleChange}
+                        error={errors.nom} disabled={!isEditing}
+                        className="h-13 bg-zinc-950/50 border-white/[0.07] rounded-2xl text-white disabled:opacity-50"
+                        leftIcon={<User className="w-4 h-4 text-zinc-500" />} />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <FieldLabel>Email</FieldLabel>
+                        <Input type="email" name="email" value={formData.email} onChange={handleChange}
+                          error={errors.email} disabled={!isEditing}
+                          className="h-13 bg-zinc-950/50 border-white/[0.07] rounded-2xl text-white disabled:opacity-50"
+                          leftIcon={<Mail className="w-4 h-4 text-zinc-500" />} />
                       </div>
-
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-4">Ligne Directe</label>
-                         <Input
-                           type="tel"
-                           name="telephone"
-                           value={formData.telephone}
-                           onChange={handleChange}
-                           error={errors.telephone}
-                           disabled={!isEditing}
-                           className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white focus:ring-gold-primary transition-all font-bold disabled:opacity-50"
-                           leftIcon={<Phone className="w-5 h-5 text-gold-primary/40" />}
-                         />
+                      <div>
+                        <FieldLabel>Téléphone</FieldLabel>
+                        <Input type="tel" name="telephone" value={formData.telephone} onChange={handleChange}
+                          error={errors.telephone} disabled={!isEditing}
+                          className="h-13 bg-zinc-950/50 border-white/[0.07] rounded-2xl text-white disabled:opacity-50"
+                          leftIcon={<Phone className="w-4 h-4 text-zinc-500" />} />
                       </div>
-
-                      {isEditing && (
-                        <Button 
-                          type="submit" 
-                          loading={loading} 
-                          className="w-full h-18 bg-gold-primary hover:bg-gold-dark text-zinc-950 rounded-[28px] font-black uppercase tracking-[0.25em] text-xs shadow-2xl transition-all duration-500 hover:-translate-y-1"
-                        >
-                          Enregistrer les Modifications
+                    </div>
+                    {isEditing && (
+                      <div className="flex gap-4 pt-2">
+                        <Button type="submit" loading={loading}
+                          className="flex-1 h-13 bg-gold-primary hover:bg-amber-300 text-black rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-gold-primary/20">
+                          <Save className="mr-2 w-4 h-4" /> Enregistrer
                         </Button>
-                      )}
-                   </form>
-                </div>
-
-                {/* Security Section */}
-                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-[32px] md:rounded-[40px] border border-white/5 p-6 md:p-10 shadow-2xl">
-                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                      <div className="flex items-center gap-4">
-                         <div className="p-3 bg-zinc-950 rounded-2xl text-gold-primary">
-                            <Lock className="w-6 h-6" />
-                         </div>
-                         <h3 className="text-xl font-black text-white tracking-tight">Sécurisation du Compte</h3>
+                        <Button type="button" variant="outline" onClick={() => setIsEditing(false)}
+                          className="h-13 px-7 bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white rounded-2xl font-black uppercase tracking-widest text-xs">
+                          Annuler
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => setPwdOpen(!pwdOpen)}
-                        className="text-gold-primary font-black uppercase tracking-widest text-[10px] hover:bg-gold-primary/10"
-                      >
-                         {pwdOpen ? 'Annuler' : 'Changer le Pass'}
-                      </Button>
-                   </div>
+                    )}
+                  </form>
 
-                   {pwdOpen && (
-                     <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                           <Input
-                             type="password"
-                             placeholder="Pass actuel"
-                             value={pwdData.currentPassword}
-                             onChange={(e) => setPwdData({ ...pwdData, currentPassword: e.target.value })}
-                             error={pwdErrors.currentPassword}
-                             className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white font-mono"
-                           />
-                           <Input
-                             type="password"
-                             placeholder="Nouveau Pass"
-                             value={pwdData.newPassword}
-                             onChange={(e) => setPwdData({ ...pwdData, newPassword: e.target.value })}
-                             error={pwdErrors.newPassword}
-                             className="h-16 px-8 bg-zinc-950/50 border-white/5 rounded-[24px] text-white font-mono"
-                           />
+                  {/* info chips */}
+                  {!isEditing && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/[0.06]">
+                      {[
+                        { icon: CheckCircle, label: 'Compte vérifié', ok: true },
+                        { icon: Shield, label: user?.role === 'admin' ? 'Administrateur' : 'Utilisateur standard', ok: true },
+                        { icon: Calendar, label: `Depuis ${memberSince}`, ok: true },
+                      ].map((c, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3.5 bg-zinc-950/50 border border-white/[0.06] rounded-2xl">
+                          <c.icon className={cn('w-4 h-4 shrink-0', c.ok ? 'text-emerald-400' : 'text-zinc-600')} />
+                          <span className="text-xs font-medium text-zinc-400">{c.label}</span>
                         </div>
-                        <Button 
-                          onClick={handlePwdSave}
-                          className="w-full h-16 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-[24px] font-black uppercase tracking-[0.2em] text-[10px]"
-                        >
-                           Mettre à jour la Sécurité
-                        </Button>
-                     </div>
-                   )}
+                      ))}
+                    </div>
+                  )}
                 </div>
-             </div>
+              )}
 
-             {/* Right Column: Stats & Meta */}
-             <div className="space-y-8">
-                <div className="bg-gradient-to-br from-gold-primary to-gold-dark rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-2xl shadow-gold-primary/20 text-zinc-950">
-                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-60">Volume d'Activité</h4>
-                   <div className="space-y-10">
-                      <div className="flex items-end justify-between">
-                         <div>
-                            <div className="text-5xl font-black tracking-tighter leading-none">{stats.favoritesCount ?? 0}</div>
-                            <div className="text-[10px] font-black uppercase tracking-widest mt-2">Favoris Sélectionnés</div>
-                         </div>
-                         <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center text-gold-primary">
-                            <Star className="w-6 h-6" />
-                         </div>
+              {/* ── Security tab ── */}
+              {activeTab === 'security' && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-2xl font-black text-white tracking-tight italic">Sécurité du Compte</h3>
+                    <p className="text-zinc-500 text-sm mt-1">Mettez à jour votre mot de passe pour sécuriser votre compte.</p>
+                  </div>
+                  <div className="space-y-5">
+                    {[
+                      { key: 'currentPassword', label: 'Mot de passe actuel', pwdKey: 'current' },
+                      { key: 'newPassword', label: 'Nouveau mot de passe', pwdKey: 'new' },
+                      { key: 'confirm', label: 'Confirmer le mot de passe', pwdKey: 'confirm' },
+                    ].map(f => (
+                      <div key={f.key}>
+                        <FieldLabel>{f.label}</FieldLabel>
+                        <div className="relative">
+                          <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 pointer-events-none" />
+                          <input type={showPwd[f.pwdKey] ? 'text' : 'password'} placeholder="••••••••"
+                            value={pwdData[f.key]}
+                            onChange={e => setPwdData(p => ({...p, [f.key]: e.target.value}))}
+                            className={cn(
+                              'w-full pl-11 pr-12 py-3.5 bg-zinc-950/50 border rounded-2xl text-sm text-white placeholder:text-zinc-700 outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all',
+                              pwdErrors[f.key] ? 'border-red-500/40' : 'border-white/[0.07]'
+                            )} />
+                          <button type="button" onClick={() => setShowPwd(p => ({...p, [f.pwdKey]: !p[f.pwdKey]}))}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors rounded-lg">
+                            {showPwd[f.pwdKey] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {pwdErrors[f.key] && <p className="mt-1.5 text-[9px] font-bold text-red-400 uppercase tracking-widest">{pwdErrors[f.key]}</p>}
                       </div>
-                      
-                      <div className="h-px bg-zinc-950/10" />
+                    ))}
+                    {/* strength hint */}
+                    <div className="p-4 bg-zinc-950/50 border border-white/[0.06] rounded-2xl">
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Règles de sécurité</p>
+                      {['8 caractères minimum', 'Une lettre majuscule', 'Une lettre minuscule', 'Un chiffre', 'Un caractère spécial'].map(r => (
+                        <div key={r} className="flex items-center gap-2 mb-1">
+                          <div className={cn('w-1.5 h-1.5 rounded-full',
+                            pwdData.newPassword && new RegExp(
+                              r.includes('8') ? '.{8,}' : r.includes('maj') ? '[A-Z]' : r.includes('min') ? '[a-z]' : r.includes('chif') ? '[0-9]' : '[^A-Za-z0-9]'
+                            ).test(pwdData.newPassword) ? 'bg-emerald-400' : 'bg-zinc-700'
+                          )} />
+                          <span className="text-[10px] text-zinc-500">{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button onClick={handlePwdSave}
+                      className="h-13 w-full bg-gold-primary hover:bg-amber-300 text-black rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-gold-primary/20">
+                      <Lock className="mr-2 w-4 h-4" /> Mettre à jour le mot de passe
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-                      <div className="flex items-end justify-between">
-                         <div>
-                            <div className="text-5xl font-black tracking-tighter leading-none">{stats.ratingsCount ?? 0}</div>
-                            <div className="text-[10px] font-black uppercase tracking-widest mt-2">Critiques Émises</div>
-                         </div>
-                         <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center text-gold-primary">
-                            <Save className="w-6 h-6" />
-                         </div>
+              {/* ── Activity tab ── */}
+              {activeTab === 'activity' && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-2xl font-black text-white tracking-tight italic">Activité Récente</h3>
+                    <p className="text-zinc-500 text-sm mt-1">Suivez vos interactions sur la plateforme SCIM.</p>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { icon: Heart, color: 'text-rose-400', bg: 'bg-rose-500/10', title: 'Favoris mis à jour', desc: 'Votre liste de favoris a été actualisée', time: "Aujourd'hui" },
+                      { icon: Eye, color: 'text-blue-400', bg: 'bg-blue-500/10', title: 'Propriétés consultées', desc: 'Vous avez consulté plusieurs biens récemment', time: 'Récemment' },
+                      { icon: MessageSquare, color: 'text-gold-primary', bg: 'bg-gold-primary/10', title: 'Messagerie active', desc: 'Vos conversations avec SCIM sont accessibles', time: 'En continu' },
+                    ].map((a, i) => (
+                      <div key={i} className="flex items-start gap-4 p-5 bg-zinc-950/40 border border-white/[0.06] rounded-2xl hover:border-white/10 transition-all group">
+                        <div className={cn('p-3 rounded-xl shrink-0', a.bg)}>
+                          <a.icon className={cn('w-5 h-5', a.color)} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <h4 className="font-black text-white text-sm">{a.title}</h4>
+                            <span className="text-[10px] text-zinc-500 shrink-0">{a.time}</span>
+                          </div>
+                          <p className="text-sm text-zinc-500">{a.desc}</p>
+                        </div>
                       </div>
-                   </div>
+                    ))}
+                  </div>
+                  <div className="pt-4 border-t border-white/[0.06] flex gap-4">
+                    <Link to="/properties"
+                      className="flex items-center gap-2.5 px-6 py-3 bg-gold-primary text-black rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-amber-300 transition-all hover:-translate-y-0.5 shadow-lg shadow-gold-primary/20">
+                      <Building2 className="w-4 h-4" /> Explorer les biens
+                    </Link>
+                    <Link to="/messages"
+                      className="flex items-center gap-2.5 px-6 py-3 bg-zinc-900 border border-white/10 text-zinc-300 rounded-2xl text-xs font-black uppercase tracking-widest hover:text-white hover:border-white/20 transition-all">
+                      <MessageSquare className="w-4 h-4" /> Mes messages
+                    </Link>
+                  </div>
                 </div>
-
-                <div className="bg-zinc-900 border border-white/5 rounded-[32px] md:rounded-[40px] p-6 md:p-8">
-                   <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-6">Assistance Premium</h4>
-                   <p className="text-zinc-400 text-sm font-medium leading-relaxed mb-8">
-                      Bénéficiez d'une assistance prioritaire 24/7 pour toutes vos transactions et recherches exclusives.
-                   </p>
-                   <Button className="w-full h-14 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-2xl text-[10px] font-black uppercase tracking-widest">
-                      Contacter le Concierge
-                   </Button>
-                </div>
-             </div>
+              )}
+            </div>
           </div>
-       </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, 
+  Heart, MapPin, Bed, Bath, Square, Star, Phone, Mail, Send,
   ArrowLeft, Share2, Calendar, Eye, Car, Waves, TreePine,
   Home, Shield, Award, ChevronLeft, ChevronRight, Clock, AlertCircle, MessageCircle, Sparkles, CheckCircle2, X
 } from 'lucide-react';
@@ -278,15 +278,9 @@ const PropertyDetailPage = () => {
   // images already defined above
   const features = [];
   
-  if (property.nombre_chambres !== undefined && property.nombre_chambres !== null) {
-    features.push({ icon: Bed, label: `${property.nombre_chambres} chambre${property.nombre_chambres > 1 ? 's' : ''}` });
-  }
-  if (property.nombre_salles_bain !== undefined && property.nombre_salles_bain !== null) {
-    features.push({ icon: Bath, label: `${property.nombre_salles_bain} salle${property.nombre_salles_bain > 1 ? 's' : ''} de bain` });
-  }
-  if (property.nombre_salons !== undefined && property.nombre_salons !== null) {
-    features.push({ icon: Home, label: `${property.nombre_salons} salon${property.nombre_salons > 1 ? 's' : ''}` });
-  }
+  if (property.nombre_chambres) features.push({ icon: Bed, label: `${property.nombre_chambres} chambre${property.nombre_chambres > 1 ? 's' : ''}` });
+  if (property.nombre_salles_bain) features.push({ icon: Bath, label: `${property.nombre_salles_bain} salle${property.nombre_salles_bain > 1 ? 's' : ''} de bain` });
+  if (property.nombre_salons) features.push({ icon: Home, label: `${property.nombre_salons} salon${property.nombre_salons > 1 ? 's' : ''}` });
   if (property.superficie) features.push({ icon: Square, label: `${property.superficie} m²` });
   if (property.garage) features.push({ icon: Car, label: 'Garage' });
   if (property.gardien) features.push({ icon: Shield, label: 'Gardien' });
@@ -768,70 +762,90 @@ const PropertyDetailPage = () => {
                   </p>
 
                   {reservationAck && (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
-                      <div className="text-sm font-semibold text-emerald-800">Demande enregistree avec succes</div>
-                      <div className="text-xs text-emerald-700">
-                        Reference: <span className="font-semibold">{reservationAck.reference || reservationAck.reservationId}</span>
+                    <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-4">
+                      {/* success header */}
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30 shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-emerald-400 uppercase tracking-wide leading-snug">
+                            Demande enregistrée !
+                          </p>
+                          <p className="text-xs text-zinc-400 mt-0.5">Notre équipe reviendra vers vous sous {reservationAck.expectedResponseMinutes} min.</p>
+                        </div>
                       </div>
-                      <div className="text-xs text-emerald-700">
-                        {reservationAck.asyncNotice} (SLA cible: {reservationAck.expectedResponseMinutes} min)
+                      {/* reference */}
+                      <div className="flex items-center justify-between px-4 py-3 bg-zinc-950/40 border border-white/[0.07] rounded-2xl">
+                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Référence</span>
+                        <span className="text-sm font-black text-white">{reservationAck.reference || '—'}</span>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                        <Link 
-                          to="/dashboard" 
-                          className="w-full sm:w-auto flex items-center justify-center px-4 py-3 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-100 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-colors"
+                      {/* actions */}
+                      <div className="flex flex-col gap-2.5">
+                        <Link
+                          to="/dashboard"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 px-5 bg-gold-primary hover:bg-amber-300 text-zinc-950 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-gold-primary/20 hover:-translate-y-0.5"
                         >
                           Suivre mes réservations
                         </Link>
-                        {reservationAck.whatsappUrl ? (
-                          <a 
-                            href={reservationAck.whatsappUrl} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="w-full sm:w-auto flex items-center justify-center px-4 py-3 bg-emerald-600 border border-emerald-600 text-white hover:bg-emerald-700 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-colors shadow-lg shadow-emerald-600/20"
+                        {reservationAck.whatsappUrl && (
+                          <a
+                            href={reservationAck.whatsappUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 px-5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 rounded-2xl font-black uppercase tracking-widest text-xs transition-all"
                           >
-                            Continuer sur WhatsApp
+                            <span>💬</span> Contacter via WhatsApp
                           </a>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               </div>
             ) : !isAuthenticated ? (
-              <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6 text-center">
-                <h3 className="text-lg font-bold text-blue-900 mb-2">Intéressé par ce bien ?</h3>
-                <p className="text-sm text-blue-700 mb-4">Connectez-vous pour planifier une visite ou contacter l'agent.</p>
+              <div className="bg-blue-500/10 rounded-[32px] border border-blue-500/20 p-6 text-center">
+                <h3 className="text-lg font-black text-white mb-2">Intéressé par ce bien ?</h3>
+                <p className="text-sm text-blue-200 mb-4">Connectez-vous pour planifier une visite ou contacter l'agent.</p>
                 <Link to="/login">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md">Se connecter</Button>
+                  <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black uppercase tracking-widest">Se connecter</Button>
                 </Link>
               </div>
             ) : null}
 
 
             {/* Trust Indicators */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Pourquoi nous faire confiance ?</h3>
+            <div className="bg-zinc-900 rounded-[32px] border border-white/10 p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-6 bg-gold-primary rounded-full" />
+                <h3 className="text-lg font-black text-white uppercase italic">Pourquoi nous faire confiance ?</h3>
+              </div>
               <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <Shield className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-3 group">
+                  <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 flex-shrink-0">
+                    <Shield className="w-5 h-5 text-emerald-400" />
+                  </div>
                   <div>
-                    <div className="font-medium text-gray-900">Transactions sécurisées</div>
-                    <div className="text-sm text-gray-600">Toutes nos transactions sont protégées</div>
+                    <div className="font-black text-white">Transactions sécurisées</div>
+                    <div className="text-sm text-zinc-400">Toutes nos transactions sont protégées</div>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Award className="w-6 h-6 text-gold-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-3 group">
+                  <div className="w-10 h-10 bg-gold-primary/10 rounded-xl flex items-center justify-center border border-gold-primary/20 flex-shrink-0">
+                    <Award className="w-5 h-5 text-gold-primary" />
+                  </div>
                   <div>
-                    <div className="font-medium text-gray-900">Expertise reconnue</div>
-                    <div className="text-sm text-gray-600">5+ années d'expérience</div>
+                    <div className="font-black text-white">Expertise reconnue</div>
+                    <div className="text-sm text-zinc-400">5+ années d'expérience</div>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Star className="w-6 h-6 text-gold-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-3 group">
+                  <div className="w-10 h-10 bg-gold-primary/10 rounded-xl flex items-center justify-center border border-gold-primary/20 flex-shrink-0">
+                    <Star className="w-5 h-5 text-gold-primary" />
+                  </div>
                   <div>
-                    <div className="font-medium text-gray-900">98% de satisfaction</div>
-                    <div className="text-sm text-gray-600">Clients satisfaits de nos services</div>
+                    <div className="font-black text-white">98% de satisfaction</div>
+                    <div className="text-sm text-zinc-400">Clients satisfaits de nos services</div>
                   </div>
                 </div>
               </div>
@@ -844,87 +858,152 @@ const PropertyDetailPage = () => {
       <Modal
         isOpen={showContactModal}
         onClose={() => setShowContactModal(false)}
-        title="Demande de Renseignements Exclusive"
-        size="md"
+        size="lg"
         variant="glass"
       >
-        <form className="space-y-6" onSubmit={handleContactSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
-                Identité Complète
-              </label>
-              <input
-                type="text"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
-                placeholder="Votre nom complet"
-                value={contactForm.name}
-                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                required
-              />
+        <div className="space-y-8">
+          {/* Modal Header */}
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black text-gold-primary uppercase tracking-[0.3em] mb-2">
+              <Sparkles className="w-3 h-3" />
+              Demande Exclusive
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight italic">
+              Demande de Renseignements <span className="text-gold-primary">Exclusive</span>
+            </h2>
+            <p className="text-zinc-400 font-medium max-w-md mx-auto">
+              Notre équipe d'experts vous répondra sous 24h maximum.
+            </p>
+          </div>
+
+          {/* Property Info Card */}
+          {property && (
+            <div className="bg-zinc-900/60 rounded-[32px] border border-white/10 p-6 backdrop-blur-xl">
+              <div className="flex items-start gap-4">
+                {property.images?.[0] && (
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0">
+                    <img 
+                      src={getImageUrl(property.images[0]?.url || property.images[0])} 
+                      alt={property.titre} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-black text-gold-primary uppercase tracking-widest mb-1">
+                    {property.transactionType === 'vente' ? 'En Vente' : 'En Location'} • {property.categorie}
+                  </p>
+                  <h3 className="text-lg font-black text-white tracking-tight mb-2 truncate">
+                    {property.titre}
+                  </h3>
+                  <div className="flex items-center gap-2 text-zinc-400 font-medium mb-1">
+                    <MapPin className="w-4 h-4 text-gold-primary" />
+                    <span className="text-sm">{property.ville}</span>
+                  </div>
+                  <p className="text-xl font-black text-gold-primary">
+                    {formatPrice(property.prix)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Form */}
+          <form className="space-y-6" onSubmit={handleContactSubmit}>
+            <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
-                  Email Privé
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">
+                  Identité Complète
                 </label>
                 <input
-                  type="email"
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
-                  placeholder="votre@email.com"
-                  value={contactForm.email}
-                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                  type="text"
+                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-[24px] focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                  placeholder="Votre nom complet"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                   required
                 />
               </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">
+                    Email Privé
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-[24px] focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                    placeholder="votre@email.com"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">
+                    Ligne Directe
+                  </label>
+                  <input
+                    type="tel"
+                    className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-[24px] focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
+                    placeholder="+242 06 123 45 67"
+                    value={contactForm.phone}
+                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
-                  Ligne Directe
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">
+                  Message d'Intérêt
                 </label>
-                <input
-                  type="tel"
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all"
-                  placeholder="+242 06 123 45 67"
-                  value={contactForm.phone}
-                  onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                <textarea
+                  rows={5}
+                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-[24px] focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all resize-none"
+                  placeholder="Décrivez votre projet immobilier..."
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">
-                Message d'Intérêt
-              </label>
-              <textarea
-                rows={4}
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-600 transition-all resize-none"
-                placeholder="Décrivez votre projet immobilier..."
-                value={contactForm.message}
-                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                required
-              />
+            {/* Trust Badges */}
+            <div className="grid grid-cols-3 gap-3 pt-4">
+              {[
+                { icon: Shield, label: 'Sécurisé', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+                { icon: Clock, label: 'Rapide', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+                { icon: Star, label: 'Premium', color: 'text-gold-primary', bg: 'bg-gold-primary/10', border: 'border-gold-primary/20' }
+              ].map((item, i) => (
+                <div key={i} className={`${item.bg} ${item.border} border rounded-2xl p-4 text-center`}>
+                  <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color}`} />
+                  <p className={`text-[10px] font-black uppercase tracking-widest ${item.color}`}>
+                    {item.label}
+                  </p>
+                </div>
+              ))}
             </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button 
-              type="submit" 
-              className="flex-1 bg-gold-primary text-zinc-950 hover:bg-amber-300 h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all hover:-translate-y-1"
-            >
-              Envoyer la Demande
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setShowContactModal(false)}
-              className="sm:w-32 h-16 rounded-2xl bg-white/5 border-white/10 text-white hover:bg-white/10 font-bold uppercase tracking-widest text-[10px]"
-            >
-              Annuler
-            </Button>
-          </div>
-        </form>
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <Button 
+                type="submit" 
+                className="flex-1 bg-gold-primary text-zinc-950 hover:bg-amber-300 h-16 rounded-[24px] font-black uppercase tracking-widest text-xs shadow-xl shadow-gold-primary/20 transition-all hover:-translate-y-1"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Envoyer la Demande
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowContactModal(false)}
+                className="sm:w-32 h-16 rounded-[24px] bg-white/5 border-white/10 text-white hover:bg-white/10 font-bold uppercase tracking-widest text-[10px]"
+              >
+                Annuler
+              </Button>
+            </div>
+          </form>
+        </div>
       </Modal>
 
       {/* Image Modal */}

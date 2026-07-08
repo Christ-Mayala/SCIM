@@ -1,4 +1,5 @@
 // Utilitaires pour l'accessibilité (A11y)
+import React from 'react';
 
 // Gestion du focus pour les modales et overlays
 export class FocusManager {

@@ -25,6 +25,7 @@ const Navbar = () => {
   const publicLinks = [
     { path: '/home', label: 'Accueil', icon: Home },
     { path: '/properties', label: 'Propriétés', icon: Search },
+    { path: '/offres-speciales', label: 'Offres', icon: null },
     { path: '/about', label: 'À propos', icon: null },
     { path: '/contact', label: 'Contact', icon: null },
   ];
@@ -40,24 +41,29 @@ const Navbar = () => {
     : baseAuthLinks;
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-40">
+    <nav className="bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/home" className="flex items-center space-x-3">
-            <img src="/images/scim-logo.jpg" alt="SCIM" className="h-12 w-12 rounded-full object-cover ring-2 ring-gold-primary/30" />
-            <span className="text-xl font-bold text-gray-900">SCIM</span>
+          <Link to="/home" className="flex items-center space-x-4 group">
+            <div className="p-1 bg-gradient-to-br from-gold-primary to-gold-dark rounded-full">
+              <img src="/images/scim-logo.jpg" alt="SCIM" className="h-10 w-10 rounded-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-black text-white tracking-tight">SCIM</span>
+              <span className="text-[10px] font-black text-gold-primary uppercase tracking-[0.2em]">Immobilier Prestige</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {publicLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  'text-gray-700 hover:text-gold-primary transition-colors font-medium',
-                  isActive(link.path) && 'text-gold-primary'
+                  'px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300',
+                  isActive(link.path) && 'text-gold-primary bg-gold-primary/10'
                 )}
               >
                 {link.label}
@@ -66,7 +72,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Auth Section */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-3">
             {isAuthenticated ? (
               <>
                 {authenticatedLinks.map((link) => (
@@ -74,8 +80,8 @@ const Navbar = () => {
                     key={link.path}
                     to={link.path}
                     className={cn(
-                      'flex items-center space-x-1 text-gray-700 hover:text-gold-primary transition-colors relative',
-                      isActive(link.path) && 'text-gold-primary'
+                      'flex items-center space-x-1 px-3 py-2 rounded-xl text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 relative',
+                      isActive(link.path) && 'text-gold-primary bg-gold-primary/10'
                     )}
                   >
                     {link.icon && <link.icon className="w-4 h-4" />}
@@ -87,29 +93,31 @@ const Navbar = () => {
                     )}
                   </Link>
                 ))}
-                <div className="flex items-center text-sm text-gray-600 max-w-[160px]">
-                  <span className="truncate">Bonjour, {user?.nom}</span>
+                <div className="flex items-center text-sm text-zinc-500 max-w-[160px] pl-3 border-l border-white/10">
+                  <span className="truncate font-bold">Bonjour, {user?.nom}</span>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="flex items-center space-x-1"
+                  className="flex items-center space-x-1 text-zinc-400 hover:text-white"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Déconnexion</span>
                 </Button>
               </>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-gold-primary transition-colors font-medium"
+                  className="text-sm font-bold text-zinc-400 hover:text-white transition-colors px-4 py-2 rounded-xl hover:bg-white/5"
                 >
                   Connexion
                 </Link>
                 <Link to="/register">
-                  <Button size="sm">Inscription</Button>
+                  <Button size="sm" className="bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black">
+                    Inscription
+                  </Button>
                 </Link>
               </div>
             )}
@@ -118,13 +126,13 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             {isAuthenticated && (
-              <Link to="/dashboard" className="mr-3 text-gray-700 hover:text-gold-primary">
+              <Link to="/dashboard" className="mr-3 text-zinc-400 hover:text-gold-primary">
                 <Settings className="w-5 h-5" />
               </Link>
             )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-gold-primary transition-colors"
+              className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -133,8 +141,8 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="space-y-4">
+          <div className="md:hidden py-6 border-t border-white/5 bg-zinc-950/95 backdrop-blur-xl">
+            <div className="space-y-2">
               {/* Public Links */}
               {publicLinks.map((link) => (
                 <Link
@@ -142,57 +150,56 @@ const Navbar = () => {
                   to={link.path}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    'block text-gray-700 hover:text-gold-primary transition-colors font-medium',
-                    isActive(link.path) && 'text-gold-primary'
+                    'flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all',
+                    isActive(link.path) && 'text-gold-primary bg-gold-primary/10'
                   )}
                 >
-                  {link.label}
+                  {link.icon && <link.icon className="w-5 h-5" />}
+                  <span>{link.label}</span>
                 </Link>
               ))}
 
               {/* Auth Section */}
               {isAuthenticated ? (
-                <>
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="text-sm text-gray-600 mb-4">
-                      Bonjour, {user?.nom} {user?.role === 'admin' ? '(admin)' : ''}
-                    </div>
-                    {authenticatedLinks.map((link) => (
-                      <Link
-                        key={link.path}
-                        to={link.path}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={cn(
-                          'flex items-center justify-between text-gray-700 hover:text-gold-primary transition-colors py-2',
-                          isActive(link.path) && 'text-gold-primary'
-                        )}
-                      >
-                        <div className="flex items-center space-x-2">
-                          {link.icon && <link.icon className="w-4 h-4" />}
-                          <span>{link.label}</span>
-                        </div>
-                        {typeof link.badge === 'number' && link.badge > 0 && (
-                          <Badge variant="primary" size="sm">
-                            {link.badge}
-                          </Badge>
-                        )}
-                      </Link>
-                    ))}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-gold-primary transition-colors py-2 w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Déconnexion</span>
-                    </button>
+                <div className="border-t border-white/5 pt-4 mt-4 space-y-2">
+                  <div className="px-4 py-2 text-sm text-zinc-500 mb-2 font-bold">
+                    Bonjour, {user?.nom} {user?.role === 'admin' ? '(admin)' : ''}
                   </div>
-                </>
+                  {authenticatedLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={cn(
+                        'flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all',
+                        isActive(link.path) && 'text-gold-primary bg-gold-primary/10'
+                      )}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {link.icon && <link.icon className="w-5 h-5" />}
+                        <span>{link.label}</span>
+                      </div>
+                      {typeof link.badge === 'number' && link.badge > 0 && (
+                        <Badge variant="primary" size="sm">
+                          {link.badge}
+                        </Badge>
+                      )}
+                    </Link>
+                  ))}
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-bold text-zinc-400 hover:text-red-400 hover:bg-red-950/30 transition-all w-full text-left mt-4"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Déconnexion</span>
+                  </button>
+                </div>
               ) : (
-                <div className="border-t border-gray-200 pt-4 space-y-4">
+                <div className="border-t border-white/5 pt-4 mt-4 space-y-3">
                   <Link
                     to="/login"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block text-gray-700 hover:text-gold-primary transition-colors font-medium"
+                    className="flex items-center justify-center px-4 py-3 rounded-2xl text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
                   >
                     Connexion
                   </Link>
@@ -200,7 +207,7 @@ const Navbar = () => {
                     to="/register"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button size="sm" className="w-full">
+                    <Button className="w-full bg-gold-primary hover:bg-amber-300 text-zinc-950 font-black">
                       Inscription
                     </Button>
                   </Link>
@@ -215,4 +222,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

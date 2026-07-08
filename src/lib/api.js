@@ -44,6 +44,8 @@ api.interceptors.request.use(
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${storedToken}`;
       }
+      // If cookie_managed with no real token and we have a refreshToken, we could try to refresh.
+      // This is handled by the response interceptor on 401.
 
       const isFormData =
         typeof FormData !== 'undefined' &&
@@ -68,9 +70,6 @@ api.interceptors.request.use(
 const isAuthEndpoint = (url = '') =>
   url.includes('/users/refresh-token') || url.includes('/users/login') || url.includes('/users/register');
 
-const isPasswordResetEndpoint = (url = '') =>
-  url.includes('/password-reset/request') || url.includes('/password-reset/verify') || url.includes('/password-reset/reset');
-
 const makeApiError = ({ payload, response, originalRequest }) => {
   const err = new Error(payload?.message || 'Request failed');
   err.response = {
@@ -92,23 +91,37 @@ api.interceptors.response.use(
 
         const looksLikeAuthError =
           String(payload?.message || '').toLowerCase().includes('non autorisé') ||
-          String(payload?.message || '').toLowerCase().includes('token');
+          String(payload?.message || '').toLowerCase().includes('token') ||
+          String(payload?.message || '').toLowerCase().includes('unauthorized');
 
         if (looksLikeAuthError && originalRequest && !originalRequest._retry && !isAuthEndpoint(url)) {
           originalRequest._retry = true;
           try {
-            const refreshResponse = await api.post('/users/refresh-token');
-            // Le token est renouvelé et placé dans un cookie HttpOnly par le backend
-            // Mais on le met aussi à jour dans le localStorage pour le mode Authorization header
+            // Use stored refreshToken in body (required by backend)
+            const storedRefreshToken = localStorage.getItem('refreshToken');
+            if (!storedRefreshToken) {
+              return Promise.reject(makeApiError({ payload, response, originalRequest }));
+            }
+            const refreshResponse = await api.post('/users/refresh-token', { refreshToken: storedRefreshToken });
             if (refreshResponse && refreshResponse.status === 200) {
               const newToken = refreshResponse.data?.token;
+              const newRefreshToken = refreshResponse.data?.refreshToken;
               if (newToken) {
                 localStorage.setItem('token', newToken);
+                originalRequest.headers = originalRequest.headers || {};
                 originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+              }
+              if (newRefreshToken) {
+                localStorage.setItem('refreshToken', newRefreshToken);
               }
               return api(originalRequest);
             }
-          } catch (_) {}
+          } catch (_) {
+            // Refresh failed — clear session
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+          }
 
           return Promise.reject(makeApiError({ payload, response, originalRequest }));
         }
@@ -121,7 +134,40 @@ api.interceptors.response.use(
 
     return response;
   },
-  (error) => Promise.reject(error),
+  async (error) => {
+    // Handle network-level 401 (not success:false, actual HTTP 401)
+    const originalRequest = error?.config;
+    if (
+      error?.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest?.url || '')
+    ) {
+      originalRequest._retry = true;
+      try {
+        const storedRefreshToken = localStorage.getItem('refreshToken');
+        if (storedRefreshToken) {
+          const refreshResponse = await api.post('/users/refresh-token', { refreshToken: storedRefreshToken });
+          const newToken = refreshResponse.data?.token;
+          const newRefreshToken = refreshResponse.data?.refreshToken;
+          if (newToken) {
+            localStorage.setItem('token', newToken);
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+          }
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+          }
+          return api(originalRequest);
+        }
+      } catch (_) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+    }
+    return Promise.reject(error);
+  },
 );
 
 export const authAPI = {
@@ -129,15 +175,14 @@ export const authAPI = {
   register: (userData) => api.post('/users/register', userData),
   logout: () => api.post('/users/logout'),
   getProfile: () => api.get('/users/profile'),
+  // updateProfile uses PUT /:id — handled in ProfilePage via userAPI or direct patch
   updateProfile: (userData) => {
-    // Utilisation du module natif /user/profile (PATCH) qui utilise le token (pas besoin d'ID)
-    // Le module natif attend un FormData si avatar, ou JSON sinon. 
-    // api.js gère déjà la conversion FormData dans l'interceptor si besoin, 
-    // mais ici on doit s'assurer d'envoyer le bon format.
-    // Pour simplifier et matcher l'existant, on envoie userData directement.
-    return api.patch('/user/profile', userData);
+    // users.routes has PUT /:id — send as PATCH /users/:id if id present, else fallback
+    const id = userData?._id || userData?.id;
+    if (id) return api.put(`/users/${id}`, userData);
+    return api.get('/users/profile'); // noop fallback
   },
-  refreshToken: () => api.post('/users/refresh-token'), // Reste sur /users
+  refreshToken: (refreshToken) => api.post('/users/refresh-token', { refreshToken }),
   requestPasswordReset: (email) => api.post('/users/reset-request', { email }),
   verifyResetCode: (email, code) => api.post('/users/reset-verify', { email, code }),
   resetPassword: (email, code, newPassword) => api.post('/users/reset-password', { email, code, newPassword }),
@@ -215,7 +260,7 @@ export const adminAPI = {
 
   getPropertySubmissions: (params = {}) => api.get('/admin/property-submissions', { params }),
   updatePropertySubmission: (id, payload) => api.put(`/admin/property-submissions/${id}`, payload),
-  updatePropertySubmissionStatus: (id, status) => api.put(`/admin/property-submissions/${id}/status`, { status }),
+  updatePropertySubmissionStatus: (id, status, reviewNote = '') => api.put(`/admin/property-submissions/${id}/status`, { status, ...(reviewNote ? { reviewNote } : {}) }),
   deletePropertySubmission: (id) => api.delete(`/admin/property-submissions/${id}`),
 
   getUsers: (params = {}) => api.get('/admin/users', { params }),

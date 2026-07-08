@@ -1,298 +1,393 @@
-import React, { useEffect, useState } from 'react';
-import { adminAPI, messageAPI } from '../../../lib/api';
-import { Button } from '../../../components/ui/Button';
+/**
+ * AdminMessagesPage — vue admin
+ *
+ * Flow : L'admin lit les messages reçus des clients.
+ * Il répond via moyens externes (téléphone, WhatsApp, email).
+ * Pas de réponse inline depuis la plateforme.
+ * Les notifications automatiques (réservation, soumission) sont envoyées par email.
+ */
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { adminAPI } from '../../../lib/api';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
-import { 
-  Search, Mail, MailOpen, Trash2, RefreshCw, X, Send, 
-  MessageSquare, User, Clock, CheckCircle2, Zap, LayoutDashboard,
-  Filter, Reply, CornerUpLeft, MoreVertical
+import {
+  Search, Mail, Trash2, RefreshCw, MessageSquare, Clock,
+  Inbox, Phone, ExternalLink, CheckCircle, X, Eye,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { useMessage } from '../../../contexts/MessageContext';
 import toast from 'react-hot-toast';
 
-const AdminMessagesPage = () => {
-  const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, unread, read
-  const [search, setSearch] = useState('');
-  const [replyText, setReplyText] = useState('');
-  const [sending, setSending] = useState(false);
+const LIMIT = 20;
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const res = await adminAPI.getMessages();
-      setMessages(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
-    } catch (e) {
-      toast.error('Erreur chargement messages');
-    } finally {
-      setLoading(false);
-    }
-  };
+const fmt     = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+const fmtShort= (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '—';
+const initials= (n) => {
+  const p = String(n || 'U').trim().split(/\s+/).filter(Boolean);
+  return !p.length ? 'U' : p.length === 1 ? p[0][0].toUpperCase() : `${p[0][0]}${p[1][0]}`.toUpperCase();
+};
 
-  useEffect(() => { load(); }, []);
+/* strip mongo IDs */
+const clean = (t) => String(t || '').replace(/\b([0-9a-f]{24})\b/gi, (m) => `[réf. ${m.slice(-6).toUpperCase()}]`);
 
-  const filtered = messages.filter(m => {
-    const matchType = filter === 'all' ? true : filter === 'unread' ? !m.lu : m.lu;
-    const matchSearch = (m.nom?.toLowerCase().includes(search.toLowerCase()) || 
-                         m.sujet?.toLowerCase().includes(search.toLowerCase()) ||
-                         m.email?.toLowerCase().includes(search.toLowerCase()));
-    return matchType && matchSearch;
-  });
+/* ── message detail panel ── */
+const MessageDetail = ({ msg, onClose, onMarkRead, onDelete }) => {
+  const sender = msg.expediteur || {};
+  const name   = sender.nom || sender.name || (sender.email || '').split('@')[0] || 'Client';
+  const phone  = sender.telephone;
+  const email  = sender.email;
 
-  const handleRead = async (m) => {
-    if (m.lu) { setSelected(m); return; }
-    try {
-      await adminAPI.markMessageAsRead(m._id);
-      setMessages(prev => prev.map(x => x._id === m._id ? { ...x, lu: true } : x));
-      setSelected({ ...m, lu: true });
-    } catch (e) { console.error(e); }
-  };
+  const waText = encodeURIComponent(
+    `Bonjour ${name}, nous avons bien reçu votre message concernant "${msg.sujet || 'votre demande'}". ` +
+    `Voici notre réponse :`
+  );
+  const waPhone = phone ? phone.replace(/[^\d+]/g, '') : '';
 
-  const handleDelete = async (id, e) => {
-    e?.stopPropagation();
-    if (!window.confirm('Supprimer ce message ?')) return;
-    try {
-      await adminAPI.deleteMessage(id);
-      setMessages(prev => prev.filter(x => x._id !== id));
-      if (selected?._id === id) setSelected(null);
-      toast.success('Message supprimé');
-    } catch (e) { toast.error('Erreur suppression'); }
-  };
-
-  const handleReply = async () => {
-    if (!replyText.trim()) return;
-    try {
-      setSending(true);
-      // Logic for sending reply (placeholder)
-      toast.success('Réponse envoyée avec succès');
-      setReplyText('');
-    } catch (e) {
-      toast.error('Erreur lors de l\'envoi');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const StatusTab = ({ id, label, count }) => {
-    const active = filter === id;
-    return (
-      <button
-        onClick={() => setFilter(id)}
-        className={cn(
-          "flex items-center gap-3 px-6 py-4 border-b-2 font-black text-xs uppercase tracking-widest transition-all",
-          active 
-            ? "border-gold-primary text-zinc-900 bg-gold-primary/5" 
-            : "border-transparent text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
-        )}
-      >
-        {label}
-        {count > 0 && (
-          <span className={cn(
-             "px-1.5 py-0.5 rounded-md text-[9px] font-black leading-none",
-             active ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-400"
-          )}>
-            {count}
-          </span>
-        )}
-      </button>
-    );
-  };
+  useEffect(() => { if (!msg.lu) onMarkRead(msg._id); }, [msg._id, msg.lu]); // eslint-disable-line
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 flex flex-col">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 flex-1 flex flex-col">
-        
-        {/* ── Header Section ── */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 shrink-0">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white mb-4 shadow-lg shadow-zinc-900/10">
-              <Zap className="h-3.5 w-3.5 text-amber-400" />
-              Centre de Correspondance
+    <div className="fixed inset-0 z-50 flex" onClick={onClose}>
+      <div className="flex-1 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="w-full max-w-lg bg-[#111] border-l border-white/10 flex flex-col h-full overflow-hidden shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* header */}
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-white/[0.07]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-2xl bg-gold-primary/10 border border-gold-primary/20 flex items-center justify-center text-gold-primary font-black text-base shrink-0">
+              {initials(name)}
             </div>
-            <h1 className="text-4xl font-black text-zinc-900 tracking-tight">Messagerie</h1>
-            <p className="mt-1 text-sm font-medium text-zinc-500">Gérez les demandes de renseignements et le support utilisateur.</p>
+            <div className="min-w-0">
+              <h2 className="text-sm font-black text-white truncate">{name}</h2>
+              <p className="text-[10px] text-zinc-500">{fmt(msg.createdAt)}</p>
+            </div>
           </div>
-          <Button 
-            variant="outline"
-            onClick={load} 
-            className="h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white border-zinc-200 transition-all shadow-sm gap-2"
-          >
-            <RefreshCw className={cn("h-4 w-4 text-amber-500", loading && "animate-spin")} />
-            Actualiser
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => { onDelete(msg._id); onClose(); }}
+              className="h-8 w-8 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-500 flex items-center justify-center transition-all">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={onClose}
+              className="h-8 w-8 rounded-xl border border-white/5 bg-zinc-900 text-zinc-500 hover:text-white flex items-center justify-center transition-all">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* ── Main Interface ── */}
-        <div className="flex-1 bg-white rounded-[2.5rem] border border-zinc-200 shadow-sm overflow-hidden flex flex-col lg:flex-row min-h-[600px]">
-           
-           {/* ── Left Rail: Message List ── */}
-           <div className="w-full lg:w-[400px] border-r border-zinc-100 flex flex-col bg-zinc-50/20">
-              {/* Filter Tabs */}
-              <div className="flex border-b border-zinc-100 overflow-x-auto overflow-y-hidden shrink-0">
-                <StatusTab id="all" label="Tous" />
-                <StatusTab id="unread" label="Non lus" count={messages.filter(m => !m.lu).length} />
-                <StatusTab id="read" label="Lus" />
-              </div>
-              
-              {/* Search Rail */}
-              <div className="p-4 border-b border-zinc-100 shrink-0">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
-                  <input 
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Chercher une discussion..."
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-zinc-100 rounded-2xl text-[11px] font-black uppercase tracking-tight focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all"
-                  />
+        {/* scrollable body */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+          {/* subject + content */}
+          <div className="bg-zinc-900/50 border border-white/[0.07] rounded-2xl p-5">
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2">Objet</p>
+            <h3 className="text-base font-black text-white italic mb-4">"{msg.sujet || 'Sans sujet'}"</h3>
+            <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{clean(msg.contenu)}</p>
+          </div>
+
+          {/* contact info */}
+          <div>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-3">Coordonnées du client</p>
+            <div className="bg-zinc-900/50 border border-white/[0.07] rounded-2xl divide-y divide-white/[0.05]">
+              {[
+                { icon: '👤', label: 'Nom', value: name },
+                { icon: '✉️', label: 'Email', value: email },
+                { icon: '📞', label: 'Téléphone', value: phone },
+              ].filter(r => r.value).map(r => (
+                <div key={r.label} className="flex items-center gap-4 px-5 py-3.5">
+                  <span className="text-base shrink-0">{r.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{r.label}</p>
+                    <p className="text-sm font-bold text-white truncate">{r.value}</p>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Scrollable List */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {loading ? (
-                   <div className="py-12 flex flex-col items-center justify-center opacity-40">
-                      <LoadingSpinner size="sm" />
-                      <p className="text-[9px] font-black uppercase tracking-widest mt-2 px-10 text-center">Interrogation de la base de données...</p>
-                   </div>
-                ) : filtered.length === 0 ? (
-                   <div className="py-20 text-center px-10">
-                      <MessageSquare className="h-10 w-10 text-zinc-200 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Aucune correspondance</p>
-                   </div>
-                ) : (
-                  <div className="divide-y divide-zinc-50">
-                    {filtered.map((m) => {
-                       const active = selected?._id === m._id;
-                       return (
-                        <div 
-                          key={m._id}
-                          onClick={() => handleRead(m)}
-                          className={cn(
-                            "p-6 cursor-pointer transition-all relative group",
-                            active ? "bg-white shadow-inner" : "hover:bg-white",
-                            !m.lu && "bg-amber-50/30"
-                          )}
-                        >
-                          {!m.lu && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-amber-400 rounded-r-full" />
-                          )}
-                          <div className="flex items-start justify-between gap-3">
-                             <div className="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center text-amber-400 shrink-0 shadow-lg">
-                                <User className="h-5 w-5" />
-                             </div>
-                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                   <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic">{m.email?.split('@')[0]}</div>
-                                   <div className="text-[9px] font-black text-zinc-400 uppercase">{m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '—'}</div>
-                                </div>
-                                <div className={cn("text-sm font-black uppercase tracking-tight truncate", !m.lu ? "text-zinc-900" : "text-zinc-700")}>
-                                  {m.sujet || 'Sans sujet'}
-                                </div>
-                                <div className="text-[11px] font-medium text-zinc-400 line-clamp-1 mt-0.5">{m.contenu}</div>
-                             </div>
-                          </div>
-                        </div>
-                       );
-                    })}
+          {/* external reply actions */}
+          <div>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-3">Répondre via</p>
+            <div className="space-y-2.5">
+              {email && (
+                <a href={`mailto:${email}?subject=Réponse: ${encodeURIComponent(msg.sujet || 'Votre demande')}&body=Bonjour ${name},%0D%0A%0D%0A`}
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center gap-3 px-5 py-3.5 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 rounded-2xl transition-all group">
+                  <Mail className="h-4 w-4 text-blue-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-white">Email</p>
+                    <p className="text-[10px] text-blue-400 truncate">{email}</p>
                   </div>
-                )}
-              </div>
-           </div>
-
-           {/* ── Right Rail: Message Detail ── */}
-           <div className="flex-1 flex flex-col bg-white">
-              {selected ? (
-                <>
-                  {/* Detail Header */}
-                  <div className="px-10 py-8 border-b border-zinc-100 bg-zinc-50/30 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-5">
-                       <div className="h-14 w-14 rounded-2xl bg-zinc-900 flex items-center justify-center text-amber-400 shadow-2xl ring-4 ring-zinc-900/5 transition-transform duration-500 hover:rotate-6">
-                          <User className="h-7 w-7" />
-                       </div>
-                       <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{selected.nom || 'Expéditeur'}</h2>
-                            {!selected.lu && <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />}
-                          </div>
-                          <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                             <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {selected.email}</span>
-                             <span className="opacity-20">|</span>
-                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(selected.createdAt).toLocaleString()}</span>
-                          </div>
-                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <Button 
-                         variant="outline" 
-                         onClick={(e) => handleDelete(selected._id, e)}
-                         className="h-11 w-11 p-0 rounded-2xl border-zinc-200 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm"
-                       >
-                          <Trash2 className="h-5 w-5" />
-                       </Button>
-                       <button className="h-11 w-11 rounded-2xl border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 text-zinc-400">
-                          <MoreVertical className="h-5 w-5" />
-                       </button>
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="flex-1 overflow-y-auto p-12 custom-scrollbar space-y-10">
-                    <div className="bg-zinc-50/80 rounded-[2rem] p-10 border border-zinc-100 shadow-sm">
-                       <div className="flex items-center gap-2 mb-6">
-                          <div className="h-1 w-10 bg-amber-400 rounded-full" />
-                          <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Correspondance reçue</h4>
-                       </div>
-                       <h3 className="text-2xl font-black text-zinc-900 uppercase tracking-tight mb-6 leading-tight max-w-2xl italic">
-                         "{selected.sujet || 'Sans sujet précis'}"
-                       </h3>
-                       <div className="text-zinc-700 text-lg leading-relaxed font-medium whitespace-pre-wrap">
-                         {selected.contenu}
-                       </div>
-                    </div>
-                    
-                    {/* Reply Section */}
-                    <div className="pt-10 border-t border-zinc-100">
-                       <div className="flex items-center gap-4 mb-4">
-                          <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400">
-                             <Reply className="h-4 w-4" />
-                          </div>
-                          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Rédiger une réponse officielle</span>
-                       </div>
-                       <div className="relative group">
-                          <textarea 
-                            value={replyText}
-                            onChange={(e) => setReplyText(e.target.value)}
-                            placeholder="Saisissez votre réponse ici..."
-                            className="w-full h-40 rounded-[2rem] bg-zinc-50/50 border border-zinc-100 p-8 text-sm font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-amber-400/5 focus:border-amber-400/30 transition-all resize-none shadow-inner"
-                          />
-                          <div className="absolute bottom-6 right-6 flex items-center gap-3 opacity-0 translate-y-2 group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-300">
-                             <Button 
-                               onClick={handleReply}
-                               loading={sending}
-                               className="h-12 px-8 rounded-2xl bg-zinc-900 text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-zinc-900/20 flex items-center gap-2 hover:bg-zinc-800"
-                             >
-                                <Send className="h-3.5 w-3.5 text-amber-400" />
-                                Transmettre
-                             </Button>
-                          </div>
-                       </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/10 opacity-40 py-20">
-                   <div className="h-24 w-24 rounded-[2rem] bg-zinc-100 flex items-center justify-center mb-6 ring-1 ring-zinc-200">
-                      <LayoutDashboard className="h-10 w-10 text-zinc-300" />
-                   </div>
-                   <h3 className="text-sm font-black text-zinc-900 uppercase tracking-[0.2em] mb-2">Interface de Lecture</h3>
-                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sélectionnez une discussion pour ouvrir les détails</p>
-                </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-zinc-600 group-hover:text-blue-400 transition-colors" />
+                </a>
               )}
-           </div>
+              {phone && waPhone && (
+                <a href={`https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}?text=${waText}`}
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center gap-3 px-5 py-3.5 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 rounded-2xl transition-all group">
+                  <span className="text-base shrink-0">💬</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-white">WhatsApp</p>
+                    <p className="text-[10px] text-emerald-400 truncate">{phone}</p>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-zinc-600 group-hover:text-emerald-400 transition-colors" />
+                </a>
+              )}
+              {phone && (
+                <a href={`tel:${phone}`}
+                  className="flex items-center gap-3 px-5 py-3.5 bg-zinc-900/60 border border-white/[0.07] hover:bg-zinc-900/80 rounded-2xl transition-all group">
+                  <Phone className="h-4 w-4 text-zinc-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-white">Appel téléphonique</p>
+                    <p className="text-[10px] text-zinc-500 truncate">{phone}</p>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* info note */}
+          <div className="flex items-start gap-3 p-4 bg-zinc-950/50 border border-white/[0.05] rounded-2xl">
+            <span className="text-base shrink-0">💡</span>
+            <p className="text-[10px] text-zinc-600 leading-relaxed">
+              Les réponses se font via les canaux externes. Les notifications automatiques (confirmation de réservation, approbation de soumission) sont envoyées directement par email au client.
+            </p>
+          </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+/* ── Main page ── */
+const AdminMessagesPage = () => {
+  const { fetchUnreadCount } = useMessage();
+
+  const [loading,    setLoading]    = useState(true);
+  const [messages,   setMessages]   = useState([]);
+  const [filter,     setFilter]     = useState('all');
+  const [search,     setSearch]     = useState('');
+  const [dSearch,    setDSearch]    = useState('');
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 });
+  const [selected,   setSelected]   = useState(null);
+
+  const loadIdRef  = useRef(0);
+  const mountedRef = useRef(false);
+
+  /* debounce search */
+  useEffect(() => {
+    const t = setTimeout(() => setDSearch(search), 400);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    if (!mountedRef.current) return;
+    load(1, filter, dSearch);
+  }, [dSearch]); // eslint-disable-line
+
+  const load = useCallback(async (page = 1, f = filter, q = dSearch) => {
+    const callId = ++loadIdRef.current;
+    try {
+      setLoading(true);
+      setMessages([]);
+      const res = await adminAPI.getMessages({
+        page, limit: LIMIT,
+        ...(f !== 'all' ? { status: f } : {}),
+        ...(q ? { search: q } : {}),
+      });
+      if (callId !== loadIdRef.current) return;
+      const d = res.data?.data || res.data;
+      setMessages(Array.isArray(d?.items) ? d.items : Array.isArray(d) ? d : []);
+      setPagination({ page: d?.page || 1, totalPages: d?.totalPages || 1, totalItems: d?.total || 0 });
+    } catch {
+      if (callId !== loadIdRef.current) return;
+      toast.error('Erreur chargement messages');
+    } finally {
+      if (callId === loadIdRef.current) setLoading(false);
+    }
+  }, [filter, dSearch]);
+
+  useEffect(() => { mountedRef.current = true; load(1, 'all', ''); }, []); // eslint-disable-line
+
+  const handleMarkRead = useCallback(async (id) => {
+    try {
+      await adminAPI.updateMessageStatus(id, true);
+      setMessages(prev => prev.map(m => m._id === id ? { ...m, lu: true } : m));
+      fetchUnreadCount();
+    } catch { /* silent */ }
+  }, [fetchUnreadCount]);
+
+  const handleDelete = useCallback(async (id) => {
+    if (!window.confirm('Supprimer ce message définitivement ?')) return;
+    try {
+      await adminAPI.deleteMessage(id);
+      setMessages(prev => prev.filter(m => m._id !== id));
+      fetchUnreadCount();
+      toast.success('Message supprimé');
+    } catch { toast.error('Erreur suppression'); }
+  }, [fetchUnreadCount]);
+
+  const localUnread = messages.filter(m => !m.lu).length;
+
+  const tabs = [
+    { id: 'all',    label: 'Tous',     badge: 0 },
+    { id: 'unread', label: 'Non lus',  badge: localUnread },
+    { id: 'read',   label: 'Lus',      badge: 0 },
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-[#0d0d0d] text-white overflow-hidden">
+
+      {/* header */}
+      <div className="shrink-0 px-6 lg:px-10 pt-8 pb-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-white/5">
+        <div>
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+            Administration / <span className="text-zinc-300">Messages</span>
+          </p>
+          <h1 className="text-3xl font-black tracking-tight uppercase italic">
+            Messagerie<span className="text-gold-primary">.</span>
+          </h1>
+          <p className="text-xs text-zinc-500 mt-1">
+            Demandes et informations reçues des clients. Répondez via email, WhatsApp ou téléphone.
+          </p>
+        </div>
+        <button onClick={() => load(pagination.page, filter, dSearch)}
+          className="h-10 w-10 rounded-2xl bg-zinc-900/50 border border-white/5 text-zinc-400 hover:text-white flex items-center justify-center transition-all shrink-0">
+          <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
+        </button>
+      </div>
+
+      {/* content */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+
+        {/* filter tabs */}
+        <div className="shrink-0 flex border-b border-white/5 bg-zinc-900/30">
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => { if (filter === t.id) return; setFilter(t.id); load(1, t.id, dSearch); }}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-1.5 px-2 py-3.5 text-[10px] font-black uppercase tracking-widest transition-all border-b-2',
+                filter === t.id
+                  ? 'border-gold-primary text-gold-primary bg-gold-primary/5'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]',
+              )}>
+              {t.label}
+              {t.badge > 0 && (
+                <span className="h-4 min-w-[16px] px-1 rounded-md bg-gold-primary text-black text-[8px] font-black flex items-center justify-center">
+                  {t.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* search */}
+        <div className="shrink-0 px-4 py-3 border-b border-white/5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-600 pointer-events-none" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Chercher un client, un sujet..."
+              className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/60 border border-white/5 rounded-xl text-xs font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all" />
+          </div>
+        </div>
+
+        {/* list */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {loading ? (
+            <div className="flex items-center justify-center py-16 opacity-50">
+              <LoadingSpinner size="sm" />
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+              <div className="h-16 w-16 rounded-3xl bg-zinc-900/60 border border-white/5 flex items-center justify-center mb-4">
+                <Inbox className="h-8 w-8 text-zinc-700" />
+              </div>
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Aucun message</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {messages.map(m => {
+                const senderName = m.expediteur?.nom || m.expediteur?.name || (m.expediteur?.email || '').split('@')[0] || 'Anonyme';
+                const isActive   = selected?._id === m._id;
+                return (
+                  <div key={m._id} onClick={() => setSelected(m)}
+                    className={cn(
+                      'relative flex items-start gap-4 px-5 py-4 cursor-pointer transition-all group',
+                      isActive ? 'bg-gold-primary/[0.06] border-l-2 border-gold-primary' : 'hover:bg-zinc-900/60',
+                      !m.lu && !isActive && 'bg-gold-primary/[0.025]',
+                    )}>
+                    {/* unread dot */}
+                    {!m.lu && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gold-primary rounded-r-full" />}
+
+                    {/* avatar */}
+                    <div className={cn(
+                      'h-10 w-10 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 border',
+                      isActive ? 'bg-gold-primary text-black border-gold-primary' : 'bg-zinc-800 text-zinc-400 border-white/5'
+                    )}>
+                      {initials(senderName)}
+                    </div>
+
+                    {/* content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <p className={cn('text-sm font-black truncate', !m.lu ? 'text-white' : 'text-zinc-400')}>
+                          {senderName}
+                        </p>
+                        <span className="text-[9px] text-zinc-600 shrink-0">{fmtShort(m.createdAt)}</span>
+                      </div>
+                      <p className={cn('text-xs font-bold truncate mb-0.5', !m.lu ? 'text-zinc-200' : 'text-zinc-500')}>
+                        {m.sujet || 'Sans sujet'}
+                      </p>
+                      <p className="text-[10px] text-zinc-600 truncate">{clean(m.contenu)}</p>
+                    </div>
+
+                    {/* actions */}
+                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                      <button onClick={e => { e.stopPropagation(); setSelected(m); }}
+                        className="h-7 w-7 rounded-lg bg-zinc-800 hover:bg-white/10 text-zinc-500 hover:text-white flex items-center justify-center transition-all" title="Voir">
+                        <Eye className="h-3 w-3" />
+                      </button>
+                      {!m.lu && (
+                        <button onClick={e => { e.stopPropagation(); handleMarkRead(m._id); }}
+                          className="h-7 w-7 rounded-lg bg-gold-primary/10 hover:bg-gold-primary/20 text-gold-primary flex items-center justify-center transition-all" title="Marquer comme lu">
+                          <CheckCircle className="h-3 w-3" />
+                        </button>
+                      )}
+                      <button onClick={e => { e.stopPropagation(); handleDelete(m._id); }}
+                        className="h-7 w-7 rounded-lg bg-red-500/5 hover:bg-red-500/15 text-red-500/60 hover:text-red-400 flex items-center justify-center transition-all" title="Supprimer">
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="shrink-0 flex items-center justify-between px-5 py-3 border-t border-white/5 bg-zinc-900/30">
+            <button disabled={pagination.page <= 1} onClick={() => load(pagination.page - 1, filter, dSearch)}
+              className="h-8 px-3 rounded-lg border border-white/5 text-[9px] font-black text-zinc-500 hover:text-white disabled:opacity-30 uppercase tracking-widest transition-all">
+              Préc.
+            </button>
+            <span className="text-[9px] font-black text-zinc-600 uppercase">{pagination.page} / {pagination.totalPages}</span>
+            <button disabled={pagination.page >= pagination.totalPages} onClick={() => load(pagination.page + 1, filter, dSearch)}
+              className="h-8 px-3 rounded-lg border border-white/5 text-[9px] font-black text-zinc-500 hover:text-white disabled:opacity-30 uppercase tracking-widest transition-all">
+              Suiv.
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* detail drawer */}
+      {selected && (
+        <MessageDetail
+          msg={selected}
+          onClose={() => setSelected(null)}
+          onMarkRead={handleMarkRead}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 };

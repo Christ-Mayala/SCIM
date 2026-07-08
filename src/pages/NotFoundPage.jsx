@@ -1,86 +1,86 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Home, Search, ArrowLeft } from 'lucide-react';
-import {Button} from '../components/ui/Button';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, Search, ArrowLeft, Building2 } from 'lucide-react';
 
 const NotFoundPage = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full text-center">
-        {/* 404 Illustration */}
-        <div className="mb-8">
-          <div className="text-9xl font-bold text-gold-primary mb-4">404</div>
-          <div className="text-6xl mb-4"></div>
+    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6 relative overflow-hidden">
+      {/* Ambient */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 -left-40 w-[600px] h-[600px] bg-gold-primary/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 -right-40 w-[500px] h-[500px] bg-gold-primary/5 rounded-full blur-[100px]" />
+        {/* Grid */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{
+          backgroundImage: 'linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} />
+      </div>
+
+      <div className="relative z-10 text-center max-w-lg w-full">
+        {/* Icon */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="h-24 w-24 rounded-3xl bg-zinc-900/80 border border-white/10 flex items-center justify-center shadow-2xl">
+            <Building2 className="h-12 w-12 text-zinc-600" />
+          </div>
         </div>
 
-        {/* Error Message */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Page non trouvée
+        {/* 404 */}
+        <div className="mb-4">
+          <span className="text-[120px] font-black text-transparent bg-clip-text bg-gradient-to-r from-gold-primary via-amber-300 to-gold-primary leading-none block">
+            404
+          </span>
+        </div>
+
+        {/* Title */}
+        <h1 className="text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tight mb-3">
+          Page introuvable<span className="text-gold-primary">.</span>
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Désolé, la page que vous recherchez n'existe pas ou a été déplacée. 
-          Vérifiez l'URL ou retournez à l'accueil.
+        <p className="text-zinc-400 font-medium text-base leading-relaxed mb-10 max-w-sm mx-auto">
+          Cette page n'existe pas ou a été déplacée. Retournez au catalogue ou à l'accueil.
         </p>
 
-        {/* Action Buttons */}
-        <div className="space-y-4">
-          <Link to="/" className="block">
-            <Button size="lg" className="w-full flex items-center justify-center space-x-2">
-              <Home className="w-5 h-5" />
-              <span>Retour à l'accueil</span>
-            </Button>
-          </Link>
-          
-          <Link to="/properties" className="block">
-            <Button variant="outline" size="lg" className="w-full flex items-center justify-center space-x-2">
-              <Search className="w-5 h-5" />
-              <span>Voir les propriétés</span>
-            </Button>
-          </Link>
-          
-          <button 
-            onClick={() => window.history.back()}
-            className="w-full flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors py-2"
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <Link
+            to="/"
+            className="flex items-center justify-center gap-2 h-12 px-8 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/20 transition-all hover:-translate-y-0.5"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Page précédente</span>
+            <Home className="h-4 w-4" />
+            Accueil
+          </Link>
+          <Link
+            to="/properties"
+            className="flex items-center justify-center gap-2 h-12 px-8 rounded-2xl border border-white/10 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-white/20 font-black uppercase tracking-widest text-[10px] transition-all"
+          >
+            <Search className="h-4 w-4" />
+            Catalogue
+          </Link>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center gap-2 h-12 px-8 rounded-2xl border border-white/5 bg-zinc-950/60 text-zinc-500 hover:text-zinc-300 font-black uppercase tracking-widest text-[10px] transition-all"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
           </button>
         </div>
 
-        {/* Additional Help */}
-        <div className="mt-12 p-6 bg-white rounded-xl shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Besoin d'aide ?
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à nous contacter.
-          </p>
-          <Link to="/contact">
-            <Button variant="outline" size="sm">
-              Nous contacter
-            </Button>
-          </Link>
-        </div>
-
-        {/* Popular Links */}
-        <div className="mt-8">
-          <h4 className="text-sm font-medium text-gray-900 mb-4">
-            Liens populaires
-          </h4>
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link to="/" className="text-gold-primary hover:text-gold-dark transition-colors">
-              Accueil
+        {/* Quick links */}
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          {[
+            { to: '/about',   label: 'À propos' },
+            { to: '/contact', label: 'Contact' },
+            { to: '/login',   label: 'Connexion' },
+          ].map(({ to, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className="text-[10px] font-black text-zinc-600 hover:text-gold-primary uppercase tracking-widest transition-colors"
+            >
+              {label}
             </Link>
-            <Link to="/properties" className="text-gold-primary hover:text-gold-dark transition-colors">
-              Propriétés
-            </Link>
-            <Link to="/about" className="text-gold-primary hover:text-gold-dark transition-colors">
-              À propos
-            </Link>
-            <Link to="/contact" className="text-gold-primary hover:text-gold-dark transition-colors">
-              Contact
-            </Link>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -88,4 +88,3 @@ const NotFoundPage = () => {
 };
 
 export default NotFoundPage;
-

@@ -26,6 +26,7 @@ const renderRoutes = (routes) => {
 const AppShell = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
+  const isFullscreenPage = isAdminPath || location.pathname === '/messages';
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -48,7 +49,7 @@ const AppShell = () => {
         </React.Suspense>
       </main>
 
-      {!isAdminPath ? <Footer /> : null}
+      {!isFullscreenPage ? <Footer /> : null}
     </div>
   );
 };

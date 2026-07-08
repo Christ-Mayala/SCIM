@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -11,23 +11,35 @@ import {
   X,
   ClipboardList,
   CalendarDays,
-  ShieldCheck,
-  ChevronDown,
-  ChevronUp,
-  Bell,
   ChevronLeft,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
-import { useMessage } from '../../contexts/MessageContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import { adminAPI } from '../../lib/api';
 
 const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { unreadCount } = useMessage();
   const { settings } = useSettings();
   const [collapsed, setCollapsed] = useState(false);
+  const [adminUnread, setAdminUnread] = useState(0);
+
+  /* ── poll admin unread count every 30s ── */
+  useEffect(() => {
+    let cancelled = false;
+    const fetchAdminUnread = async () => {
+      try {
+        const res = await adminAPI.getMessages({ page: 1, limit: 1, status: 'unread' });
+        if (cancelled) return;
+        const d = res.data?.data || res.data;
+        setAdminUnread(Number(d?.total ?? 0));
+      } catch { /* silent */ }
+    };
+    fetchAdminUnread();
+    const interval = setInterval(fetchAdminUnread, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [location.pathname]); // re-fetch when navigating (including after reading messages)
 
   const handleLogout = async () => {
     await logout();
@@ -39,18 +51,22 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
       section: 'MENU PRINCIPAL',
       items: [
         { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-        { to: '/admin/properties', icon: Building2, label: 'Annonces', dropdown: true },
-        { to: '/admin/submissions', icon: ClipboardList, label: 'Soumissions', dropdown: true },
+        { to: '/admin/properties', icon: Building2, label: 'Annonces' },
+        { to: '/admin/submissions', icon: ClipboardList, label: 'Soumissions' },
         { to: '/admin/reservations', icon: CalendarDays, label: 'Visites' },
-        { to: '/admin/analytics', icon: BarChart3, label: 'Statistiques', dropdown: true },
-        { to: '/admin/users', icon: Users, label: 'Utilisateurs', dropdown: true },
-        { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
+      ],
+    },
+    {
+      section: 'ANALYTIQUE & COMMUNICATION',
+      items: [
+        { to: '/admin/analytics', icon: BarChart3, label: 'Statistiques' },
+        { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: adminUnread },
+        { to: '/admin/users', icon: Users, label: 'Utilisateurs' },
       ],
     },
     {
       section: 'COMPTE',
       items: [
-        { to: '/profile', icon: Users, label: 'Mon Profil' },
         { to: '/admin/settings', icon: Settings, label: 'Paramètres' },
       ],
     },
@@ -67,7 +83,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
       collapsed ? "w-20" : "w-full"
     )}>
       {/* Header / Logo */}
-      <div className="flex h-24 shrink-0 items-center justify-between px-6 border-b border-white/5">
+      <div className="flex h-16 shrink-0 items-center justify-between px-5 border-b border-white/5">
         <Link to="/admin/dashboard" className={cn("flex items-center gap-3 transition-all", collapsed && "hidden")} onClick={() => setMobileOpen(false)}>
           <div className="h-10 w-10 rounded-xl overflow-hidden ring-2 ring-gold-primary/20 shadow-lg shadow-gold-primary/10">
              <img src="/images/scim-logo.jpg" alt="Logo" className="w-full h-full object-cover scale-110" />

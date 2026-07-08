@@ -40,14 +40,21 @@ const Footer = () => {
           <div className="space-y-8">
             <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Navigation</h3>
             <ul className="space-y-4">
-              {['Accueil', 'Properties', 'About', 'Contact', 'Login'].map((item) => (
-                <li key={item}>
+              {[
+                { label: 'Accueil', path: '/home' },
+                { label: 'Propriétés', path: '/properties' },
+                { label: 'Offres spéciales', path: '/offres-speciales' },
+                { label: 'À propos', path: '/about' },
+                { label: 'Contact', path: '/contact' },
+                { label: 'Connexion', path: '/login' }
+              ].map((item) => (
+                <li key={item.path}>
                   <Link 
-                    to={item === 'Accueil' ? '/' : `/${item.toLowerCase().replace('à ', '').replace('é', 'e')}`} 
+                    to={item.path} 
                     className="text-zinc-500 hover:text-gold-primary transition-all duration-300 text-sm font-bold flex items-center group"
                   >
                     <span className="w-0 group-hover:w-4 h-[1px] bg-gold-primary transition-all duration-300 mr-0 group-hover:mr-2" />
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}

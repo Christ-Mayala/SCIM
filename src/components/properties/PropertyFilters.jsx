@@ -1,226 +1,253 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Search, SlidersHorizontal, X, ChevronDown, Zap } from 'lucide-react';
 import { useProperty } from '../../contexts/PropertyContext';
-import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
-import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
 
-const DEFAULT_FILTERS = {
-  search: '',
-  category: '',
-  minPrice: '',
-  maxPrice: '',
-  city: '',
-  bedrooms: '',
-  bathrooms: '',
-  transactionType: '',
-  minSurface: '',
-  maxSurface: '',
+const DEFAULT = {
+  search: '', category: '', minPrice: '', maxPrice: '',
+  city: '', bedrooms: '', bathrooms: '', transactionType: '',
+  minSurface: '', maxSurface: '', isBonPlan: '',
 };
+
+const CATS = [
+  { v: 'Appartement', l: 'Appartement' },
+  { v: 'Maison',      l: 'Maison' },
+  { v: 'Hôtel',       l: 'Hôtel' },
+  { v: 'Terrain',     l: 'Terrain' },
+  { v: 'Commercial',  l: 'Commercial' },
+  { v: 'Autre',       l: 'Autre' },
+];
+const TRANS = [{ v: 'location', l: 'Location' }, { v: 'vente', l: 'Vente' }];
+const BEDS = ['1', '2', '3', '4', '5+'];
+const BATHS = ['1', '2', '3', '4'];
+
+const Pill = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    type="button"
+    className={cn(
+      'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border whitespace-nowrap',
+      active
+        ? 'bg-gold-primary text-black border-gold-primary shadow-sm shadow-gold-primary/20'
+        : 'border-white/8 bg-zinc-900/60 text-zinc-500 hover:text-white hover:border-white/15',
+    )}
+  >
+    {children}
+  </button>
+);
+
+const FieldLabel = ({ children }) => (
+  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">{children}</p>
+);
+
+const NativeSelect = ({ value, onChange, options, placeholder }) => (
+  <select
+    value={value}
+    onChange={onChange}
+    className="w-full bg-zinc-900/60 border border-white/8 rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-gold-primary/30 appearance-none transition-all"
+  >
+    <option value="" className="bg-zinc-900">{placeholder}</option>
+    {options.map(o => <option key={o.v || o} value={o.v || o} className="bg-zinc-900">{o.l || o}</option>)}
+  </select>
+);
+
+const NumberInput = ({ value, onChange, placeholder }) => (
+  <input
+    type="number"
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    min="0"
+    className="w-full bg-zinc-900/60 border border-white/8 rounded-xl px-3 py-2.5 text-xs font-bold text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+  />
+);
 
 const PropertyFilters = ({ className }) => {
   const { filters, setFilters, resetFilters, fetchProperties } = useProperty();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [localFilters, setLocalFilters] = useState({ ...DEFAULT_FILTERS, ...filters });
+  const [local, setLocal] = useState({ ...DEFAULT, ...filters });
+  const [open, setOpen] = useState(false);
+  const searchRef = useRef(null);
 
+  // Sync global → local when filters change externally (URL nav)
   useEffect(() => {
-    setLocalFilters((prev) => ({ ...prev, ...DEFAULT_FILTERS, ...filters }));
+    setLocal(prev => ({ ...DEFAULT, ...filters }));
   }, [filters]);
 
-  const categoryOptions = [
-    { value: 'Appartement', label: 'Appartement' },
-    { value: 'Maison', label: 'Maison' },
-    { value: 'Terrain', label: 'Terrain' },
-    { value: 'Commercial', label: 'Commercial' },
-    { value: 'Autre', label: 'Autre' },
-  ];
+  const set = (k, v) => setLocal(p => ({ ...p, [k]: v }));
 
-  const transactionOptions = [
-    { value: 'location', label: 'Location' },
-    { value: 'vente', label: 'Vente' },
-  ];
-
-  const bedroomOptions = [
-    { value: '1', label: '1+ chambre' },
-    { value: '2', label: '2+ chambres' },
-    { value: '3', label: '3+ chambres' },
-    { value: '4', label: '4+ chambres' },
-    { value: '5', label: '5+ chambres' },
-  ];
-
-  const bathroomOptions = [
-    { value: '1', label: '1+ salle de bain' },
-    { value: '2', label: '2+ salles de bain' },
-    { value: '3', label: '3+ salles de bain' },
-    { value: '4', label: '4+ salles de bain' },
-  ];
-
-  const handleFilterChange = (key, value) => {
-    setLocalFilters((prev) => ({ ...prev, [key]: value }));
+  const apply = () => {
+    setFilters({ ...DEFAULT, ...local });
+    fetchProperties(1, { ...DEFAULT, ...local });
   };
 
-  const handleSearch = () => {
-    const nextFilters = { ...DEFAULT_FILTERS, ...localFilters };
-    setFilters(nextFilters);
-    fetchProperties(1, nextFilters);
+  // Pour les filtres "pill" (transaction, catégorie, chambres, salles de bain) :
+  // on lance la recherche immédiatement au clic, sans attendre Entrée/Chercher.
+  const applyImmediate = (patch) => {
+    const next = { ...DEFAULT, ...local, ...patch };
+    setLocal(next);
+    setFilters(next);
+    fetchProperties(1, next);
   };
 
-  const handleReset = () => {
-    setLocalFilters(DEFAULT_FILTERS);
+  const reset = () => {
+    setLocal(DEFAULT);
     resetFilters();
-    fetchProperties(1, DEFAULT_FILTERS);
+    fetchProperties(1, DEFAULT);
   };
 
-  const hasActiveFilters = Object.values(localFilters).some((value) => {
-    if (typeof value === 'string') return value.trim() !== '';
-    return value !== '' && value !== null && value !== undefined;
-  });
+  const activeCount = Object.values(local).filter(v => String(v || '').trim() !== '').length;
 
   return (
-    <div className={cn('bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-white/10 p-4 sm:p-6 shadow-2xl', className)}>
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <input
-          type="text"
-          placeholder="Rechercher par titre, ville, adresse..."
-          value={localFilters.search}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-gold-primary focus:border-transparent outline-none text-white font-bold placeholder-zinc-500 transition-all"
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center space-x-3 text-zinc-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
-        >
-          <div className={cn(
-            "p-2 rounded-lg bg-white/5 border border-white/5 transition-all",
-            isExpanded && "bg-gold-primary border-gold-primary text-zinc-950"
-          )}>
-            <Filter className="w-4 h-4" />
-          </div>
-          <span>Affiner la recherche</span>
-          {hasActiveFilters && (
-            <span className="bg-gold-primary text-zinc-950 text-[10px] font-black px-2 py-0.5 rounded-full">
-              {Object.values(localFilters).filter((v) => String(v || '').trim() !== '').length}
-            </span>
-          )}
-        </button>
-
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={handleSearch} 
-            className="bg-gold-primary text-zinc-950 hover:bg-amber-300 rounded-2xl font-black uppercase tracking-widest text-[10px] px-6 py-4 shadow-xl transition-all hover:-translate-y-0.5"
-          >
-            Rechercher
-          </Button>
-          {hasActiveFilters && (
-            <Button 
-              onClick={handleReset} 
-              variant="outline" 
-              className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-6 py-4"
+    <div className={cn('space-y-4', className)}>
+      {/* ── Main search row ── */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 pointer-events-none" />
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Titre, ville, quartier..."
+            value={local.search}
+            onChange={e => set('search', e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && apply()}
+            className="w-full pl-11 pr-4 py-3.5 bg-zinc-900/60 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-gold-primary/30 transition-all"
+          />
+          {local.search && (
+            <button onClick={() => { set('search', ''); searchRef.current?.focus(); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white transition-all"
             >
-              <X className="w-4 h-4 mr-2" />
-              Réinitialiser
-            </Button>
+              <X className="h-3.5 w-3.5" />
+            </button>
           )}
         </div>
+
+        <button
+          onClick={() => setOpen(o => !o)}
+          className={cn(
+            'flex items-center gap-2 px-5 py-3.5 rounded-2xl border text-sm font-black uppercase tracking-widest transition-all shrink-0',
+            open || activeCount > 0
+              ? 'bg-gold-primary text-black border-gold-primary shadow-lg shadow-gold-primary/20'
+              : 'bg-zinc-900/60 border-white/10 text-zinc-400 hover:text-white hover:border-white/20',
+          )}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span className="hidden sm:inline">Filtres</span>
+          {activeCount > 0 && (
+            <span className={cn(
+              'h-5 min-w-[20px] px-1 rounded-md text-[9px] font-black flex items-center justify-center',
+              open ? 'bg-black text-gold-primary' : 'bg-gold-primary text-black',
+            )}>
+              {activeCount}
+            </span>
+          )}
+          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+        </button>
+
+        <button
+          onClick={apply}
+          className="px-6 py-3.5 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/20 transition-all hover:-translate-y-0.5 shrink-0"
+        >
+          Chercher
+        </button>
       </div>
 
-      {isExpanded && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-white/10 animate-fade-in mt-2">
-          <Select
-            label="Type de propriete"
-            value={localFilters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
-            options={categoryOptions}
-            placeholder="Tous les types"
-          />
+      {/* ── Quick transaction pills ── */}
+      <div className="flex gap-2 flex-wrap">
+        <Pill active={local.transactionType === ''} onClick={() => applyImmediate({ transactionType: '' })}>Tous</Pill>
+        <Pill active={local.transactionType === 'location'} onClick={() => applyImmediate({ transactionType: 'location' })}>Location</Pill>
+        <Pill active={local.transactionType === 'vente'} onClick={() => applyImmediate({ transactionType: 'vente' })}>Vente</Pill>
+        <span className="w-px h-6 bg-white/10 self-center mx-1" />
+        {CATS.slice(0, 4).map(c => (
+          <Pill key={c.v} active={local.category === c.v} onClick={() => applyImmediate({ category: local.category === c.v ? '' : c.v })}>
+            {c.l}
+          </Pill>
+        ))}
+        <span className="w-px h-6 bg-white/10 self-center mx-1" />
+        <Pill
+          active={Boolean(local.isBonPlan)}
+          onClick={() => applyImmediate({ isBonPlan: local.isBonPlan ? '' : true })}
+        >
+          <span className="inline-flex items-center gap-1.5">
+            <Zap className="h-3 w-3" />
+            Bons Plans
+          </span>
+        </Pill>
+      </div>
 
-          <Select
-            label="Transaction"
-            value={localFilters.transactionType}
-            onChange={(e) => handleFilterChange('transactionType', e.target.value)}
-            options={transactionOptions}
-            placeholder="Vente ou location"
-          />
+      {/* ── Advanced filters panel ── */}
+      {open && (
+        <div className="bg-zinc-900/60 border border-white/8 rounded-3xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-in fade-in slide-in-from-top-2 duration-200">
 
-          <Input
-            label="Ville"
-            value={localFilters.city}
-            onChange={(e) => handleFilterChange('city', e.target.value)}
-            placeholder="Entrez une ville"
-          />
+          <div>
+            <FieldLabel>Ville</FieldLabel>
+            <input
+              type="text"
+              value={local.city}
+              onChange={e => set('city', e.target.value)}
+              placeholder="Ex: Brazzaville"
+              className="w-full bg-zinc-900/60 border border-white/8 rounded-xl px-3 py-2.5 text-xs font-bold text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+            />
+          </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Prix (CFA)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                type="number"
-                value={localFilters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                placeholder="Min"
-              />
-              <Input
-                type="number"
-                value={localFilters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                placeholder="Max"
-              />
+          <div>
+            <FieldLabel>Catégorie</FieldLabel>
+            <NativeSelect value={local.category} onChange={e => applyImmediate({ category: e.target.value })} options={CATS.map(c => ({ v: c.v, l: c.l }))} placeholder="Tous les types" />
+          </div>
+
+          <div>
+            <FieldLabel>Prix min (XAF)</FieldLabel>
+            <NumberInput value={local.minPrice} onChange={e => set('minPrice', e.target.value)} placeholder="0" />
+          </div>
+
+          <div>
+            <FieldLabel>Prix max (XAF)</FieldLabel>
+            <NumberInput value={local.maxPrice} onChange={e => set('maxPrice', e.target.value)} placeholder="∞" />
+          </div>
+
+          <div>
+            <FieldLabel>Surface min (m²)</FieldLabel>
+            <NumberInput value={local.minSurface} onChange={e => set('minSurface', e.target.value)} placeholder="0" />
+          </div>
+
+          <div>
+            <FieldLabel>Surface max (m²)</FieldLabel>
+            <NumberInput value={local.maxSurface} onChange={e => set('maxSurface', e.target.value)} placeholder="∞" />
+          </div>
+
+          <div>
+            <FieldLabel>Chambres (min)</FieldLabel>
+            <div className="flex gap-1.5 flex-wrap">
+              {BEDS.map(b => (
+                <Pill key={b} active={local.bedrooms === b} onClick={() => applyImmediate({ bedrooms: local.bedrooms === b ? '' : b })}>{b}</Pill>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Superficie (m2)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                type="number"
-                value={localFilters.minSurface}
-                onChange={(e) => handleFilterChange('minSurface', e.target.value)}
-                placeholder="Min"
-              />
-              <Input
-                type="number"
-                value={localFilters.maxSurface}
-                onChange={(e) => handleFilterChange('maxSurface', e.target.value)}
-                placeholder="Max"
-              />
+          <div>
+            <FieldLabel>Salles de bain (min)</FieldLabel>
+            <div className="flex gap-1.5 flex-wrap">
+              {BATHS.map(b => (
+                <Pill key={b} active={local.bathrooms === b} onClick={() => applyImmediate({ bathrooms: local.bathrooms === b ? '' : b })}>{b}</Pill>
+              ))}
             </div>
           </div>
 
-          <Select
-            label="Chambres"
-            value={localFilters.bedrooms}
-            onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
-            options={bedroomOptions}
-            placeholder="Nombre de chambres"
-          />
-
-          <Select
-            label="Salles de bain"
-            value={localFilters.bathrooms}
-            onChange={(e) => handleFilterChange('bathrooms', e.target.value)}
-            options={bathroomOptions}
-            placeholder="Nombre de salles de bain"
-          />
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 sm:col-span-2 lg:col-span-1">
-            <Button 
-              onClick={handleSearch} 
-              className="flex-1 bg-gold-primary text-zinc-950 hover:bg-amber-300 rounded-2xl font-black uppercase tracking-widest text-[10px] h-12"
+          {/* Actions */}
+          <div className="sm:col-span-2 lg:col-span-4 flex gap-3 pt-2 border-t border-white/5">
+            <button
+              onClick={() => { apply(); setOpen(false); }}
+              className="flex-1 h-11 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/20 transition-all"
             >
-              Appliquer
-            </Button>
-            <Button 
-              onClick={handleReset} 
-              variant="outline" 
-              className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12"
-            >
-              Reset
-            </Button>
+              Appliquer les filtres
+            </button>
+            {activeCount > 0 && (
+              <button
+                onClick={() => { reset(); setOpen(false); }}
+                className="px-6 h-11 rounded-2xl border border-white/10 bg-zinc-950/50 text-zinc-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2"
+              >
+                <X className="h-3.5 w-3.5" /> Réinitialiser
+              </button>
+            )}
           </div>
         </div>
       )}

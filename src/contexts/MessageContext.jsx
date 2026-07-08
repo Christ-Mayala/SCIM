@@ -64,8 +64,9 @@ const upsertConversation = (prev, { otherUser, lastMessage, unreadDelta = 0, unr
 };
 
 export const MessageProvider = ({ children }) => {
-  const { user } = useAuth();
-  const userId = user?._id || user?.id;
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  // Wait for AuthContext to finish loading before making any authenticated calls
+  const userId = (isAuthenticated && !authLoading) ? (user?._id || user?.id) : null;
 
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([]);

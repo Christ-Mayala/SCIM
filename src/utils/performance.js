@@ -1,4 +1,5 @@
 // Utilitaires pour l'optimisation des performances
+import React from 'react';
 
 // Debounce function
 export const debounce = (func, wait, immediate = false) => {

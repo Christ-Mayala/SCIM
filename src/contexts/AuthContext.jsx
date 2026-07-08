@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
-import { authAPI } from '../lib/api';
+import api, { authAPI } from '../lib/api';
 
 const AuthContext = createContext();
 
@@ -58,10 +58,11 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const persistSession = useCallback((token, user) => {
+  const persistSession = useCallback((token, user, refreshToken) => {
     try {
       if (user) localStorage.setItem('user', JSON.stringify(user));
       if (token && token !== 'cookie_managed') localStorage.setItem('token', token);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     } catch (_) {}
   }, []);
 
@@ -76,14 +77,42 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const run = async () => {
       // Lecture directe et fraîche du localStorage
-      const token = localStorage.getItem('token') || (localStorage.getItem('user') ? 'cookie_managed' : null);
+      let token = localStorage.getItem('token');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
       const cachedUser = readStoredUser();
 
-      // Si on n'a rien en local, on arrête le chargement (on est déconnecté)
-      if (!token) {
-        if (state.isAuthenticated) {
-            dispatch({ type: 'LOGOUT' });
+      // Si aucun token et aucun user en cache → déconnecté
+      if (!token && !cachedUser) {
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
+
+      // Si token est 'cookie_managed' mais qu'on a un refreshToken → tenter un vrai refresh
+      if ((!token || token === 'cookie_managed') && storedRefreshToken) {
+        try {
+          const refreshRes = await api.post('/users/refresh-token', { refreshToken: storedRefreshToken });
+          const newToken = refreshRes.data?.token;
+          const newRefreshToken = refreshRes.data?.refreshToken;
+          if (newToken) {
+            localStorage.setItem('token', newToken);
+            token = newToken;
+          }
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+          }
+        } catch (_) {
+          // Refresh échoué → déconnexion
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          dispatch({ type: 'LOGOUT' });
+          dispatch({ type: 'SET_LOADING', payload: false });
+          return;
         }
+      }
+
+      // Pas de token valide → déconnecté
+      if (!token || token === 'cookie_managed') {
         dispatch({ type: 'SET_LOADING', payload: false });
         return;
       }
@@ -120,47 +149,39 @@ export const AuthProvider = ({ children }) => {
     };
 
     run();
-  }, [clearSession, persistSession]);
+  }, [clearSession, persistSession]); // eslint-disable-line
 
   const login = useCallback(
     async (email, password) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         const response = await authAPI.login(email, password);
+        // api.js interceptor already unwraps: response.data = payload.data
+        // So response.data = { token, refreshToken, user }
+        const data = response.data || {};
         
-        // Extraction robuste des données
-        let data = response.data;
-        if (data && typeof data === 'object') {
-             // Si la réponse est { success: true, data: { ... } }
-             if (data.data && (data.success || data.token === undefined)) {
-                 data = data.data;
-             }
-        }
-        
-        const { user } = data || {};
-        const safeToken = data?.token || 'cookie_managed';
+        const { user } = data;
+        const safeToken = data?.token || null;
+        const safeRefreshToken = data?.refreshToken || null;
 
-        if (!user) {
-           console.error('Login failed: User missing', { data });
+        if (!user || !safeToken) {
            throw new Error('Réponse de connexion invalide');
         }
 
-        persistSession(safeToken, user);
+        persistSession(safeToken, user, safeRefreshToken);
 
         let profileUser = null;
         try {
           const me = await authAPI.getProfile();
           profileUser = me.data;
-          // Si me.data est enveloppé
           if (profileUser && profileUser.data && profileUser.success) {
               profileUser = profileUser.data;
           }
-
           if (profileUser) {
-             persistSession(safeToken, profileUser);
+             persistSession(safeToken, profileUser, safeRefreshToken);
           }
         } catch (err) {
-          console.error('Erreur récupération profil après login:', err);
+          // Profile fetch failed but login was successful
         }
 
         dispatch({ type: 'SET_USER', payload: { user: profileUser || user, token: safeToken } });
@@ -225,21 +246,18 @@ export const AuthProvider = ({ children }) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         const response = await authAPI.register(userData);
+        // api.js interceptor already unwraps: response.data = payload.data
+        const data = response.data || {};
         
-        // Extraction robuste
-        let data = response.data;
-        if (data && data.data && (data.success || data.token === undefined)) {
-            data = data.data;
-        }
-        
-        const { user } = data || {};
-        const safeToken = data?.token || 'cookie_managed';
+        const { user } = data;
+        const safeToken = data?.token || null;
+        const safeRefreshToken = data?.refreshToken || null;
 
-        if (!user) {
+        if (!user || !safeToken) {
              throw new Error("Réponse d'inscription invalide");
         }
 
-        persistSession(safeToken, user);
+        persistSession(safeToken, user, safeRefreshToken);
 
         let profileUser = null;
         try {
@@ -249,7 +267,7 @@ export const AuthProvider = ({ children }) => {
               profileUser = profileUser.data;
           }
           if (profileUser) {
-            persistSession(safeToken, profileUser);
+            persistSession(safeToken, profileUser, safeRefreshToken);
           }
         } catch (_) {}
 
@@ -290,12 +308,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = useCallback(
     async (payload) => {
       try {
-        const response = await authAPI.updateProfile(payload);
-        let updated = response.data;
-        if (updated && updated.data && (updated.success || !updated._id)) {
-            updated = updated.data;
-        }
-        
+        // PUT /users/:id — backend users.routes.js has router.put('/:id', protect, updateUser)
+        const id = state.user?._id || state.user?.id || payload?._id || payload?.id;
+        if (!id) throw new Error('ID utilisateur manquant');
+        const response = await api.put(`/users/${id}`, payload);
+        const updated = response.data;
         if (!updated) throw new Error("Réponse de mise à jour invalide");
 
         persistSession(state.token, updated);
@@ -308,7 +325,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message };
       }
     },
-    [persistSession, state.token],
+    [persistSession, state.token, state.user],
   );
 
   const clearError = useCallback(() => {

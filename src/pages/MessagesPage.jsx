@@ -1,441 +1,348 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  MessageSquare, 
-  Send, 
-  Plus, 
-  Search, 
-  MoreVertical,
-  Phone,
-
-  Info,
-  ArrowLeft,
-  Trash
+/**
+ * MessagesPage — côté client
+ *
+ * Flow : Le client envoie des demandes d'information / support à l'admin.
+ * L'admin lit et répond via moyens externes (téléphone, WhatsApp, email).
+ * Le client reçoit ici les notifications automatiques du système
+ * (réservation confirmée/annulée, soumission approuvée/rejetée).
+ */
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  MessageSquare, Send, Sparkles, CheckCircle, Clock,
+  Bell, ChevronRight, Mail, Phone, Building2, FileText,
+  Info, RefreshCw,
 } from 'lucide-react';
 import { useMessage } from '../contexts/MessageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input'; 
-import { Textarea } from '../components/ui/Textarea'; 
+import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import Modal from '../components/ui/Modal';
-import { formatDate, formatTime } from '../lib/utils';
+import { cn } from '../lib/utils';
+import toast from 'react-hot-toast';
+
+/* ── helpers ── */
+const fmt = (d) => {
+  if (!d) return '';
+  const date = new Date(d);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffH = diffMs / 3600000;
+  if (diffH < 1) return 'À l\'instant';
+  if (diffH < 24) return `Il y a ${Math.floor(diffH)}h`;
+  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+};
+
+/* strip mongo IDs from system messages */
+const cleanText = (t) => {
+  if (!t) return '';
+  return t.replace(/\b([0-9a-f]{24})\b/gi, (m) => `[réf. ${m.slice(-6).toUpperCase()}]`);
+};
+
+/* detect if a message is a system notification */
+const isSystemMsg = (msg) => {
+  const s = (msg?.sujet || '').toLowerCase();
+  return (
+    s.includes('confirmée') || s.includes('confirmee') ||
+    s.includes('annulée') || s.includes('annulee') ||
+    s.includes('approuvé') || s.includes('approuve') ||
+    s.includes('rejeté') || s.includes('rejete') ||
+    s.includes('enregistrée') || s.includes('visite') ||
+    s.includes('réservation') || s.includes('reservation') ||
+    s.includes('soumission') || s.includes('bien')
+  );
+};
+
+const SUBJECTS = [
+  { value: 'info_bien',       label: 'Demande d\'information sur un bien' },
+  { value: 'visite',          label: 'Planifier / modifier une visite'    },
+  { value: 'soumission',      label: 'Question sur ma soumission'         },
+  { value: 'reservation',     label: 'Question sur ma réservation'        },
+  { value: 'support',         label: 'Support technique'                  },
+  { value: 'autre',           label: 'Autre demande'                      },
+];
 
 const MessagesPage = () => {
   const { user } = useAuth();
-  const currentUserId = user?._id || user?.id;
   const {
-    messages,
-    conversations,
-    currentConversation,
-    unreadCount,
-    inboxLoading,
-    conversationLoading,
-    isSending,
-    isContactSending,
-    fetchInbox,
-    inboxPage,
-    inboxTotalPages,
-    convPage,
-    convTotalPages,
-    fetchMessagesWithUser,
-    sendMessage,
-    contactScim,
-    markMessageAsRead,
-    clearCurrentConversation,
-    typingFromOther,
-    notifyTyping,
-    stopTyping,
-    deleteMessage,
-    deleteThread,
+    messages, conversations, inboxLoading, isContactSending,
+    fetchInbox, fetchMessagesWithUser, contactScim,
   } = useMessage();
 
-  const [newMessage, setNewMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [newMessageForm, setNewMessageForm] = useState({
-    subject: '',
-    content: ''
-  });
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showConversationList, setShowConversationList] = useState(true);
-  const [showUserInfo, setShowUserInfo] = useState(false);
-  
-  const messagesEndRef = useRef(null);
+  /* ── form state ── */
+  const [subject, setSubject] = useState('');
+  const [content, setContent] = useState('');
+  const [sent, setSent] = useState(false);
+
+  /* ── notifications : messages reçus DE l'admin (system messages) ── */
+  const [notifications, setNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  /* ── load inbox on mount to get notifications ── */
+  useEffect(() => { fetchInbox(1); }, [fetchInbox]);
+
+  /* ── extract system notifications from conversations ── */
+  useEffect(() => {
+    const adminConv = conversations.find(
+      c => (c?.otherUser?.role === 'admin') || (c?.otherUser?.nom || '').toLowerCase().includes('admin')
+    );
+    if (!adminConv?.otherUser?._id) {
+      setNotifications([]);
+      return;
+    }
+    setNotifLoading(true);
+    fetchMessagesWithUser(adminConv.otherUser._id, 1)
+      .finally(() => setNotifLoading(false));
+  }, [conversations]); // eslint-disable-line
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const systemMessages = messages.filter(msg => {
+      const fromAdmin = msg?.expediteur?.role === 'admin' ||
+        (msg?.expediteur?._id && msg?.expediteur?._id !== (user?._id || user?.id));
+      return fromAdmin && isSystemMsg(msg);
+    });
+    setNotifications(systemMessages.slice().reverse().slice(0, 20));
+  }, [messages, user]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    if (isMobile && currentConversation) {
-      setShowConversationList(false);
+  /* ── send ── */
+  const handleSend = useCallback(async (e) => {
+    e?.preventDefault();
+    if (!subject || !content.trim()) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
     }
-  }, [currentConversation, isMobile]);
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !currentConversation || isSending) return;
-    const result = await sendMessage(currentConversation, newMessage);
-    if (result.success) {
-      setNewMessage('');
-      stopTyping();
+    const subjectLabel = SUBJECTS.find(s => s.value === subject)?.label || subject;
+    const res = await contactScim(subjectLabel, content.trim());
+    if (res.success) {
+      setSent(true);
+      setSubject('');
+      setContent('');
+      setTimeout(() => setSent(false), 4000);
     }
+  }, [subject, content, contactScim]);
+
+  const notifIcon = (msg) => {
+    const s = (msg?.sujet || '').toLowerCase();
+    if (s.includes('confirmée') || s.includes('confirmee') || s.includes('approuvé')) return '✅';
+    if (s.includes('annulée') || s.includes('annulee') || s.includes('rejeté')) return '❌';
+    if (s.includes('soumission') || s.includes('bien')) return '🏠';
+    if (s.includes('visite') || s.includes('réservation')) return '📅';
+    return '📬';
   };
-
-  const handleContactScim = async (e) => {
-    e.preventDefault();
-    if (!newMessageForm.subject.trim() || !newMessageForm.content.trim() || isContactSending) return;
-    const result = await contactScim(newMessageForm.subject, newMessageForm.content);
-    if (result.success) {
-      setNewMessageForm({ subject: '', content: '' });
-      setShowNewMessageModal(false);
-    }
-  };
-
-  const handleConversationClick = (userId) => {
-    if (!userId) return;
-    fetchMessagesWithUser(userId);
-    if (isMobile) {
-      setShowConversationList(false);
-    }
-  };
-
-  const handleBackToList = () => {
-    setShowConversationList(true);
-    clearCurrentConversation();
-  };
-
-  const filteredConversations = conversations.filter((conv) =>
-    (conv?.otherUser?.nom || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (conv?.lastMessage?.contenu || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const renderConversationList = () => (
-    <div className="w-full md:w-96 lg:w-[420px] bg-white border-r border-gray-200 flex flex-col shrink-0">
-      <div className="p-3 sm:p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Messages</h1>
-          <Button
-            size="sm"
-            onClick={() => setShowNewMessageModal(true)}
-            className="flex items-center space-x-1"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nouveau</span>
-          </Button>
-        </div>
-        <div className="relative">
-          <Input
-            placeholder="Rechercher une conversation..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            leftIcon={<Search className="w-4 h-4" />}
-          />
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {inboxLoading ? (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner />
-          </div>
-        ) : filteredConversations.length === 0 ? (
-          <div className="text-center py-8 px-4">
-            <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Aucune conversation</p>
-            <Button size="sm" onClick={() => setShowNewMessageModal(true)} className="mt-4">
-              Commencer une conversation
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-gray-200">
-              {filteredConversations.map((conversation, index) => (
-                <div
-                  key={conversation?.otherUser?._id || conversation?.lastMessage?._id || index}
-                  onClick={() => handleConversationClick(conversation?.otherUser?._id)}
-                  className={`p-3 sm:p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    currentConversation === conversation?.otherUser?._id ? 'bg-gold-light/30 border-r-2 border-gold-primary' : ''
-                  }`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-gold-primary to-gold-dark rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-semibold">
-                        {(conversation?.otherUser?.nom || 'A').charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {conversation?.otherUser?.nom || 'Utilisateur'}
-                        </p>
-                        {conversation?.lastMessage && (
-                          <p className="text-xs text-gray-500">
-                            {formatTime(conversation.lastMessage.createdAt)}
-                          </p>
-                        )}
-                      </div>
-                      {conversation?.lastMessage && (
-                        <p className="text-sm text-gray-600 truncate mt-1">
-                          {conversation.lastMessage.contenu}
-                        </p>
-                      )}
-                      {conversation?.unreadCount > 0 && (
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-gray-500">
-                            {conversation.unreadCount} non lu{conversation.unreadCount > 1 ? 's' : ''}
-                          </span>
-                          <div className="w-2 h-2 bg-gold-primary rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {inboxPage < inboxTotalPages && (
-              <div className="p-4">
-                <Button variant="outline" className="w-full" onClick={() => fetchInbox(inboxPage + 1)}>
-                  Charger plus de conversations
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderConversation = () => (
-    <div className="flex-1 flex flex-col bg-gray-50">
-      {currentConversation ? (
-        <>
-          <div className="bg-white border-b border-gray-200 p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                {isMobile && (
-                  <Button variant="ghost" size="sm" onClick={handleBackToList} className="mr-2">
-                    <ArrowLeft className="w-4 h-4" />
-                  </Button>
-                )}
-                <div className="w-8 h-8 bg-gradient-to-r from-gold-primary to-gold-dark rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    {(conversations.find(c => c?.otherUser?._id === currentConversation)?.otherUser?.nom || 'A').charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900">
-                    {conversations.find(c => c?.otherUser?._id === currentConversation)?.otherUser?.nom || 'Administration'}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {typingFromOther ? "L'autre écrit…" : 'En ligne'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <Phone className="w-4 h-4" />
-                </Button>
-
-                <Button variant="ghost" size="sm" onClick={() => setShowUserInfo(true)}>
-                  <Info className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (!currentConversation) return;
-                    if (window.confirm('Supprimer toute la conversation ?')) {
-                      deleteThread(currentConversation);
-                    }
-                  }}
-                >
-                  <Trash className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
-            {currentConversation && convPage < convTotalPages && (
-              <div className="flex justify-center">
-                <Button variant="outline" size="sm" onClick={() => fetchMessagesWithUser(currentConversation, convPage + 1)}>
-                  Charger plus d'anciens messages
-                </Button>
-              </div>
-            )}
-            {conversationLoading ? (
-              <div className="flex justify-center py-8">
-                <LoadingSpinner />
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Aucun message dans cette conversation</p>
-                <p className="text-sm text-gray-500 mt-2">Commencez la conversation en envoyant un message</p>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message._id}
-                  className={`flex ${message?.expediteur?._id === currentUserId ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] sm:max-w-md lg:max-w-lg px-3 sm:px-4 py-2 rounded-lg ${
-                      message?.expediteur?._id === currentUserId
-                        ? 'bg-gold-primary text-white'
-                        : 'bg-white text-gray-900 border border-gray-200'
-                    }`}
-                  >
-                    <p className="text-sm">{message.contenu}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <p
-                        className={`text-xs ${
-                          message?.expediteur?._id === currentUserId ? 'text-gold-light' : 'text-gray-500'
-                        }`}
-                      >
-                        {formatTime(message.createdAt)}
-                        {user?.role === 'admin' && message?.expediteur?._id === currentUserId && (
-                          <span className="ml-2">{message.lu ? 'Lu' : 'Non lu'}</span>
-                        )}
-                      </p>
-                      {message?.expediteur?._id === currentUserId && (
-                        <button
-                          className={`text-xs flex items-center space-x-1 ${message?.expediteur?._id === currentUserId ? 'text-gold-light hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                          onClick={() => {
-                            if (window.confirm('Supprimer ce message ?')) {
-                              deleteMessage(message._id);
-                            }
-                          }}
-                        >
-                          <Trash className="w-3 h-3" />
-                          <span>Supprimer</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="bg-white border-t border-gray-200 p-3 sm:p-4">
-            <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-              <div className="flex-1">
-                <Textarea
-                  value={newMessage}
-                  onChange={(e) => {
-                    setNewMessage(e.target.value);
-                    notifyTyping();
-                  }}
-                  onBlur={stopTyping}
-                  placeholder="Tapez votre message..."
-                  rows={1}
-                  className="resize-none"
-                  disabled={isSending}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage(e);
-                    }
-                  }}
-                />
-              </div>
-              <Button type="submit" disabled={!newMessage.trim() || isSending} className="flex items-center space-x-1 shrink-0">
-                <Send className="w-4 h-4" />
-                <span className="hidden sm:inline">{isSending ? 'Envoi...' : 'Envoyer'}</span>
-              </Button>
-            </form>
-          </div>
-        </>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Sélectionnez une conversation</h3>
-            <p className="text-gray-600 mb-6">Choisissez une conversation existante ou commencez-en une nouvelle</p>
-            <Button onClick={() => setShowNewMessageModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouvelle conversation
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50">
-      <div className="max-w-7xl mx-auto px-0 sm:px-4">
-        <div className="flex h-[calc(100dvh-4rem)]">
-          {(!isMobile || showConversationList) && renderConversationList()}
-          {(!isMobile || !showConversationList) && renderConversation()}
+    <div className="min-h-[calc(100dvh-4rem)] bg-zinc-950 text-white">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-8">
+
+        {/* ── Page header ── */}
+        <div>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold-primary/10 border border-gold-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
+            <Sparkles className="w-3 h-3" /> Centre de contact
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter italic">
+            Messages<span className="text-gold-primary">.</span>
+          </h1>
+          <p className="text-zinc-500 mt-2 text-sm">
+            Envoyez vos demandes à l'équipe SCIM. Nous répondons dans les plus brefs délais.
+          </p>
         </div>
-      </div>
-      <Modal
-        isOpen={showUserInfo}
-        onClose={() => setShowUserInfo(false)}
-        title="Informations de l'utilisateur"
-      >
-        {(() => {
-          const other = conversations.find(c => c?.otherUser?._id === currentConversation)?.otherUser;
-          if (!other) return <div className="text-gray-600">Aucune information disponible.</div>;
-          return (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Nom</span>
-                <span className="font-medium">{other.nom || '—'}</span>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+          {/* ── LEFT : form + contact info ── */}
+          <div className="lg:col-span-3 space-y-6">
+
+            {/* Contact form */}
+            <div className="bg-zinc-900/50 border border-white/[0.07] rounded-3xl p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-2xl bg-gold-primary/10 border border-gold-primary/20 flex items-center justify-center">
+                  <Send className="h-4 w-4 text-gold-primary" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-black text-white uppercase tracking-widest">Nouvelle demande</h2>
+                  <p className="text-[10px] text-zinc-500">Votre message sera traité dans les meilleurs délais</p>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Email</span>
-                <span className="font-medium">{other.email || '—'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Téléphone</span>
-                <span className="font-medium">{other.telephone || '—'}</span>
+
+              {sent && (
+                <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl mb-5 animate-in fade-in duration-300">
+                  <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <div>
+                    <p className="text-sm font-black text-emerald-300">Message envoyé !</p>
+                    <p className="text-xs text-emerald-400/70">Notre équipe vous recontactera par email ou téléphone.</p>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSend} className="space-y-4">
+                {/* Subject select */}
+                <div>
+                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">
+                    Type de demande *
+                  </label>
+                  <select
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                    required
+                    className="w-full bg-zinc-950/60 border border-white/8 rounded-2xl px-4 py-3.5 text-sm text-white appearance-none outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+                  >
+                    <option value="" className="bg-zinc-900">Sélectionner un type…</option>
+                    {SUBJECTS.map(s => (
+                      <option key={s.value} value={s.value} className="bg-zinc-900">{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">
+                    Votre message *
+                  </label>
+                  <textarea
+                    value={content}
+                    onChange={e => setContent(e.target.value)}
+                    placeholder="Décrivez votre demande en détail : référence du bien, date souhaitée, questions spécifiques..."
+                    rows={6}
+                    required
+                    className="w-full bg-zinc-950/60 border border-white/8 rounded-2xl px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-gold-primary/30 resize-none transition-all"
+                  />
+                  <p className="text-[10px] text-zinc-600 mt-1.5">{content.length} / 2000 caractères</p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isContactSending || !subject || !content.trim()}
+                  className="w-full h-13 flex items-center justify-center gap-2.5 bg-gold-primary hover:bg-amber-300 text-black rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-gold-primary/20 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  {isContactSending ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      Envoi en cours…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Envoyer à l'équipe SCIM
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Contact info */}
+            <div className="bg-zinc-900/40 border border-white/[0.07] rounded-3xl p-6">
+              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">
+                Autres moyens de contact
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { icon: Phone, label: 'Téléphone', value: '+242 06 XXX XX XX', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                  { icon: Mail,  label: 'Email',     value: 'contact@scim.cg',   color: 'text-blue-400',    bg: 'bg-blue-500/10'    },
+                ].map(c => (
+                  <div key={c.label} className="flex items-center gap-4 p-4 bg-zinc-950/40 border border-white/[0.06] rounded-2xl">
+                    <div className={cn('h-9 w-9 rounded-xl flex items-center justify-center shrink-0', c.bg)}>
+                      <c.icon className={cn('h-4 w-4', c.color)} />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{c.label}</p>
+                      <p className="text-sm font-bold text-white">{c.value}</p>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[10px] text-zinc-600 leading-relaxed pt-1">
+                  Notre équipe est disponible du lundi au vendredi, de 8h à 17h (heure de Brazzaville).
+                  Nous répondons à toutes les demandes sous 24h ouvrées.
+                </p>
               </div>
             </div>
-          );
-        })()}
-      </Modal>
-
-      <Modal
-        isOpen={showNewMessageModal}
-        onClose={() => setShowNewMessageModal(false)}
-        title="Contacter l'administration"
-      >
-        <form onSubmit={handleContactScim} className="space-y-3 sm:space-y-4">
-          <Input
-            label="Sujet"
-            value={newMessageForm.subject}
-            onChange={(e) => setNewMessageForm(prev => ({ ...prev, subject: e.target.value }))}
-            placeholder="Objet de votre message"
-            required
-          />
-          <Textarea
-            label="Message"
-            value={newMessageForm.content}
-            onChange={(e) => setNewMessageForm(prev => ({ ...prev, content: e.target.value }))}
-            placeholder="Votre message..."
-            rows={4}
-            required
-          />
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button type="submit" disabled={isContactSending} className="w-full sm:flex-1">
-              {isContactSending ? 'Envoi...' : 'Envoyer'}
-            </Button>
-            <Button type="button" variant="outline" disabled={isContactSending} className="w-full sm:w-auto" onClick={() => setShowNewMessageModal(false)}>
-              Annuler
-            </Button>
           </div>
-        </form>
-      </Modal>
+
+          {/* ── RIGHT : notifications ── */}
+          <div className="lg:col-span-2 space-y-5">
+
+            {/* quick links */}
+            <div className="bg-zinc-900/40 border border-white/[0.07] rounded-3xl p-5">
+              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Accès rapide</h3>
+              <div className="space-y-2">
+                {[
+                  { to: '/dashboard',     icon: Building2,  label: 'Mes réservations', color: 'text-gold-primary',  bg: 'bg-gold-primary/10'  },
+                  { to: '/soumettre-bien', icon: FileText,   label: 'Soumettre un bien', color: 'text-blue-400',    bg: 'bg-blue-500/10'      },
+                  { to: '/properties',    icon: Building2,  label: 'Voir les biens',    color: 'text-emerald-400', bg: 'bg-emerald-500/10'   },
+                ].map(l => (
+                  <Link key={l.to} to={l.to}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-zinc-950/50 transition-all group">
+                    <div className={cn('h-8 w-8 rounded-xl flex items-center justify-center shrink-0', l.bg)}>
+                      <l.icon className={cn('h-4 w-4', l.color)} />
+                    </div>
+                    <span className="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors flex-1">{l.label}</span>
+                    <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* system notifications */}
+            <div className="bg-zinc-900/40 border border-white/[0.07] rounded-3xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-gold-primary" />
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest">Notifications</h3>
+                </div>
+                <button onClick={() => fetchInbox(1)}
+                  className="h-7 w-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-500 hover:text-white transition-all">
+                  <RefreshCw className="h-3 w-3" />
+                </button>
+              </div>
+
+              {notifLoading || inboxLoading ? (
+                <div className="flex justify-center py-8"><LoadingSpinner size="sm" /></div>
+              ) : notifications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bell className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
+                  <p className="text-xs text-zinc-600 font-bold">Aucune notification</p>
+                  <p className="text-[10px] text-zinc-700 mt-1">Vous serez notifié ici des mises à jour importantes</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {notifications.map(msg => (
+                    <div key={msg._id}
+                      className={cn(
+                        'flex items-start gap-3 p-3.5 rounded-2xl border transition-all',
+                        !msg.lu
+                          ? 'bg-gold-primary/[0.05] border-gold-primary/20'
+                          : 'bg-zinc-950/40 border-white/[0.05]'
+                      )}>
+                      <span className="text-lg shrink-0 mt-0.5">{notifIcon(msg)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn('text-xs font-black truncate', !msg.lu ? 'text-white' : 'text-zinc-300')}>
+                          {msg.sujet || 'Notification'}
+                        </p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">
+                          {cleanText(msg.contenu)}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Clock className="h-3 w-3 text-zinc-600" />
+                          <p className="text-[9px] text-zinc-600 font-bold">{fmt(msg.createdAt)}</p>
+                          {!msg.lu && (
+                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold-primary" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* info banner */}
+            <div className="flex items-start gap-3 p-4 bg-zinc-900/40 border border-white/[0.06] rounded-2xl">
+              <Info className="h-4 w-4 text-zinc-500 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-zinc-500 leading-relaxed">
+                L'équipe SCIM vous recontacte par <strong className="text-zinc-400">email ou téléphone</strong> suite à votre message.
+                Vous recevez automatiquement des notifications par email pour les confirmations de visite et l'approbation de vos biens.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
