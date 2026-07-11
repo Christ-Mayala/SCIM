@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { adminAPI } from '../../../lib/api';
+import { adminAPI, reservationAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import {
-  Search, RefreshCw, CalendarDays, CheckCircle, XCircle,
-  Phone, Trash2, MessageCircle, Shield,
+  Search, RefreshCw, CalendarDays, CheckCircle, XCircle, CheckCheck,
+  Phone, Trash2, MessageCircle, Shield, Download, FileText,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { toWhatsAppNumber } from '../../../lib/phone';
 import toast from 'react-hot-toast';
 
 const LIMIT = 10;
@@ -15,6 +16,7 @@ const STATUS_CONFIG = {
   confirmee:  { label: 'Confirmée',  cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
   en_attente: { label: 'En attente', cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
   annulee:    { label: 'Annulée',    cls: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  terminee:   { label: 'Terminée',   cls: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
 };
 
 const AdminReservationsPage = () => {
@@ -25,6 +27,7 @@ const AdminReservationsPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [downloadingId, setDownloadingId] = useState('');
   const loadIdRef = useRef(0);
   const isMountedRef = useRef(false);
 
@@ -73,12 +76,49 @@ const AdminReservationsPage = () => {
     load(1, v, debouncedSearch);
   };
 
+  const STATUS_TOAST = {
+    confirmee: 'Visite confirmée — le client a été notifié par email et message',
+    annulee: 'Visite annulée — le client a été notifié par email et message',
+    terminee: 'Visite marquée comme terminée — le client a été notifié',
+  };
+
   const handleStatusUpdate = async (id, status) => {
+    let reason = '';
+    if (status === 'annulee') {
+      const input = window.prompt("Motif de l'annulation (visible par le client, optionnel) :", '');
+      if (input === null) return; // admin a fermé la boîte de dialogue sans valider
+      reason = input.trim();
+    }
     try {
-      await adminAPI.updateReservationStatus(id, status);
+      await adminAPI.updateReservationStatus(id, status, reason);
       setReservations(prev => prev.map(r => r._id === id ? { ...r, status } : r));
-      toast.success(status === 'confirmee' ? 'Visite confirmée' : 'Visite annulée');
+      toast.success(STATUS_TOAST[status] || 'Statut mis à jour');
     } catch (e) { toast.error(e?.response?.data?.message || 'Mise à jour impossible'); }
+  };
+
+  const getRequestTypeLabel = (r) => r?.requestTypeLabel || (r?.requestType === 'location' ? 'Location' : r?.requestType === 'achat' ? 'Achat' : 'Visite');
+  const isContractEligible = (r) => String(r?.status || '') === 'confirmee' && r?.requestType && r.requestType !== 'visite';
+
+  const handleDownloadReceipt = async (id) => {
+    try {
+      setDownloadingId(`receipt-${id}`);
+      await reservationAPI.downloadReceipt(id);
+    } catch (e) {
+      toast.error('Téléchargement du reçu impossible');
+    } finally {
+      setDownloadingId('');
+    }
+  };
+
+  const handleDownloadContract = async (id) => {
+    try {
+      setDownloadingId(`contract-${id}`);
+      await reservationAPI.downloadContract(id);
+    } catch (e) {
+      toast.error('Téléchargement du contrat impossible');
+    } finally {
+      setDownloadingId('');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -88,21 +128,25 @@ const AdminReservationsPage = () => {
   };
 
   const openWhatsApp = (r) => {
-    const phone = (r.user?.telephone || '').replace(/[^\d+]/g, '');
-    if (!phone) return;
+    const phone = toWhatsAppNumber(r.user?.telephone);
+    if (!phone) {
+      toast.error("Numéro de téléphone invalide ou manquant pour ce client");
+      return;
+    }
     const msg = encodeURIComponent(
       `[SCIM Immobilier — Visite]\n\n` +
       `Bonjour, nous vous contactons concernant votre demande de visite (Réf: ${r.reference || r._id?.slice(-6).toUpperCase()}) ` +
       `pour le bien : ${r.property?.titre || 'Bien'} à ${r.property?.ville || ''}.\n\n` +
       `Merci de confirmer votre disponibilité.`
     );
-    window.open(`https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
   };
 
   const statusTabs = [
     { value: '',           label: 'Toutes' },
     { value: 'en_attente', label: 'En attente' },
     { value: 'confirmee',  label: 'Confirmées' },
+    { value: 'terminee',   label: 'Terminées' },
     { value: 'annulee',    label: 'Annulées' },
   ];
 
@@ -172,20 +216,21 @@ const AdminReservationsPage = () => {
                     <th className="px-6 py-4">Réf & Date</th>
                     <th className="px-6 py-4">Propriété</th>
                     <th className="px-6 py-4">Visiteur</th>
+                    <th className="px-6 py-4">Type</th>
                     <th className="px-6 py-4">Statut</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
                   {loading ? (
-                    <tr><td colSpan="5" className="py-20 text-center"><LoadingSpinner size="md" /></td></tr>
+                    <tr><td colSpan="6" className="py-20 text-center"><LoadingSpinner size="md" /></td></tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="5" className="py-16 text-center text-sm text-red-400 font-bold">{error}</td>
+                      <td colSpan="6" className="py-16 text-center text-sm text-red-400 font-bold">{error}</td>
                     </tr>
                   ) : reservations.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="py-24 text-center">
+                      <td colSpan="6" className="py-24 text-center">
                         <div className="flex flex-col items-center gap-4">
                           <div className="h-16 w-16 rounded-2xl bg-zinc-800/60 flex items-center justify-center text-zinc-600">
                             <CalendarDays className="h-8 w-8" />
@@ -230,12 +275,35 @@ const AdminReservationsPage = () => {
                           <p className="text-[9px] text-zinc-600 uppercase tracking-widest mt-0.5">{r.user?.telephone || '—'}</p>
                         </td>
                         <td className="px-6 py-5">
+                          <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10 bg-white/5 text-zinc-300 whitespace-nowrap">
+                            {getRequestTypeLabel(r)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
                           <span className={cn('inline-block px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border whitespace-nowrap', scfg.cls)}>
                             {scfg.label}
                           </span>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              disabled={downloadingId === `receipt-${r._id}`}
+                              onClick={() => handleDownloadReceipt(r._id)}
+                              title="Télécharger le reçu"
+                              className="h-8 w-8 rounded-lg border border-white/5 bg-zinc-900 hover:bg-white/5 text-zinc-500 hover:text-white flex items-center justify-center transition-all disabled:opacity-50"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </button>
+                            {isContractEligible(r) && (
+                              <button
+                                disabled={downloadingId === `contract-${r._id}`}
+                                onClick={() => handleDownloadContract(r._id)}
+                                title="Télécharger le contrat"
+                                className="h-8 w-8 rounded-lg border border-gold-primary/20 bg-gold-primary/10 hover:bg-gold-primary/20 text-gold-primary flex items-center justify-center transition-all disabled:opacity-50"
+                              >
+                                <FileText className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                             {r.user?.telephone && (
                               <>
                                 <button
@@ -245,29 +313,44 @@ const AdminReservationsPage = () => {
                                 >
                                   <Phone className="h-3.5 w-3.5" />
                                 </button>
-                                <button
-                                  onClick={() => openWhatsApp(r)}
-                                  title="WhatsApp"
-                                  className="h-8 w-8 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-all"
-                                >
-                                  <MessageCircle className="h-3.5 w-3.5" />
-                                </button>
+                                {toWhatsAppNumber(r.user.telephone) && (
+                                  <button
+                                    onClick={() => openWhatsApp(r)}
+                                    title="WhatsApp"
+                                    className="h-8 w-8 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-all"
+                                  >
+                                    <MessageCircle className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
                               </>
                             )}
-                            <button
-                              onClick={() => handleStatusUpdate(r._id, 'confirmee')}
-                              title="Confirmer"
-                              className="h-8 w-8 rounded-lg border border-emerald-500/20 bg-zinc-900 hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-500 flex items-center justify-center transition-all"
-                            >
-                              <CheckCircle className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleStatusUpdate(r._id, 'annulee')}
-                              title="Annuler"
-                              className="h-8 w-8 rounded-lg border border-red-500/20 bg-zinc-900 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 flex items-center justify-center transition-all"
-                            >
-                              <XCircle className="h-3.5 w-3.5" />
-                            </button>
+                            {r.status === 'en_attente' && (
+                              <button
+                                onClick={() => handleStatusUpdate(r._id, 'confirmee')}
+                                title="Confirmer"
+                                className="h-8 w-8 rounded-lg border border-emerald-500/20 bg-zinc-900 hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-500 flex items-center justify-center transition-all"
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            {r.status === 'confirmee' && (
+                              <button
+                                onClick={() => handleStatusUpdate(r._id, 'terminee')}
+                                title="Marquer terminée (la visite a bien eu lieu)"
+                                className="h-8 w-8 rounded-lg border border-sky-500/20 bg-zinc-900 hover:bg-sky-500/10 text-zinc-500 hover:text-sky-400 flex items-center justify-center transition-all"
+                              >
+                                <CheckCheck className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            {(r.status === 'en_attente' || r.status === 'confirmee') && (
+                              <button
+                                onClick={() => handleStatusUpdate(r._id, 'annulee')}
+                                title="Annuler"
+                                className="h-8 w-8 rounded-lg border border-red-500/20 bg-zinc-900 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 flex items-center justify-center transition-all"
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                             <button
                               onClick={() => handleDelete(r._id)}
                               title="Supprimer"

@@ -21,6 +21,13 @@ const TRANS = [{ v: 'location', l: 'Location' }, { v: 'vente', l: 'Vente' }];
 const BEDS = ['1', '2', '3', '4', '5+'];
 const BATHS = ['1', '2', '3', '4'];
 
+// Villes principales du Congo-Brazzaville, utilisées tant que la liste des villes
+// disposant réellement d'annonces (fournie par l'API) n'est pas encore chargée.
+const DEFAULT_CITIES = [
+  'Brazzaville', 'Pointe-Noire', 'Dolisie', 'Nkayi',
+  'Ouesso', 'Madingou', 'Owando', 'Sibiti',
+];
+
 const Pill = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
@@ -63,10 +70,13 @@ const NumberInput = ({ value, onChange, placeholder }) => (
 );
 
 const PropertyFilters = ({ className }) => {
-  const { filters, setFilters, resetFilters, fetchProperties } = useProperty();
+  const { filters, setFilters, resetFilters, fetchProperties, availableCities } = useProperty();
   const [local, setLocal] = useState({ ...DEFAULT, ...filters });
   const [open, setOpen] = useState(false);
   const searchRef = useRef(null);
+
+  const cityOptions = (availableCities?.length ? availableCities : DEFAULT_CITIES)
+    .map((c) => ({ v: c, l: c }));
 
   // Sync global → local when filters change externally (URL nav)
   useEffect(() => {
@@ -180,12 +190,11 @@ const PropertyFilters = ({ className }) => {
 
           <div>
             <FieldLabel>Ville</FieldLabel>
-            <input
-              type="text"
+            <NativeSelect
               value={local.city}
-              onChange={e => set('city', e.target.value)}
-              placeholder="Ex: Brazzaville"
-              className="w-full bg-zinc-900/60 border border-white/8 rounded-xl px-3 py-2.5 text-xs font-bold text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-gold-primary/30 transition-all"
+              onChange={e => applyImmediate({ city: e.target.value })}
+              options={cityOptions}
+              placeholder="Toutes les villes"
             />
           </div>
 

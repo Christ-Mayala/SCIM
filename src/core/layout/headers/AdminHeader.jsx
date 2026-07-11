@@ -237,8 +237,21 @@ const AdminHeader = () => {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1.5 pr-1">
-             <Link 
-              to="/home" 
+             <Link
+              to="/admin/messages"
+              title="Notifications"
+              className="relative p-2.5 rounded-full bg-white/5 text-zinc-400 hover:text-gold-primary hover:bg-white/10 transition-all border border-white/10"
+             >
+                <Bell className="h-3.5 w-3.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+             </Link>
+
+             <Link
+              to="/home"
               className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-white/10"
              >
                 <Home className="h-3.5 w-3.5" />

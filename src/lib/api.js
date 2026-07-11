@@ -236,22 +236,47 @@ export const favoritesAPI = {
   remove: (propertyId) => api.post(`/favoris/${propertyId}`),
 };
 
+const extractFilename = (response, fallback) => {
+  const disposition = response.headers?.['content-disposition'] || '';
+  const match = /filename="?([^"]+)"?/i.exec(disposition);
+  return match?.[1] || fallback;
+};
+
+const downloadBlob = (blob, filename) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
+
 export const reservationAPI = {
-  create: (propertyId, date, telephone = '', isWhatsapp = false) =>
-    api.post('/reservation', { propertyId, date, ...(telephone ? { telephone } : {}), isWhatsapp }),
+  create: (propertyId, date, telephone = '', isWhatsapp = false, requestType = 'visite') =>
+    api.post('/reservation', { propertyId, date, requestType, ...(telephone ? { telephone } : {}), isWhatsapp }),
   my: () => api.get('/reservation/my'),
   owner: () => api.get('/reservation/owner'),
-  cancel: (id) => api.patch(`/reservation/${id}/cancel`),
+  cancel: (id, reason = '') => api.patch(`/reservation/${id}/cancel`, reason ? { reason } : {}),
   confirm: (id) => api.patch(`/reservation/${id}/confirm`),
   ack: (id) => api.patch(`/reservation/${id}/ack`),
   getById: (id) => api.get(`/reservation/${id}`),
+  downloadReceipt: async (id) => {
+    const res = await api.get(`/reservation/${id}/receipt`, { responseType: 'blob' });
+    downloadBlob(res.data, extractFilename(res, `recu-${id}.pdf`));
+  },
+  downloadContract: async (id) => {
+    const res = await api.get(`/reservation/${id}/contract`, { responseType: 'blob' });
+    downloadBlob(res.data, extractFilename(res, `contrat-${id}.pdf`));
+  },
 };
 
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
   
   getReservations: (params = {}) => api.get('/admin/reservations', { params }),
-  updateReservationStatus: (id, status) => api.put(`/admin/reservations/${id}/status`, { status }),
+  updateReservationStatus: (id, status, reason = '') => api.put(`/admin/reservations/${id}/status`, { status, ...(reason ? { reason } : {}) }),
 
   getProperties: (params = {}) => api.get('/admin/properties', { params }),
   getPropertyById: (id) => api.get(`/admin/properties/${id}`),
@@ -278,6 +303,11 @@ export const adminAPI = {
   getPropertyAnalytics: (params = {}) => api.get('/admin/analytics/properties', { params }),
   getUserAnalytics: (params = {}) => api.get('/admin/analytics/users', { params }),
   getRevenueAnalytics: (params = {}) => api.get('/admin/analytics/revenue', { params }),
+
+  downloadActivityReport: async (params = {}) => {
+    const res = await api.get('/admin/reports/activity', { params, responseType: 'blob' });
+    downloadBlob(res.data, extractFilename(res, 'rapport-activite.pdf'));
+  },
 
   getSettings: () => api.get('/admin/settings'),
   updateSettings: (payload) => api.put('/admin/settings', payload),

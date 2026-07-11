@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   MessageSquare, Send, Sparkles, CheckCircle, Clock,
   Bell, ChevronRight, Mail, Phone, Building2, FileText,
-  Info, RefreshCw,
+  Info, RefreshCw, X,
 } from 'lucide-react';
 import { useMessage } from '../contexts/MessageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,15 +19,21 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { cn } from '../lib/utils';
 import toast from 'react-hot-toast';
 
-/* ── helpers ── */
+/* ── helpers ──
+ * Granularité minute -> heure -> jour -> date, pour que l'affichage évolue
+ * réellement avec le temps au lieu de rester bloqué sur "À l'instant". */
 const fmt = (d) => {
   if (!d) return '';
   const date = new Date(d);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffH = diffMs / 3600000;
-  if (diffH < 1) return 'À l\'instant';
-  if (diffH < 24) return `Il y a ${Math.floor(diffH)}h`;
+  if (Number.isNaN(date.getTime())) return '';
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'À l\'instant';
+  if (diffMin < 60) return `Il y a ${diffMin} min`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `Il y a ${diffH}h`;
+  const diffJ = Math.floor(diffH / 24);
+  if (diffJ < 7) return `Il y a ${diffJ}j`;
   return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 };
 
@@ -64,7 +70,7 @@ const MessagesPage = () => {
   const { user } = useAuth();
   const {
     messages, conversations, inboxLoading, isContactSending,
-    fetchInbox, fetchMessagesWithUser, contactScim,
+    fetchInbox, fetchMessagesWithUser, contactScim, markMessageAsRead,
   } = useMessage();
 
   /* ── form state ── */
@@ -75,23 +81,39 @@ const MessagesPage = () => {
   /* ── notifications : messages reçus DE l'admin (system messages) ── */
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [openNotification, setOpenNotification] = useState(null);
+
+  const handleOpenNotification = (msg) => {
+    setOpenNotification(msg);
+    if (!msg.lu) {
+      markMessageAsRead(msg._id);
+      setNotifications((prev) => prev.map((n) => (n._id === msg._id ? { ...n, lu: true } : n)));
+    }
+  };
 
   /* ── load inbox on mount to get notifications ── */
   useEffect(() => { fetchInbox(1); }, [fetchInbox]);
 
-  /* ── extract system notifications from conversations ── */
+  /* ── extract system notifications from conversations ──
+   * Ne dépend QUE de l'identité de la conversation admin et de son dernier
+   * message : dépendre de tout le tableau `conversations` provoquait une
+   * boucle infinie (fetchMessagesWithUser -> markThreadAsRead -> mutation de
+   * `conversations` -> re-déclenchement de cet effet -> refetch -> ...). */
+  const adminConv = conversations.find(
+    c => (c?.otherUser?.role === 'admin') || (c?.otherUser?.nom || '').toLowerCase().includes('admin')
+  );
+  const adminConvId = adminConv?.otherUser?._id || adminConv?.otherUser?.id || '';
+  const adminConvLastMessageId = adminConv?.lastMessage?._id || '';
+
   useEffect(() => {
-    const adminConv = conversations.find(
-      c => (c?.otherUser?.role === 'admin') || (c?.otherUser?.nom || '').toLowerCase().includes('admin')
-    );
-    if (!adminConv?.otherUser?._id) {
+    if (!adminConvId) {
       setNotifications([]);
       return;
     }
     setNotifLoading(true);
-    fetchMessagesWithUser(adminConv.otherUser._id, 1)
+    fetchMessagesWithUser(adminConvId, 1)
       .finally(() => setNotifLoading(false));
-  }, [conversations]); // eslint-disable-line
+  }, [adminConvId, adminConvLastMessageId]); // eslint-disable-line
 
   useEffect(() => {
     const systemMessages = messages.filter(msg => {
@@ -234,8 +256,8 @@ const MessagesPage = () => {
               </h3>
               <div className="space-y-3">
                 {[
-                  { icon: Phone, label: 'Téléphone', value: '+242 06 XXX XX XX', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-                  { icon: Mail,  label: 'Email',     value: 'contact@scim.cg',   color: 'text-blue-400',    bg: 'bg-blue-500/10'    },
+                  { icon: Phone, label: 'Téléphone', value: '+242 06 57 45 422', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                  { icon: Mail,  label: 'Email',     value: 'contact@scim.com',  color: 'text-blue-400',    bg: 'bg-blue-500/10'    },
                 ].map(c => (
                   <div key={c.label} className="flex items-center gap-4 p-4 bg-zinc-950/40 border border-white/[0.06] rounded-2xl">
                     <div className={cn('h-9 w-9 rounded-xl flex items-center justify-center shrink-0', c.bg)}>
@@ -303,9 +325,11 @@ const MessagesPage = () => {
               ) : (
                 <div className="space-y-2.5">
                   {notifications.map(msg => (
-                    <div key={msg._id}
+                    <button key={msg._id}
+                      type="button"
+                      onClick={() => handleOpenNotification(msg)}
                       className={cn(
-                        'flex items-start gap-3 p-3.5 rounded-2xl border transition-all',
+                        'w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-all hover:border-gold-primary/30 cursor-pointer',
                         !msg.lu
                           ? 'bg-gold-primary/[0.05] border-gold-primary/20'
                           : 'bg-zinc-950/40 border-white/[0.05]'
@@ -326,7 +350,7 @@ const MessagesPage = () => {
                           )}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -343,6 +367,40 @@ const MessagesPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Lecture complète d'une notification ── */}
+      {openNotification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setOpenNotification(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl max-h-[85vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="shrink-0 flex items-start justify-between gap-4 px-6 py-5 border-b border-white/[0.07]">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="text-xl shrink-0 mt-0.5">{notifIcon(openNotification)}</span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-black text-white">{openNotification.sujet || 'Notification'}</h3>
+                  <p className="text-[10px] text-zinc-500 mt-1 flex items-center gap-1.5">
+                    <Clock className="h-3 w-3" /> {fmt(openNotification.createdAt)}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setOpenNotification(null)}
+                className="h-8 w-8 rounded-xl border border-white/5 bg-zinc-900 text-zinc-500 hover:text-white flex items-center justify-center transition-all shrink-0"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">
+                {cleanText(openNotification.contenu)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

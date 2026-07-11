@@ -71,7 +71,7 @@ const HomePage = () => {
   const stats = [
     { icon: TrendingUp, value: 500, suffix: '+', label: 'Biens vendus',     sub: "Transactions d'excellence" },
     { icon: Users,      value: 98,  suffix: '%', label: 'Clients satisfaits', sub: 'Prestige & Confiance'      },
-    { icon: Award,      value: 5,   suffix: '+', label: "Années d'expertise", sub: 'Leader au Congo'           },
+    { icon: Award,      value: 3,   suffix: '+', label: "Années d'expertise", sub: 'Leader au Congo'           },
   ];
 
   const categories = [
@@ -84,7 +84,7 @@ const HomePage = () => {
   const features = [
     { icon: Search,  title: 'Recherche Intelligente', desc: 'Algorithme prédictif et filtres exclusifs pour trouver votre domaine idéal.',       grad: 'from-gold-primary/30 to-amber-600/10' },
     { icon: Shield,  title: 'Sécurité Totale',        desc: 'Protocoles de vérification blindés pour des transactions en toute discrétion.',      grad: 'from-emerald-500/20 to-emerald-600/5' },
-    { icon: Award,   title: 'Expertise Locale',       desc: 'Connaissance chirurgicale du patrimoine immobilier congolais depuis 5 ans.',          grad: 'from-blue-500/20 to-blue-600/5'       },
+    { icon: Award,   title: 'Expertise Locale',       desc: 'Connaissance chirurgicale du patrimoine immobilier congolais depuis 2023.',          grad: 'from-blue-500/20 to-blue-600/5'       },
   ];
 
   const testimonials = [

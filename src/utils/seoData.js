@@ -84,14 +84,13 @@ export const organizationStructuredData = {
   "url": "https://scim.app",
   "logo": "https://scim.app/images/scim-logo.jpg",
   "image": "https://scim.app/images/og/og-default.jpg",
-  "telephone": "+33 1 23 45 67 89",
-  "email": "contact@scim.app",
+  "telephone": "+242065745422",
+  "email": "contact@scim.com",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "123 Avenue des Champs-Élysées",
-    "addressLocality": "Paris",
-    "postalCode": "75008",
-    "addressCountry": "FR"
+    "streetAddress": "63 bis, rue Moundzombo, Moungali",
+    "addressLocality": "Brazzaville",
+    "addressCountry": "CG"
   },
   "openingHours": "Mo-Fr 09:00-18:00",
   "sameAs": [

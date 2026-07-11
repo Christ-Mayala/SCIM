@@ -9,6 +9,7 @@ const initialState = {
   properties: [],
   currentProperty: null,
   favorites: [],
+  availableCities: [],
   loading: false,
   error: null,
   pagination: {
@@ -41,6 +42,9 @@ const reducer = (state, action) => {
         ...state,
         properties: action.payload.properties,
         pagination: action.payload.pagination,
+        availableCities: action.payload.availableCities?.length
+          ? action.payload.availableCities
+          : state.availableCities,
         loading: false,
         error: null,
       };
@@ -138,6 +142,7 @@ export const PropertyProvider = ({ children }) => {
               total: data.total || 0,
               totalPages: data.totalPages || 1,
             },
+            availableCities: Array.isArray(data.villes) ? data.villes : [],
           },
         });
       } catch (error) {

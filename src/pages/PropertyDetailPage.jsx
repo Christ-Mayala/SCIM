@@ -16,6 +16,7 @@ import { formatPrice, formatDate, getImageUrl, getPropertyTypeIcon } from '../li
 import StarRating from '../components/common/StarRating';
 import { propertyAPI, reservationAPI } from '../lib/api';
 import { cn } from '../lib/utils';
+import { toWhatsAppNumber } from '../lib/phone';
 import SEOHead from '../components/seo/SEOHead';
 import { seoConfig, generatePropertyStructuredData } from '../utils/seoData';
 
@@ -48,9 +49,25 @@ const PropertyDetailPage = () => {
   const [userRating, setUserRating] = useState(0);
 
   const [reservationDate, setReservationDate] = useState('');
+  const [reservationType, setReservationType] = useState('visite');
   const [isWhatsapp, setIsWhatsapp] = useState(true);
   const [reservationLoading, setReservationLoading] = useState(false);
   const [reservationAck, setReservationAck] = useState(null);
+  const [receiptDownloading, setReceiptDownloading] = useState(false);
+
+  const availableReservationTypes = useMemo(() => {
+    const types = [{ value: 'visite', label: 'Visite' }];
+    if (property?.transactionType === 'location') types.push({ value: 'location', label: 'Location' });
+    if (property?.transactionType === 'vente') types.push({ value: 'achat', label: 'Achat' });
+    return types;
+  }, [property?.transactionType]);
+
+  useEffect(() => {
+    if (!availableReservationTypes.some((t) => t.value === reservationType)) {
+      setReservationType('visite');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableReservationTypes]);
 
   // Normalisation des images : gérer à la fois {url: '...'} et '...'
   const images = useMemo(() => {
@@ -97,14 +114,16 @@ const PropertyDetailPage = () => {
 
     if (when.getTime() < Date.now()) return 'Choisissez une date dans le futur.';
 
-    const minutes = when.getHours() * 60 + when.getMinutes();
-    const min = 10 * 60;
-    const max = 17 * 60;
+    if (reservationType === 'visite') {
+      const minutes = when.getHours() * 60 + when.getMinutes();
+      const min = 10 * 60;
+      const max = 17 * 60;
 
-    if (minutes < min || minutes > max) return 'Réservation possible uniquement entre 10h00 et 17h00.';
+      if (minutes < min || minutes > max) return 'Réservation possible uniquement entre 10h00 et 17h00.';
+    }
 
     return null;
-  }, [reservationDate]);
+  }, [reservationDate, reservationType]);
 
   const nextImage = () => {
     if (!images.length) return;
@@ -621,9 +640,13 @@ const PropertyDetailPage = () => {
                       variant="outline" 
                       className="h-14 bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all"
                       onClick={() => {
-                        const phone = (owner?.telephone || '+242061234567').replace(/[^\d+]/g, '');
-                        const price = property.prix 
-                          ? new Intl.NumberFormat('fr-CG').format(property.prix) + ' XAF' 
+                        const phone = toWhatsAppNumber(owner?.telephone);
+                        if (!phone) {
+                          toast.error("Numéro WhatsApp indisponible pour ce bien");
+                          return;
+                        }
+                        const price = property.prix
+                          ? new Intl.NumberFormat('fr-CG').format(property.prix) + ' XAF'
                           : 'sur demande';
                         const typeLabel = property.transactionType === 'vente' ? 'Vente' : 'Location';
                         const message = encodeURIComponent(
@@ -637,7 +660,7 @@ const PropertyDetailPage = () => {
                           `Lien de l'annonce : ${window.location.href}\n\n` +
                           `Merci de me revenir dans les plus brefs délais.`
                         );
-                        window.open(`https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone}?text=${message}`, '_blank');
+                        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
                       }}
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
@@ -666,12 +689,41 @@ const PropertyDetailPage = () => {
                    <div className="p-2.5 bg-gold-primary/10 rounded-xl text-gold-primary border border-gold-primary/20">
                       <Calendar className="w-5 h-5" />
                    </div>
-                   <h3 className="text-lg font-black text-white tracking-tight uppercase italic">Planifier une Visite</h3>
+                   <h3 className="text-lg font-black text-white tracking-tight uppercase italic">
+                     {reservationType === 'location' ? 'Demander une Location' : reservationType === 'achat' ? "Faire une Demande d'Achat" : 'Planifier une Visite'}
+                   </h3>
                 </div>
-                
+
                 <div className="space-y-4">
+                  {availableReservationTypes.length > 1 && (
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Type de demande</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {availableReservationTypes.map((t) => (
+                          <button
+                            key={t.value}
+                            type="button"
+                            onClick={() => {
+                              setReservationType(t.value);
+                              if (reservationAck) setReservationAck(null);
+                            }}
+                            className={`py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${
+                              reservationType === t.value
+                                ? 'bg-gold-primary text-zinc-950 border-gold-primary'
+                                : 'bg-white/5 border-white/10 text-zinc-400 hover:border-white/20'
+                            }`}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Date et heure souhaitées</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">
+                      {reservationType === 'visite' ? 'Date et heure souhaitées' : 'Date souhaitée'}
+                    </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gold-primary">
                         <Clock className="w-4 h-4" />
@@ -689,7 +741,9 @@ const PropertyDetailPage = () => {
                         style={{ colorScheme: 'dark' }}
                       />
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">Sélectionnez une date et une heure (10h-17h)</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {reservationType === 'visite' ? 'Sélectionnez une date et une heure (10h-17h)' : 'Sélectionnez la date à laquelle vous souhaitez démarrer la démarche'}
+                    </p>
                   </div>
 
                   <div className="flex items-center space-x-3">
@@ -731,7 +785,7 @@ const PropertyDetailPage = () => {
                           return;
                         }
 
-                        const res = await reservationAPI.create(property._id, reservationDate, reservationPhone, isWhatsapp);
+                        const res = await reservationAPI.create(property._id, reservationDate, reservationPhone, isWhatsapp, reservationType);
                         const payload = res?.data || {};
                         const reservation = payload?.reservation || payload;
                         const support = payload?.support || reservation?.support || {};
@@ -788,6 +842,23 @@ const PropertyDetailPage = () => {
                         >
                           Suivre mes réservations
                         </Link>
+                        <button
+                          type="button"
+                          disabled={receiptDownloading}
+                          onClick={async () => {
+                            try {
+                              setReceiptDownloading(true);
+                              await reservationAPI.downloadReceipt(reservationAck.reservationId);
+                            } catch (err) {
+                              toast.error('Téléchargement du reçu impossible');
+                            } finally {
+                              setReceiptDownloading(false);
+                            }
+                          }}
+                          className="w-full flex items-center justify-center gap-2 py-3.5 px-5 bg-white/5 border border-white/10 text-zinc-300 hover:border-white/30 rounded-2xl font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50"
+                        >
+                          {receiptDownloading ? 'Génération...' : 'Télécharger le reçu'}
+                        </button>
                         {reservationAck.whatsappUrl && (
                           <a
                             href={reservationAck.whatsappUrl}
@@ -836,7 +907,7 @@ const PropertyDetailPage = () => {
                   </div>
                   <div>
                     <div className="font-black text-white">Expertise reconnue</div>
-                    <div className="text-sm text-zinc-400">5+ années d'expérience</div>
+                    <div className="text-sm text-zinc-400">3+ années d'expérience</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 group">

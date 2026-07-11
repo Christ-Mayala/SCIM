@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { favoritesAPI, formatDate, formatPrice, reservationAPI, userAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../contexts/AuthContext';
+import { toWhatsAppNumber } from '../../../lib/phone';
 import { IncompleteProfileBanner } from '../../../components/features/IncompleteProfileBanner';
 
 const ClientDashboardPage = () => {
@@ -13,6 +14,7 @@ const ClientDashboardPage = () => {
   const [visited, setVisited] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [ackLoadingId, setAckLoadingId] = useState('');
+  const [downloadingId, setDownloadingId] = useState('');
 
   useEffect(() => {
     const fetchFavs = async () => {
@@ -69,6 +71,7 @@ const ClientDashboardPage = () => {
 
   const getReservationStatusMeta = (statusValue) => {
     const s = String(statusValue || '').toLowerCase();
+    if (s.includes('termin') || s.includes('complet')) return { label: 'Terminée', className: 'bg-sky-500/10 text-sky-400 border border-sky-500/20' };
     if (s.includes('confirm')) return { label: 'Confirmée', className: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' };
     if (s.includes('annul') || s.includes('cancel')) return { label: 'Annulée', className: 'bg-red-500/10 text-red-400 border border-red-500/20' };
     return { label: 'En attente', className: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' };
@@ -83,6 +86,30 @@ const ClientDashboardPage = () => {
   };
   const isConfirmedReservation = (r) => String(r?.status || '').toLowerCase().includes('confirm');
   const isAcknowledgedReservation = (r) => Boolean(r?.support?.acknowledgedAt);
+  const getRequestTypeLabel = (r) => r?.requestTypeLabel || (r?.requestType === 'location' ? 'Location' : r?.requestType === 'achat' ? 'Achat' : 'Visite');
+  const isContractEligible = (r) => isConfirmedReservation(r) && r?.requestType && r.requestType !== 'visite';
+
+  const handleDownloadReceipt = async (id) => {
+    try {
+      setDownloadingId(`receipt-${id}`);
+      await reservationAPI.downloadReceipt(id);
+    } catch (error) {
+      toast.error('Téléchargement du reçu impossible.');
+    } finally {
+      setDownloadingId('');
+    }
+  };
+
+  const handleDownloadContract = async (id) => {
+    try {
+      setDownloadingId(`contract-${id}`);
+      await reservationAPI.downloadContract(id);
+    } catch (error) {
+      toast.error('Téléchargement du contrat impossible.');
+    } finally {
+      setDownloadingId('');
+    }
+  };
 
   const handleAckReservation = async (id) => {
     try {
@@ -213,9 +240,14 @@ const ClientDashboardPage = () => {
                             {r.date ? formatDate(r.date) : '-'}
                           </div>
                         </div>
-                        <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase tracking-widest flex-shrink-0 ${statusMeta.className}`}>
-                          {statusMeta.label}
-                        </span>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase tracking-widest ${statusMeta.className}`}>
+                            {statusMeta.label}
+                          </span>
+                          <span className="text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest bg-white/5 border border-white/10 text-zinc-400">
+                            {getRequestTypeLabel(r)}
+                          </span>
+                        </div>
                       </div>
                       <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">
                         Réf: <span className="text-zinc-300">{reference}</span> · {getReservationLastUpdate(r)}
@@ -231,6 +263,22 @@ const ClientDashboardPage = () => {
                           {r.property?.prix != null ? formatPrice(r.property.prix) : '-'}
                         </span>
                         <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end">
+                          <button
+                            disabled={downloadingId === `receipt-${r._id}`}
+                            onClick={() => handleDownloadReceipt(r._id)}
+                            className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-zinc-300 hover:border-white/30 transition-all disabled:opacity-50"
+                          >
+                            {downloadingId === `receipt-${r._id}` ? '...' : 'Reçu'}
+                          </button>
+                          {isContractEligible(r) && (
+                            <button
+                              disabled={downloadingId === `contract-${r._id}`}
+                              onClick={() => handleDownloadContract(r._id)}
+                              className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-gold-primary/10 border border-gold-primary/20 rounded-xl text-gold-primary hover:bg-gold-primary/20 transition-all disabled:opacity-50"
+                            >
+                              {downloadingId === `contract-${r._id}` ? '...' : 'Contrat'}
+                            </button>
+                          )}
                           {showAckAction && (
                             <button
                               disabled={ackLoadingId === r._id}
@@ -245,7 +293,8 @@ const ClientDashboardPage = () => {
                               size="sm" 
                               className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 hover:bg-emerald-500/20 transition-all"
                               onClick={() => {
-                                const phone = whatsappUrl.split('wa.me/')[1]?.split('?')[0] || '+242061234567';
+                                const phone = whatsappUrl.split('wa.me/')[1]?.split('?')[0] || toWhatsAppNumber(r?.support?.requesterPhone || r?.user?.telephone);
+                                if (!phone) return;
                                 const price = r.property?.prix ? new Intl.NumberFormat('fr-CG').format(r.property.prix) + ' XAF' : 'sur demande';
                                 const typeLabel = r.property?.transactionType === 'vente' ? 'Vente' : 'Location';
                                 const propertyUrl = `${window.location.origin}/properties/${r.property?._id}`;

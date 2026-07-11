@@ -23,10 +23,10 @@ const AboutPage = () => {
       suffix: '',
       description: 'Depuis notre création'
     },
-    { 
-      icon: Award, 
-      label: "Années d'expérience", 
-      value: '5',
+    {
+      icon: Award,
+      label: "Années d'expérience",
+      value: '3',
       suffix: '+',
       description: "D'expertise immobilière"
     },
@@ -43,31 +43,31 @@ const AboutPage = () => {
     {
       name: 'Théodor Bilongo',
       role: 'Directeur Général',
-      image: '/images/about/theodor.jpg',
-      description: "8 ans d'expérience dans l'immobilier de luxe",
+      image: 'https://api.dicebear.com/9.x/notionists/svg?seed=Theodor%20Bilongo&backgroundColor=18181b',
+      description: "Fondateur, expert de l'immobilier de luxe",
       expertise: ['Immobilier de luxe', 'Stratégie', 'Management']
     },
     {
       name: 'Pierre Martin',
       role: 'Responsable Commercial',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+      image: 'https://api.dicebear.com/9.x/notionists/svg?seed=Pierre%20Martin&backgroundColor=18181b',
       description: 'Expert en négociation et relation client',
       expertise: ['Négociation', 'Relation client', 'Marketing']
     },
     {
       name: 'Sophie Laurence',
       role: 'Conseillère Immobilière',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+      image: 'https://api.dicebear.com/9.x/notionists/svg?seed=Sophie%20Laurence&backgroundColor=18181b',
       description: "Spécialisée dans l'immobilier résidentiel",
       expertise: ['Résidentiel', 'Accompagnement', 'Évaluation']
     },
     {
       name: 'Thomas Malonga',
       role: 'Conseiller Investissement',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+      image: 'https://api.dicebear.com/9.x/notionists/svg?seed=Thomas%20Malonga&backgroundColor=18181b',
       description: 'Expert en investissement immobilier',
       expertise: ['Investissement', 'Rentabilité', 'Analyse de marché']
-    }, 
+    },
   ];
 
   const values = [
@@ -98,11 +98,11 @@ const AboutPage = () => {
   ];
 
   const milestones = [
-    { year: '2018', title: 'Fondation de SCIM', description: 'Création avec une vision innovante' },
-    { year: '2019', title: '100ème transaction', description: 'Premier palier significatif' },
-    { year: '2020', title: "Expansion de l'équipe", description: 'Doublement des effectifs' },
-    { year: '2022', title: 'Certification Qualité', description: 'Obtenu la certification ISO' },
-    { year: '2023', title: '500+ transactions', description: 'Nouveau record annuel' },
+    { year: '2023', title: 'Création de SCIM', description: 'Fondée le 10 juillet 2023 avec une vision innovante' },
+    { year: '2023', title: 'Lancement officiel', description: 'Ouverture officielle à Brazzaville le 11 novembre 2023' },
+    { year: '2024', title: "Expansion de l'équipe", description: 'Renforcement de nos équipes terrain' },
+    { year: '2025', title: 'Certification Qualité', description: 'Obtention de la certification ISO' },
+    { year: '2026', title: '500+ transactions', description: 'Nouveau record annuel' },
   ];
 
   return (
@@ -118,7 +118,7 @@ const AboutPage = () => {
               À propos de <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-amber-200">SCIM Immobilier</span>
             </>
           }
-          description="Leader dans l'accompagnement immobilier depuis 2018, nous transformons vos ambitions en realites tangibles avec expertise et passion."
+          description="Leader dans l'accompagnement immobilier depuis 2023, nous transformons vos ambitions en realites tangibles avec expertise et passion."
           backgroundImage="https://images.unsplash.com/photo-1560185007-5f0bb1866cab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
           className="pb-10"
           actions={(
@@ -194,7 +194,7 @@ const AboutPage = () => {
                   
                   <div className="absolute bottom-0 left-0 w-full p-10 text-white">
                     <div className="inline-block px-3 py-1 rounded-full bg-gold-primary/20 border border-white/10 text-[10px] font-black uppercase tracking-widest text-gold-primary mb-4">
-                      Depuis 2018
+                      Depuis 2023
                     </div>
                     <h3 className="text-3xl font-bold mb-3 tracking-tight">L'excellence au quotidien</h3>
                     <p className="text-zinc-300 text-sm max-w-xs leading-relaxed">Une expertise reconnue pour chaque projet d'envergure.</p>

@@ -38,7 +38,7 @@ const CookiesPage = () => {
             </section>
             <section>
               <h2 className="text-base font-black text-white uppercase italic tracking-widest mb-2">4. Contact</h2>
-              <p>Contact: <a className="text-gold-primary hover:text-amber-300 transition-colors" href="mailto:support@scim.app">support@scim.app</a></p>
+              <p>Contact: <a className="text-gold-primary hover:text-amber-300 transition-colors" href="mailto:contact@scim.com">contact@scim.com</a></p>
             </section>
           </div>
           <div className="mt-10 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}</div>

@@ -105,23 +105,28 @@ const AdminPropertiesPage = () => {
     } catch (e) { toast.error('Mise à jour impossible'); }
   };
 
-  // Charts (données statiques illustratives)
-  const publicationTrendData = useMemo(() => [
-    { name: 'Janv', value: 12 }, { name: 'Fév', value: 18 }, { name: 'Mar', value: 15 },
-    { name: 'Avr', value: 22 }, { name: 'Mai', value: 28 }, { name: 'Juin', value: 25 },
-  ], []);
-  const viewsTrendData = useMemo(() => [
-    { name: 'Janv', value: 320 }, { name: 'Fév', value: 480 }, { name: 'Mar', value: 560 },
-    { name: 'Avr', value: 720 }, { name: 'Mai', value: 980 }, { name: 'Juin', value: 850 },
-  ], []);
-  const categoryData = useMemo(() => [
-    { name: 'Appartements', value: 45 }, { name: 'Villas', value: 25 },
-    { name: 'Terrains', value: 15 }, { name: 'Commercial', value: 15 },
-  ], []);
-  const cityData = useMemo(() => [
-    { name: 'Brazzaville', value: 60 }, { name: 'Pointe-Noire', value: 20 },
-    { name: 'Dolisie', value: 10 }, { name: 'Autres', value: 10 },
-  ], []);
+  // Charts — données réelles issues de l'API analytics (aucune valeur statique)
+  const monthLabel = (ym) => {
+    if (!ym) return '';
+    const [y, m] = ym.split('-');
+    return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('fr-FR', { month: 'short' });
+  };
+  const publicationTrendData = useMemo(
+    () => (data?.publicationTrend || []).map((x) => ({ name: monthLabel(x.month), value: x.count || 0 })),
+    [data],
+  );
+  const topViewedData = useMemo(
+    () => (data?.topViewedProperties || []).map((p) => ({ name: p.titre || 'Bien', value: p.vues || 0 })),
+    [data],
+  );
+  const categoryData = useMemo(
+    () => (data?.propertiesByCategory || []).map((x) => ({ name: x.category || 'Autre', value: x.count || 0 })),
+    [data],
+  );
+  const cityData = useMemo(
+    () => (data?.topLocations || []).map((x) => ({ name: x.city || 'Autre', value: x.count || 0 })),
+    [data],
+  );
   const colors = ['#d4af37', '#10b981', '#6366f1', '#f59e0b'];
 
   const statusConfig = {
@@ -223,10 +228,10 @@ const AdminPropertiesPage = () => {
 
           {/* KPI Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard title="Total biens"    value={stats.totalProperties || 0}   icon={Building2}   trend="up"      trendValue="+12%" trendLabel="ce mois"      color="gold" />
-            <KpiCard title="Publiés"        value={stats.activeProperties || 0}  icon={Globe}       trend="up"      trendValue="+8%"  trendLabel="vs dernier"   color="emerald" />
-            <KpiCard title="Suspendus"      value={stats.inactiveProperties || 0} icon={XCircle}    trend="down"    trendValue="-2"   trendLabel="ce mois"      color="red" />
-            <KpiCard title="Total vues"     value={(stats.totalViews || 0).toLocaleString('fr-FR')} icon={TrendingUp} trend="up" trendValue="+24%" trendLabel="vs dernier" color="violet" />
+            <KpiCard title="Total biens"    value={stats.totalProperties || 0}   icon={Building2}   trend="pending" trendValue={`${stats.activeProperties || 0} actifs`} color="gold" />
+            <KpiCard title="Publiés"        value={stats.activeProperties || 0}  icon={Globe}       trend="up"      trendLabel="En ligne"     color="emerald" />
+            <KpiCard title="Suspendus"      value={stats.inactiveProperties || 0} icon={XCircle}    trend="pending" trendLabel="Hors ligne"   color="red" />
+            <KpiCard title="Total vues"     value={(stats.totalViews || 0).toLocaleString('fr-FR')} icon={TrendingUp} trend="pending" trendLabel="Cumulées" color="violet" />
           </div>
 
           {/* Charts */}
@@ -236,44 +241,46 @@ const AdminPropertiesPage = () => {
                 <TrendingUp className="h-4 w-4 text-gold-primary" /> Évolution publications
               </h3>
               <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={publicationTrendData}>
-                    <defs>
-                      <linearGradient id="gPub" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#d4af37" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#d4af37" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
-                    <Area type="monotone" dataKey="value" stroke="#d4af37" strokeWidth={2.5} fill="url(#gPub)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {publicationTrendData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Pas de données</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={publicationTrendData}>
+                      <defs>
+                        <linearGradient id="gPub" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#d4af37" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#d4af37" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
+                      <Area type="monotone" dataKey="value" stroke="#d4af37" strokeWidth={2.5} fill="url(#gPub)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
             <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-8">
               <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Eye className="h-4 w-4 text-emerald-500" /> Vues
+                <Eye className="h-4 w-4 text-emerald-500" /> Biens les plus vus
               </h3>
               <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={viewsTrendData}>
-                    <defs>
-                      <linearGradient id="gViews" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
-                    <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2.5} fill="url(#gViews)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {topViewedData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Pas de données</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={topViewedData} layout="vertical" margin={{ left: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
+                      <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
+                      <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} width={110} tick={{ fill: '#a1a1aa', fontSize: 9 }} tickFormatter={(v) => (v.length > 16 ? `${v.slice(0, 16)}…` : v)} />
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
+                      <Bar dataKey="value" fill="#10b981" radius={[0, 6, 6, 0]} barSize={16} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
@@ -282,15 +289,19 @@ const AdminPropertiesPage = () => {
                 <Building2 className="h-4 w-4 text-violet-500" /> Par catégorie
               </h3>
               <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categoryData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
-                      {categoryData.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
-                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '10px', fontWeight: '800' }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                {categoryData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Pas de données</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={categoryData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
+                        {categoryData.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
+                      <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '10px', fontWeight: '800' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
@@ -299,15 +310,19 @@ const AdminPropertiesPage = () => {
                 <MapPin className="h-4 w-4 text-orange-500" /> Par ville
               </h3>
               <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={cityData} barSize={28}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
-                    <Bar dataKey="value" fill="#d4af37" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {cityData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-600">Pas de données</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={cityData} barSize={28}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} />
+                      <Bar dataKey="value" fill="#d4af37" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
           </div>

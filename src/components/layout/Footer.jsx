@@ -84,7 +84,7 @@ const Footer = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Siège Social</span>
-                  <span className="text-zinc-400 text-sm font-bold">123 Avenue des Ball, Bacongo, Brazzaville</span>
+                  <span className="text-zinc-400 text-sm font-bold">63 bis, rue Moundzombo, Moungali, Brazzaville, RC</span>
                 </div>
               </div>
               <div className="flex items-start space-x-4 group">
@@ -93,7 +93,7 @@ const Footer = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Assistance</span>
-                  <span className="text-zinc-400 text-sm font-bold">+242 06 123 45 67</span>
+                  <span className="text-zinc-400 text-sm font-bold">+242 06 57 45 422</span>
                 </div>
               </div>
               <div className="flex items-start space-x-4 group">
@@ -102,7 +102,7 @@ const Footer = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Email</span>
-                  <span className="text-zinc-400 text-sm font-bold">contact@scim.app</span>
+                  <span className="text-zinc-400 text-sm font-bold">contact@scim.com</span>
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Building2, MessageSquare, Users, CalendarDays, CheckCircle, Clock,
   Plus, ArrowRight, Home, BarChart3, Activity, RefreshCw, TrendingUp,
-  XCircle, Eye,
+  XCircle, Eye, CheckCheck,
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -47,14 +47,36 @@ const AdminDashboardPage = () => {
     utilisateurs: item.users        || 0,
   }));
 
-  const activities = (feed?.reservations || []).map(r => ({
-    title:       r.propertyTitle || 'Demande de visite',
-    description: r.customer      || 'Client',
-    time:        r.visitDate ? new Date(r.visitDate).toLocaleString('fr-FR') : 'Récemment',
-    status:      r.status === 'confirmee' ? 'success' : r.status === 'annulee' ? 'warning' : 'pending',
-    badge:       r.status === 'confirmee' ? 'Confirmé' : r.status === 'annulee' ? 'Annulé' : 'En attente',
-    icon:        r.status === 'confirmee' ? CheckCircle : Clock,
-  }));
+  const timeAgo = (value) => {
+    if (!value) return 'Récemment';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Récemment';
+    const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (diffMin < 1) return "À l'instant";
+    if (diffMin < 60) return `Il y a ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `Il y a ${diffH}h`;
+    return `Il y a ${Math.floor(diffH / 24)}j`;
+  };
+
+  const RESERVATION_ACTIVITY_CONFIG = {
+    confirmee:  { status: 'success', badge: 'Confirmé', icon: CheckCircle },
+    annulee:    { status: 'warning', badge: 'Annulé',   icon: XCircle },
+    terminee:   { status: 'success', badge: 'Terminé',  icon: CheckCheck },
+    en_attente: { status: 'pending', badge: 'En attente', icon: Clock },
+  };
+
+  const activities = (feed?.reservations || []).map(r => {
+    const cfg = RESERVATION_ACTIVITY_CONFIG[r.status] || RESERVATION_ACTIVITY_CONFIG.en_attente;
+    return {
+      title:       r.propertyTitle || 'Demande de visite',
+      description: r.customer      || 'Client',
+      time:        timeAgo(r.updatedAt || r.createdAt),
+      status:      cfg.status,
+      badge:       cfg.badge,
+      icon:        cfg.icon,
+    };
+  });
 
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',

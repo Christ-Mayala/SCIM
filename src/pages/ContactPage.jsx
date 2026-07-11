@@ -78,26 +78,26 @@ const ContactPage = () => {
     {
       icon: Phone,
       title: 'Téléphone',
-      details: '+242 06 123 45 67',
+      details: '+242 06 57 45 422',
       subtitle: 'Du lundi au vendredi, 9h-18h',
-      action: 'tel:+242061234567',
+      action: 'tel:+242065745422',
       color: 'from-blue-500/20 to-blue-600/20',
       iconColor: 'text-blue-600'
     },
     {
       icon: Mail,
       title: 'Email',
-      details: 'contact@scim.cg',
+      details: 'contact@scim.com',
       subtitle: 'Réponse garantie sous 24h',
-      action: 'mailto:contact@scim.cg',
+      action: 'mailto:contact@scim.com',
       color: 'from-emerald-500/20 to-emerald-600/20',
       iconColor: 'text-emerald-600'
     },
     {
       icon: MapPin,
       title: 'Adresse',
-      details: '123 Avenue des Ball',
-      subtitle: 'Bacongo, Brazzaville, Congo',
+      details: '63 bis, rue Moundzombo',
+      subtitle: 'Moungali, Brazzaville, République du Congo',
       action: '#map',
       color: 'from-amber-500/20 to-amber-600/20',
       iconColor: 'text-amber-600'
@@ -361,7 +361,7 @@ const ContactPage = () => {
                   
                   <div className="flex flex-col gap-4 w-full md:w-auto">
                     <Button
-                      onClick={() => window.location.href = 'tel:+242061234567'}
+                      onClick={() => window.location.href = 'tel:+242065745422'}
                       className="bg-zinc-950 text-white hover:bg-zinc-900 h-16 px-8 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl"
                     >
                       <Phone className="w-4 h-4 mr-3" />
@@ -369,7 +369,7 @@ const ContactPage = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.location.href = 'mailto:contact@scim.cg'}
+                      onClick={() => window.location.href = 'mailto:contact@scim.com'}
                       className="border-zinc-950/20 text-zinc-950 hover:bg-zinc-950 hover:text-white h-16 px-8 rounded-2xl font-black uppercase tracking-widest text-xs"
                     >
                       Conciergerie Mail
@@ -390,7 +390,7 @@ const ContactPage = () => {
                 <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden ring-1 ring-white/10 shadow-2xl group">
                   <iframe
                     title="SCIM Immobilier — Brazzaville"
-                    src="https://www.google.com/maps?q=SCIM+Immobilier,+Bacongo,+Brazzaville&output=embed"
+                    src="https://www.google.com/maps?q=63+bis+rue+Moundzombo,+Moungali,+Brazzaville,+Congo&output=embed"
                     className="absolute inset-0 w-full h-full grayscale-[0.8] opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"

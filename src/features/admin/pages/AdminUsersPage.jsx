@@ -1,10 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Search, Trash2, Pencil, Users, RefreshCw, ShieldCheck, ShieldOff, Phone, Mail } from 'lucide-react';
-import { adminAPI } from '../../../lib/api';
+import {
+  Search, Trash2, Users, RefreshCw, ShieldCheck, ShieldOff, Phone, Mail,
+  X, CalendarDays, Download, FileText, Ban, PowerOff, Power, Building2, Clock,
+} from 'lucide-react';
+import { adminAPI, reservationAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import { cn } from '../../../lib/utils';
 import toast from 'react-hot-toast';
+
+const RESERVATION_STATUS_CONFIG = {
+  confirmee:  { label: 'Confirmée',  cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+  en_attente: { label: 'En attente', cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  annulee:    { label: 'Annulée',    cls: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  terminee:   { label: 'Terminée',   cls: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+};
 
 const ROLE_CONFIG = {
   admin: { label: 'Admin', cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
@@ -27,6 +37,14 @@ const AdminUsersPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const loadIdRef = useRef(0);
   const isMountedRef = useRef(false);
+
+  // ── Détail utilisateur (réservations, activité, contrats, ban/désactivation) ──
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedReservations, setSelectedReservations] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState('');
+  const detailRequestRef = useRef(0);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400);
@@ -84,6 +102,69 @@ const AdminUsersPage = () => {
       toast.success(`Rôle changé : ${newRole === 'admin' ? 'Admin' : 'Client'}`);
     } catch { toast.error('Impossible de changer le rôle'); }
   };
+
+  const openUserDetail = async (u) => {
+    const requestId = ++detailRequestRef.current;
+    setSelectedUser(u);
+    setSelectedReservations([]);
+    setDetailLoading(true);
+    try {
+      const [userRes, reservationsRes] = await Promise.all([
+        adminAPI.getUserById(u._id),
+        adminAPI.getReservations({ user: u._id, limit: 50, sort: '-createdAt' }),
+      ]);
+      if (requestId !== detailRequestRef.current) return;
+      const fullUser = userRes.data?.data || userRes.data;
+      const rd = reservationsRes.data?.data || reservationsRes.data;
+      setSelectedUser(fullUser || u);
+      setSelectedReservations(Array.isArray(rd?.reservations) ? rd.reservations : []);
+    } catch {
+      if (requestId !== detailRequestRef.current) return;
+      toast.error('Impossible de charger le détail de cet utilisateur');
+    } finally {
+      if (requestId === detailRequestRef.current) setDetailLoading(false);
+    }
+  };
+
+  const closeUserDetail = () => {
+    detailRequestRef.current += 1;
+    setSelectedUser(null);
+    setSelectedReservations([]);
+  };
+
+  const handleSetStatus = async (status) => {
+    if (!selectedUser) return;
+    setActionLoading(true);
+    try {
+      await adminAPI.updateUser(selectedUser._id, { status });
+      setSelectedUser(prev => prev ? { ...prev, status } : prev);
+      setItems(prev => prev.map(x => x._id === selectedUser._id ? { ...x, status } : x));
+      const labels = { active: 'réactivé', inactive: 'désactivé', banned: 'banni' };
+      toast.success(`Compte ${labels[status] || 'mis à jour'}`);
+    } catch {
+      toast.error('Mise à jour du statut impossible');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDownloadReceipt = async (id) => {
+    try {
+      setDownloadingId(`receipt-${id}`);
+      await reservationAPI.downloadReceipt(id);
+    } catch { toast.error('Téléchargement du reçu impossible'); }
+    finally { setDownloadingId(''); }
+  };
+
+  const handleDownloadContract = async (id) => {
+    try {
+      setDownloadingId(`contract-${id}`);
+      await reservationAPI.downloadContract(id);
+    } catch { toast.error('Téléchargement du contrat impossible'); }
+    finally { setDownloadingId(''); }
+  };
+
+  const isContractEligible = (r) => String(r?.status || '') === 'confirmee' && r?.requestType && r.requestType !== 'visite';
 
   const roleOptions = [
     { value: '',      label: 'Tous' },
@@ -212,7 +293,11 @@ const AdminUsersPage = () => {
                     const roleCfg = ROLE_CONFIG[u.role] || ROLE_CONFIG.user;
                     const statusCfg = STATUS_CONFIG[u.status] || STATUS_CONFIG.inactive;
                     return (
-                      <tr key={u._id} className="group hover:bg-white/[0.025] transition-colors">
+                      <tr
+                        key={u._id}
+                        onClick={() => openUserDetail(u)}
+                        className="group hover:bg-white/[0.025] transition-colors cursor-pointer"
+                      >
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-xl bg-zinc-800 border border-white/5 flex items-center justify-center font-black text-gold-primary text-sm shrink-0">
@@ -251,14 +336,14 @@ const AdminUsersPage = () => {
                         <td className="px-6 py-5">
                           <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={() => handleToggleRole(u)}
+                              onClick={(e) => { e.stopPropagation(); handleToggleRole(u); }}
                               title={u.role === 'admin' ? 'Rétrograder en client' : 'Promouvoir admin'}
                               className="h-8 w-8 rounded-lg border border-white/5 bg-zinc-900 hover:bg-amber-500/10 text-zinc-500 hover:text-amber-400 flex items-center justify-center transition-all"
                             >
                               {u.role === 'admin' ? <ShieldOff className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                             </button>
                             <button
-                              onClick={() => handleDelete(u)}
+                              onClick={(e) => { e.stopPropagation(); handleDelete(u); }}
                               title="Supprimer"
                               className="h-8 w-8 rounded-lg border border-white/5 bg-zinc-900 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 flex items-center justify-center transition-all"
                             >
@@ -329,6 +414,147 @@ const AdminUsersPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Détail utilisateur (modal) ── */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-stretch justify-end">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeUserDetail} />
+          <div className="relative w-full max-w-xl bg-[#0d0d0d] border-l border-white/10 h-full overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-[#0d0d0d]/95 backdrop-blur border-b border-white/5 p-6 flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center font-black text-gold-primary text-xl shrink-0">
+                  {(selectedUser.nom || selectedUser.name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg font-black text-white truncate">{selectedUser.nom || selectedUser.name || 'Sans nom'}</p>
+                  <p className="text-xs text-zinc-500 truncate">{selectedUser.email}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={cn('px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border', (ROLE_CONFIG[selectedUser.role] || ROLE_CONFIG.user).cls)}>
+                      {(ROLE_CONFIG[selectedUser.role] || ROLE_CONFIG.user).label}
+                    </span>
+                    <span className={cn('px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border', (STATUS_CONFIG[selectedUser.status] || STATUS_CONFIG.inactive).cls)}>
+                      {(STATUS_CONFIG[selectedUser.status] || STATUS_CONFIG.inactive).label}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button onClick={closeUserDetail} className="h-9 w-9 rounded-xl bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white flex items-center justify-center shrink-0">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-8">
+
+              {/* Activité */}
+              <div>
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Activité</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Membre depuis</p>
+                    <p className="text-sm font-bold text-white">{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Téléphone</p>
+                    <p className="text-sm font-bold text-white truncate">{selectedUser.telephone || '—'}</p>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Réservations</p>
+                    <p className="text-sm font-bold text-white">{selectedReservations.length}</p>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Confirmées</p>
+                    <p className="text-sm font-bold text-emerald-500">{selectedReservations.filter(r => r.status === 'confirmee').length}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Réservations & contrats */}
+              <div>
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Réservations & contrats</h4>
+                {detailLoading ? (
+                  <div className="py-10 flex justify-center"><LoadingSpinner size="sm" /></div>
+                ) : selectedReservations.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <CalendarDays className="h-8 w-8 text-zinc-700 mx-auto mb-2" />
+                    <p className="text-xs text-zinc-600 font-bold">Aucune réservation</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedReservations.map((r) => {
+                      const scfg = RESERVATION_STATUS_CONFIG[r.status] || RESERVATION_STATUS_CONFIG.en_attente;
+                      return (
+                        <div key={r._id} className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="min-w-0">
+                              <p className="text-xs font-black text-white truncate flex items-center gap-1.5">
+                                <Building2 className="h-3 w-3 text-zinc-600 shrink-0" />
+                                {r.property?.titre || 'Bien supprimé'}
+                              </p>
+                              <p className="text-[9px] text-zinc-600 uppercase tracking-widest mt-1 flex items-center gap-1.5">
+                                <Clock className="h-2.5 w-2.5" />
+                                {r.date ? new Date(r.date).toLocaleDateString('fr-FR') : '—'} · #{r.reference || r._id?.slice(-6).toUpperCase()}
+                              </p>
+                            </div>
+                            <span className={cn('px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shrink-0', scfg.cls)}>
+                              {scfg.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              disabled={downloadingId === `receipt-${r._id}`}
+                              onClick={() => handleDownloadReceipt(r._id)}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/5 bg-zinc-950 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                            >
+                              <Download className="h-3 w-3" /> Reçu
+                            </button>
+                            {isContractEligible(r) && (
+                              <button
+                                disabled={downloadingId === `contract-${r._id}`}
+                                onClick={() => handleDownloadContract(r._id)}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gold-primary/20 bg-gold-primary/10 text-gold-primary hover:bg-gold-primary/20 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                              >
+                                <FileText className="h-3 w-3" /> Contrat
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions de modération */}
+              <div>
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Modération du compte</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    disabled={actionLoading || selectedUser.status === 'active'}
+                    onClick={() => handleSetStatus('active')}
+                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Power className="h-3.5 w-3.5" /> Activer
+                  </button>
+                  <button
+                    disabled={actionLoading || selectedUser.status === 'inactive'}
+                    onClick={() => handleSetStatus('inactive')}
+                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-white/10 bg-zinc-900 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <PowerOff className="h-3.5 w-3.5" /> Désactiver
+                  </button>
+                  <button
+                    disabled={actionLoading || selectedUser.status === 'banned'}
+                    onClick={() => { if (window.confirm(`Bannir ${selectedUser.nom || selectedUser.name || selectedUser.email} ?`)) handleSetStatus('banned'); }}
+                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Ban className="h-3.5 w-3.5" /> Bannir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

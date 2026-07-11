@@ -94,11 +94,11 @@ class ErrorBoundary extends React.Component {
             <div className="mt-6 text-sm text-gray-500">
               <p>
                 Si le problème persiste, contactez-nous à{' '}
-                <a 
-                  href="mailto:support@scim.app" 
+                <a
+                  href="mailto:contact@scim.com"
                   className="text-gold-primary hover:underline"
                 >
-                  support@scim.app
+                  contact@scim.com
                 </a>
               </p>
             </div>

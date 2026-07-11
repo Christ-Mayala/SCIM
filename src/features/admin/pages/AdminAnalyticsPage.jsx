@@ -12,24 +12,65 @@ import {
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/Button';
 import KpiCard from '../../../components/admin/KpiCard';
+import toast from 'react-hot-toast';
+
+const PERIOD_LABELS = {
+  week: 'Cette semaine',
+  month: 'Ce mois-ci',
+  quarter: 'Ce trimestre',
+  year: 'Cette année',
+};
+
+// Calcule la plage [from, to] correspondant à la période sélectionnée (Sem./Mois/Trim./Année).
+const getPeriodRange = (period) => {
+  const to = new Date();
+  const from = new Date();
+  if (period === 'week') {
+    from.setDate(to.getDate() - 7);
+  } else if (period === 'quarter') {
+    from.setMonth(to.getMonth() - 3);
+  } else if (period === 'year') {
+    from.setFullYear(to.getFullYear() - 1);
+  } else {
+    from.setMonth(to.getMonth() - 1);
+  }
+  return { from: from.toISOString(), to: to.toISOString() };
+};
 
 const AdminAnalyticsPage = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({ properties: null, users: null, revenue: null });
+  const [data, setData] = useState({ properties: null, users: null, revenue: null, dashboard: null });
   const [activePeriod, setActivePeriod] = useState('month');
+  const [reportDownloading, setReportDownloading] = useState(false);
 
-  const loadAll = async () => {
+  const handleDownloadReport = async () => {
+    try {
+      setReportDownloading(true);
+      const { from, to } = getPeriodRange(activePeriod);
+      await adminAPI.downloadActivityReport({ from, to, periodLabel: PERIOD_LABELS[activePeriod] });
+      toast.success('Rapport d\'activité généré.');
+    } catch (e) {
+      toast.error('Téléchargement du rapport impossible.');
+    } finally {
+      setReportDownloading(false);
+    }
+  };
+
+  const loadAll = async (period = activePeriod) => {
     try {
       setLoading(true);
-      const [pR, uR, rR] = await Promise.all([
-        adminAPI.getPropertyAnalytics(),
-        adminAPI.getUserAnalytics(),
-        adminAPI.getRevenueAnalytics(),
+      const { from, to } = getPeriodRange(period);
+      const [pR, uR, rR, dR] = await Promise.all([
+        adminAPI.getPropertyAnalytics({ from, to }),
+        adminAPI.getUserAnalytics({ from, to }),
+        adminAPI.getRevenueAnalytics({ from, to }),
+        adminAPI.getDashboardStats(),
       ]);
       setData({
         properties: pR.data?.data || pR.data,
         users: uR.data?.data || uR.data,
         revenue: rR.data?.data || rR.data,
+        dashboard: dR.data?.data || dR.data,
       });
     } catch (e) {
       console.error('Analytics fetch failed', e);
@@ -38,7 +79,7 @@ const AdminAnalyticsPage = () => {
     }
   };
 
-  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { loadAll(activePeriod); }, [activePeriod]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const today = useMemo(() => {
     const d = new Date();
@@ -57,25 +98,47 @@ const AdminAnalyticsPage = () => {
   }, [data.revenue]);
 
   const typeData = useMemo(() => {
-    if (!data.properties?.topLocations?.length) return [];
-    return data.properties.topLocations.map((l) => ({ type: l._id || 'Type', count: l.count || 0 }));
+    if (!data.properties?.propertiesByCategory?.length) return [];
+    return data.properties.propertiesByCategory.map((c) => ({ type: c.category || 'Autre', count: c.count || 0 }));
   }, [data.properties]);
+
+  const cityCount = useMemo(() => data.properties?.topLocations?.length || 0, [data.properties]);
+  const agentsCount = useMemo(() => data.properties?.distinctOwners || 0, [data.properties]);
+
+  const confirmationRate = useMemo(() => {
+    const total = data.dashboard?.stats?.totalReservations || 0;
+    const confirmed = data.dashboard?.stats?.confirmedReservations || 0;
+    if (!total) return 0;
+    return Math.round((confirmed / total) * 100);
+  }, [data.dashboard]);
 
   const userData = useMemo(() => {
     if (!data.users?.usersByRole?.length) return [];
     return data.users.usersByRole.map((r) => ({ role: r.role || 'Client', count: r.count || 0, revenue: r.revenue || 0 }));
   }, [data.users]);
 
+  const timeAgo = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (diffMin < 1) return "À l'instant";
+    if (diffMin < 60) return `Il y a ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `Il y a ${diffH}h`;
+    return `Il y a ${Math.floor(diffH / 24)}j`;
+  };
+
   const recentActivities = useMemo(() => {
-    if (!data.properties?.recentProperties?.length) return [];
-    return data.properties.recentProperties.slice(0, 5).map((item, i) => ({
+    if (!data.dashboard?.recentActivities?.length) return [];
+    return data.dashboard.recentActivities.slice(0, 5).map((item, i) => ({
       id: i,
-      title: `${item.titre || 'Nouveau bien'}`,
-      status: 'success',
-      time: 'Récemment',
-      by: item.ville || '—',
+      title: item.title || item.description || 'Activité',
+      status: item.status === 'warning' || item.status === 'danger' ? 'pending' : 'success',
+      time: timeAgo(item.time),
+      by: item.description || '—',
     }));
-  }, [data.properties]);
+  }, [data.dashboard]);
 
   if (loading) return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center">
@@ -90,6 +153,8 @@ const AdminAnalyticsPage = () => {
     totalUsers: data.users?.totalUsers || 0,
     totalRevenue: data.revenue?.totalRevenue || 0,
     confirmedReservations: data.revenue?.totalConfirmedReservations || 0,
+    newUsers: data.users?.newUsers,
+    newProperties: data.properties?.newProperties,
   };
 
   const periods = [
@@ -127,7 +192,7 @@ const AdminAnalyticsPage = () => {
             ))}
           </div>
           <Button
-            onClick={loadAll}
+            onClick={() => loadAll(activePeriod)}
             className="h-10 w-10 rounded-xl bg-zinc-900/60 border border-white/5 text-zinc-400 hover:text-white p-0 flex items-center justify-center"
           >
             <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
@@ -137,10 +202,10 @@ const AdminAnalyticsPage = () => {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <KpiCard title="Total Revenus"       value={formatPrice(stats.totalRevenue)}      icon={Zap}       trend="up"      trendValue="+18%" trendLabel="Ce mois"  color="gold" />
-        <KpiCard title="Ventes Confirmées"   value={stats.confirmedReservations}          icon={CheckCircle} trend="up"   trendValue="+8%"  trendLabel="Ce mois"  color="emerald" />
-        <KpiCard title="Annonces Actives"    value={stats.activeProperties}               icon={Home}      trend="pending" trendValue={`${stats.totalProperties} total`} color="violet" />
-        <KpiCard title="Utilisateurs"        value={stats.totalUsers}                     icon={Users}     trend="up"      trendValue="+5%"  trendLabel="Nouveaux" color="blue" />
+        <KpiCard title="Total Revenus"       value={formatPrice(stats.totalRevenue)}      icon={Zap}       trend="pending" trendLabel={PERIOD_LABELS[activePeriod]} color="gold" />
+        <KpiCard title="Ventes Confirmées"   value={stats.confirmedReservations}          icon={CheckCircle} trend="pending" trendValue={`${confirmationRate}%`} trendLabel="taux de confirmation" color="emerald" />
+        <KpiCard title="Annonces Actives"    value={stats.activeProperties}               icon={Home}      trend="pending" trendValue={`${stats.totalProperties} total`} trendLabel={typeof stats.newProperties === 'number' ? `+${stats.newProperties} (${PERIOD_LABELS[activePeriod].toLowerCase()})` : undefined} color="violet" />
+        <KpiCard title="Utilisateurs"        value={stats.totalUsers}                     icon={Users}     trend="pending" trendLabel={typeof stats.newUsers === 'number' ? `+${stats.newUsers} (${PERIOD_LABELS[activePeriod].toLowerCase()})` : 'Comptes enregistrés'} color="blue" />
       </div>
 
       {/* ── Charts row 1 — pleine largeur ── */}
@@ -253,22 +318,21 @@ const AdminAnalyticsPage = () => {
           <div className="space-y-4">
             <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Taux d'occupation</p>
-                <p className="text-[10px] font-black text-emerald-500">+22%</p>
+                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Taux de confirmation</p>
               </div>
-              <p className="text-3xl font-black text-white">78%</p>
+              <p className="text-3xl font-black text-white">{confirmationRate}%</p>
               <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden mt-3">
-                <div className="h-full w-[78%] bg-emerald-500 rounded-full" />
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${confirmationRate}%` }} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 text-center">
                 <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Villes</p>
-                <p className="text-xl font-black text-white">{typeData.length}</p>
+                <p className="text-xl font-black text-white">{cityCount}</p>
               </div>
               <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 text-center">
                 <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Agents</p>
-                <p className="text-xl font-black text-white">24</p>
+                <p className="text-xl font-black text-white">{agentsCount}</p>
               </div>
             </div>
           </div>
@@ -307,8 +371,12 @@ const AdminAnalyticsPage = () => {
             <Shield className="h-5 w-5 text-gold-primary" />
             <h3 className="text-sm font-black text-white uppercase tracking-widest">Actions</h3>
           </div>
-          <Button className="w-full h-12 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/20 flex items-center justify-center gap-2">
-            <Download className="h-4 w-4" /> Exporter Rapport
+          <Button
+            disabled={reportDownloading}
+            onClick={handleDownloadReport}
+            className="w-full h-12 rounded-2xl bg-gold-primary hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-gold-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" /> {reportDownloading ? 'Génération...' : 'Exporter Rapport'}
           </Button>
           <Button variant="outline" className="w-full h-12 rounded-2xl border-white/5 bg-zinc-950/50 hover:bg-white/5 text-zinc-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all">
             Voir Historique

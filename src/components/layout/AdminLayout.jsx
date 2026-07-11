@@ -1,11 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu, Search, Bell, User, LayoutDashboard, Building2, CalendarDays, ClipboardList, BarChart3, Users, MessageSquare, Settings } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
+import { adminAPI } from '../../lib/api';
 
 const AdminLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Meme source que le compteur de la sidebar (adminAPI.getMessages), pour que la
+  // cloche affiche exactement le meme nombre — plutot que le compteur de messagerie
+  // "personnelle" (useMessage) qui ne se rafraichissait pas assez souvent et restait bloque.
+  useEffect(() => {
+    let cancelled = false;
+    const fetchUnread = async () => {
+      try {
+        const res = await adminAPI.getMessages({ page: 1, limit: 1, status: 'unread' });
+        if (cancelled) return;
+        const d = res.data?.data || res.data;
+        setUnreadCount(Number(d?.total ?? 0));
+      } catch { /* silent */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [location.pathname]);
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
@@ -54,10 +74,14 @@ const AdminLayout = () => {
               />
             </div>
             <div className="flex items-center gap-1 p-1 bg-zinc-900/30 border border-white/5 rounded-xl">
-              <button className="p-2 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-white transition-all relative" aria-label="Notifications">
+              <Link to="/admin/messages" className="p-2 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-white transition-all relative" aria-label="Notifications" title="Notifications">
                 <Bell className="h-4 w-4" />
-                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-gold-primary rounded-full border border-[#0d0d0d]" />
-              </button>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-1 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border border-[#0d0d0d]">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
               <Link to="/profile" className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-lg hover:bg-white/5 transition-all group">
                 <div className="h-7 w-7 rounded-lg bg-gold-primary/10 flex items-center justify-center text-gold-primary border border-gold-primary/20 group-hover:bg-gold-primary group-hover:text-black transition-all">
                   <User className="h-3.5 w-3.5" />
