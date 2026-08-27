@@ -4,7 +4,7 @@ const axios = require('axios');
 
 // Configuration de base
 const config = {
-  baseUrl: process.env.SITE_URL || 'https://scim.netlify.app',
+  baseUrl: process.env.SITE_URL || 'https://sci-milongo.netlify.app',
   apiBaseUrl: process.env.API_URL || 'http://localhost:5000/api/v1/scim',
   outputPath: path.join(__dirname, '../public/sitemap.xml'),
   currentDate: new Date().toISOString().split('T')[0]

@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://ophrus-immobilier.com/sitemap.xml
+Sitemap: https://sci-milongo.netlify.app/sitemap.xml
 
 # Disallow admin and private areas
 Disallow: /admin/

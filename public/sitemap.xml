@@ -4,242 +4,650 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>https://scim.netlify.app/</loc>
+    <loc>https://sci-milongo.netlify.app/</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties</loc>
+    <loc>https://sci-milongo.netlify.app/properties</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/about</loc>
+    <loc>https://sci-milongo.netlify.app/about</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/contact</loc>
+    <loc>https://sci-milongo.netlify.app/contact</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/login</loc>
+    <loc>https://sci-milongo.netlify.app/login</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/register</loc>
+    <loc>https://sci-milongo.netlify.app/register</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/dashboard</loc>
+    <loc>https://sci-milongo.netlify.app/dashboard</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/admin</loc>
+    <loc>https://sci-milongo.netlify.app/admin</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a8feec0b3437ab7ae8f782f</loc>
-    <lastmod>2026-08-27T08:01:04.900Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90222b0b626ea15767eb47</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4c6</loc>
-    <lastmod>2026-08-26T13:19:40.126Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021c50b626ea15767ea05</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4b4</loc>
-    <lastmod>2026-07-07T22:55:00.060Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021c20b626ea15767ea01</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4b1</loc>
-    <lastmod>2026-07-07T02:18:17.653Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021b80b626ea15767e9de</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4b7</loc>
-    <lastmod>2026-07-07T02:18:17.653Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021450b626ea15767e92d</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4bd</loc>
-    <lastmod>2026-08-25T12:03:46.890Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021290b626ea15767e8df</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b493</loc>
-    <lastmod>2026-07-07T02:18:17.649Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90211a0b626ea15767e8a8</loc>
+    <lastmod>2026-08-27T12:06:09.534Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4cf</loc>
-    <lastmod>2026-08-02T06:57:11.831Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020f10b626ea15767e864</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b496</loc>
-    <lastmod>2026-07-07T22:33:30.108Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020bb0b626ea15767e7d7</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b478</loc>
-    <lastmod>2026-07-07T02:18:17.647Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020b40b626ea15767e7c1</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4a5</loc>
-    <lastmod>2026-08-26T13:22:07.319Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020430b626ea15767e6c4</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4ae</loc>
-    <lastmod>2026-07-07T02:18:17.652Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90200b0b626ea15767e63e</loc>
+    <lastmod>2026-08-27T11:32:39.574Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b486</loc>
-    <lastmod>2026-07-07T02:18:17.648Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90200a0b626ea15767e637</loc>
+    <lastmod>2026-08-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b475</loc>
-    <lastmod>2026-07-07T02:18:17.646Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022520b626ea15767ebd1</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4c3</loc>
-    <lastmod>2026-07-07T02:18:17.654Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90224a0b626ea15767ebb6</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b483</loc>
-    <lastmod>2026-07-07T02:18:49.409Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022380b626ea15767eb76</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b471</loc>
-    <lastmod>2026-07-07T02:18:17.644Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022240b626ea15767eb34</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b48c</loc>
-    <lastmod>2026-07-07T02:18:17.649Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022180b626ea15767eb17</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4c0</loc>
-    <lastmod>2026-07-07T02:18:17.654Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021e40b626ea15767ea6e</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4a8</loc>
-    <lastmod>2026-07-07T02:18:17.652Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021d00b626ea15767ea33</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4cc</loc>
-    <lastmod>2026-07-07T02:18:17.655Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021cb0b626ea15767ea1f</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b47f</loc>
-    <lastmod>2026-07-07T02:18:17.648Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021af0b626ea15767e9c3</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b47b</loc>
-    <lastmod>2026-08-15T05:31:21.679Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90219a0b626ea15767e984</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4c9</loc>
-    <lastmod>2026-07-07T02:18:17.655Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a90215f0b626ea15767e942</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b489</loc>
-    <lastmod>2026-07-07T02:18:17.649Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021440b626ea15767e927</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b499</loc>
-    <lastmod>2026-07-07T02:18:17.650Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021220b626ea15767e8c8</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b49f</loc>
-    <lastmod>2026-07-07T02:18:17.650Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020f30b626ea15767e86a</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b48f</loc>
-    <lastmod>2026-07-07T02:18:17.649Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020ee0b626ea15767e85d</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b49c</loc>
-    <lastmod>2026-07-07T02:18:17.650Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020b00b626ea15767e7b0</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4ab</loc>
-    <lastmod>2026-07-07T02:18:17.652Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020790b626ea15767e719</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4a2</loc>
-    <lastmod>2026-07-07T02:18:17.651Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020740b626ea15767e709</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scim.netlify.app/properties/6a4c61e97b4258707457b4ba</loc>
-    <lastmod>2026-07-07T02:18:17.653Z</lastmod>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020530b626ea15767e6cb</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90202f0b626ea15767e696</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020180b626ea15767e65b</loc>
+    <lastmod>2026-07-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022430b626ea15767eb9d</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90223c0b626ea15767eb81</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90223a0b626ea15767eb7c</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022200b626ea15767eb2e</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022100b626ea15767eafd</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90220e0b626ea15767eaf3</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021df0b626ea15767ea5e</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021ce0b626ea15767ea2a</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021c00b626ea15767e9f6</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021920b626ea15767e96a</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021730b626ea15767e94e</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020eb0b626ea15767e857</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020d00b626ea15767e818</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020c00b626ea15767e7e7</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020bf0b626ea15767e7e1</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020b80b626ea15767e7c8</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90208e0b626ea15767e751</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020860b626ea15767e73f</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020760b626ea15767e713</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90202c0b626ea15767e691</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020290b626ea15767e684</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020200b626ea15767e676</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90201b0b626ea15767e664</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020050b626ea15767e631</loc>
+    <lastmod>2026-06-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022600b626ea15767ec0c</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022590b626ea15767ebef</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022530b626ea15767ebdd</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90224f0b626ea15767ebc9</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022320b626ea15767eb62</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022270b626ea15767eb3b</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021eb0b626ea15767ea8b</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021e70b626ea15767ea7a</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021be0b626ea15767e9ef</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021b30b626ea15767e9ce</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021980b626ea15767e97d</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021480b626ea15767e932</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021350b626ea15767e8f6</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021140b626ea15767e899</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021050b626ea15767e87e</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020e30b626ea15767e844</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020c80b626ea15767e802</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020ad0b626ea15767e7a8</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020810b626ea15767e72a</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90207b0b626ea15767e71f</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90200f0b626ea15767e643</loc>
+    <lastmod>2026-05-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022640b626ea15767ec21</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90225b0b626ea15767ebf9</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90224c0b626ea15767ebbe</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022440b626ea15767ebaa</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90223f0b626ea15767eb92</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022150b626ea15767eb0f</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9022140b626ea15767eb03</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90220c0b626ea15767eae8</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021d70b626ea15767ea48</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021890b626ea15767e953</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021410b626ea15767e91e</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90213d0b626ea15767e91a</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90212d0b626ea15767e8e9</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9021240b626ea15767e8d0</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90211d0b626ea15767e8bc</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a90211b0b626ea15767e8b3</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020fd0b626ea15767e878</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020f60b626ea15767e86e</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020df0b626ea15767e837</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020b20b626ea15767e7b5</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sci-milongo.netlify.app/properties/6a9020aa0b626ea15767e79d</loc>
+    <lastmod>2026-04-27T09:39:46.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

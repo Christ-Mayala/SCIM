@@ -209,6 +209,10 @@ export const AuthProvider = ({ children }) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
 
+        // Persister le token EN PREMIER pour que l'intercepteur Axios l'injecte dans getProfile()
+        if (token) localStorage.setItem('token', token);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+
         const me = await authAPI.getProfile();
         const profileUser = me.data;
 
