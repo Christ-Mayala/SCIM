@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, History, User, CalendarDays, Search, MapPin, Star, Clock, CheckCircle2, XCircle, MessageCircle, Home, Sparkles } from 'lucide-react';
+import { Heart, History, User, CalendarDays, Search, MapPin, Star, Clock, CheckCircle2, XCircle, MessageCircle, Home, Sparkles, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { favoritesAPI, formatDate, formatPrice, reservationAPI, userAPI } from '../../../lib/api';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useMessage } from '../../../contexts/MessageContext';
 import { toWhatsAppNumber } from '../../../lib/phone';
 import { IncompleteProfileBanner } from '../../../components/features/IncompleteProfileBanner';
 
 const ClientDashboardPage = () => {
   const { user } = useAuth();
+  const { unreadCount, fetchUnreadCount } = useMessage();
   const [favoriteProperties, setFavoriteProperties] = useState([]);
   const [visited, setVisited] = useState([]);
   const [reservations, setReservations] = useState([]);
@@ -331,6 +333,43 @@ const ClientDashboardPage = () => {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Messages */}
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[24px] md:rounded-3xl border border-white/10 p-4 md:p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                  <Mail className="h-4 w-4 text-emerald-400" />
+                </div>
+                <h2 className="text-sm font-black text-white uppercase tracking-widest">Messages</h2>
+              </div>
+              <Link to="/messages">
+                <span className="text-[10px] font-black text-gold-primary uppercase tracking-widest hover:text-amber-300 transition-colors">
+                  Tout voir →
+                </span>
+              </Link>
+            </div>
+            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-5">Vos messages non lus</p>
+
+            <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center relative">
+                <MessageCircle className="w-6 h-6 text-zinc-600" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gold-primary text-black text-[9px] font-black flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-zinc-500 font-medium">
+                {unreadCount > 0 ? `${unreadCount} message${unreadCount > 1 ? 's' : ''} non lu${unreadCount > 1 ? 's' : ''}` : 'Aucun message non lu'}
+              </p>
+              <Link to="/messages">
+                <Button className="mt-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-zinc-950 text-xs font-black uppercase tracking-widest rounded-2xl">
+                  Voir mes messages
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Favorites */}

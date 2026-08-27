@@ -82,6 +82,8 @@ const MessagesPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [openNotification, setOpenNotification] = useState(null);
+  const [notifPage, setNotifPage] = useState(1);
+  const NOTIFS_PER_PAGE = 3;
 
   const handleOpenNotification = (msg) => {
     setOpenNotification(msg);
@@ -111,7 +113,7 @@ const MessagesPage = () => {
       return;
     }
     setNotifLoading(true);
-    fetchMessagesWithUser(adminConvId, 1)
+    fetchMessagesWithUser(adminConvId, 1, { limit: 50 })
       .finally(() => setNotifLoading(false));
   }, [adminConvId, adminConvLastMessageId]); // eslint-disable-line
 
@@ -121,7 +123,9 @@ const MessagesPage = () => {
         (msg?.expediteur?._id && msg?.expediteur?._id !== (user?._id || user?.id));
       return fromAdmin && isSystemMsg(msg);
     });
-    setNotifications(systemMessages.slice().reverse().slice(0, 20));
+    const sorted = systemMessages.slice().reverse();
+    setNotifications(sorted);
+    setNotifPage(1);
   }, [messages, user]);
 
   /* ── send ── */
@@ -323,36 +327,62 @@ const MessagesPage = () => {
                   <p className="text-[10px] text-zinc-700 mt-1">Vous serez notifié ici des mises à jour importantes</p>
                 </div>
               ) : (
-                <div className="space-y-2.5">
-                  {notifications.map(msg => (
-                    <button key={msg._id}
-                      type="button"
-                      onClick={() => handleOpenNotification(msg)}
-                      className={cn(
-                        'w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-all hover:border-gold-primary/30 cursor-pointer',
-                        !msg.lu
-                          ? 'bg-gold-primary/[0.05] border-gold-primary/20'
-                          : 'bg-zinc-950/40 border-white/[0.05]'
-                      )}>
-                      <span className="text-lg shrink-0 mt-0.5">{notifIcon(msg)}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn('text-xs font-black truncate', !msg.lu ? 'text-white' : 'text-zinc-300')}>
-                          {msg.sujet || 'Notification'}
-                        </p>
-                        <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">
-                          {cleanText(msg.contenu)}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <Clock className="h-3 w-3 text-zinc-600" />
-                          <p className="text-[9px] text-zinc-600 font-bold">{fmt(msg.createdAt)}</p>
-                          {!msg.lu && (
-                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold-primary" />
-                          )}
+                <>
+                  <div className="space-y-2.5">
+                    {notifications
+                      .slice((notifPage - 1) * NOTIFS_PER_PAGE, notifPage * NOTIFS_PER_PAGE)
+                      .map(msg => (
+                      <button key={msg._id}
+                        type="button"
+                        onClick={() => handleOpenNotification(msg)}
+                        className={cn(
+                          'w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-all hover:border-gold-primary/30 cursor-pointer',
+                          !msg.lu
+                            ? 'bg-gold-primary/[0.05] border-gold-primary/20'
+                            : 'bg-zinc-950/40 border-white/[0.05]'
+                        )}>
+                        <span className="text-lg shrink-0 mt-0.5">{notifIcon(msg)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn('text-xs font-black truncate', !msg.lu ? 'text-white' : 'text-zinc-300')}>
+                            {msg.sujet || 'Notification'}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">
+                            {cleanText(msg.contenu)}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <Clock className="h-3 w-3 text-zinc-600" />
+                            <p className="text-[9px] text-zinc-600 font-bold">{fmt(msg.createdAt)}</p>
+                            {!msg.lu && (
+                              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold-primary" />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {notifications.length > NOTIFS_PER_PAGE && (
+                    <div className="flex items-center justify-between pt-3">
+                      <button
+                        disabled={notifPage <= 1}
+                        onClick={() => setNotifPage((p) => Math.max(1, p - 1))}
+                        className="h-8 px-3 rounded-xl border border-white/10 bg-zinc-900 text-zinc-300 hover:text-white hover:border-gold-primary/30 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                        Précédent
+                      </button>
+                      <span className="text-[10px] text-zinc-500 font-bold">
+                        Page {notifPage} / {Math.max(1, Math.ceil(notifications.length / NOTIFS_PER_PAGE))}
+                      </span>
+                      <button
+                        disabled={notifPage >= Math.ceil(notifications.length / NOTIFS_PER_PAGE)}
+                        onClick={() => setNotifPage((p) => Math.min(Math.ceil(notifications.length / NOTIFS_PER_PAGE), p + 1))}
+                        className="h-8 px-3 rounded-xl border border-white/10 bg-zinc-900 text-zinc-300 hover:text-white hover:border-gold-primary/30 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                        Suivant
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

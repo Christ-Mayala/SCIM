@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useMessage } from '../../../contexts/MessageContext';
+import { useAuth } from '../../../contexts/AuthContext';
+import { toWhatsAppNumber } from '../../../lib/phone';
 import toast from 'react-hot-toast';
 
 const LIMIT = 20;
@@ -40,7 +42,7 @@ const MessageDetail = ({ msg, onClose, onMarkRead, onDelete }) => {
     `Bonjour ${name}, nous avons bien reçu votre message concernant "${msg.sujet || 'votre demande'}". ` +
     `Voici notre réponse :`
   );
-  const waPhone = phone ? phone.replace(/[^\d+]/g, '') : '';
+  const waPhone = toWhatsAppNumber(phone);
 
   useEffect(() => { if (!msg.lu) onMarkRead(msg._id); }, [msg._id, msg.lu]); // eslint-disable-line
 
@@ -160,7 +162,8 @@ const MessageDetail = ({ msg, onClose, onMarkRead, onDelete }) => {
 
 /* ── Main page ── */
 const AdminMessagesPage = () => {
-  const { fetchUnreadCount } = useMessage();
+  const { user } = useAuth();
+  const { fetchUnreadCount, unreadCount } = useMessage();
 
   const [loading,    setLoading]    = useState(true);
   const [messages,   setMessages]   = useState([]);
@@ -182,7 +185,16 @@ const AdminMessagesPage = () => {
   useEffect(() => {
     if (!mountedRef.current) return;
     load(1, filter, dSearch);
-  }, [dSearch]); // eslint-disable-line
+    fetchUnreadCount();
+  }, [dSearch, filter]); // eslint-disable-line
+
+  useEffect(() => {
+    mountedRef.current = true;
+    load(1, 'all', '');
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => { mountedRef.current = false; clearInterval(interval); };
+  }, [fetchUnreadCount]);
 
   const load = useCallback(async (page = 1, f = filter, q = dSearch) => {
     const callId = ++loadIdRef.current;
@@ -230,7 +242,7 @@ const AdminMessagesPage = () => {
 
   const tabs = [
     { id: 'all',    label: 'Tous',     badge: 0 },
-    { id: 'unread', label: 'Non lus',  badge: localUnread },
+    { id: 'unread', label: 'Non lus',  badge: unreadCount },
     { id: 'read',   label: 'Lus',      badge: 0 },
   ];
 
@@ -304,33 +316,35 @@ const AdminMessagesPage = () => {
             </div>
           ) : (
             <div className="divide-y divide-white/[0.04]">
-              {messages.map(m => {
-                const senderName = m.expediteur?.nom || m.expediteur?.name || (m.expediteur?.email || '').split('@')[0] || 'Anonyme';
-                const isActive   = selected?._id === m._id;
-                return (
-                  <div key={m._id} onClick={() => setSelected(m)}
-                    className={cn(
-                      'relative flex items-start gap-4 px-5 py-4 cursor-pointer transition-all group',
-                      isActive ? 'bg-gold-primary/[0.06] border-l-2 border-gold-primary' : 'hover:bg-zinc-900/60',
-                      !m.lu && !isActive && 'bg-gold-primary/[0.025]',
-                    )}>
-                    {/* unread dot */}
-                    {!m.lu && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gold-primary rounded-r-full" />}
+               {messages.map(m => {
+                 const senderName = m.expediteur?.nom || m.expediteur?.name || (m.expediteur?.email || '').split('@')[0] || 'Anonyme';
+                 const isActive   = selected?._id === m._id;
+                 const isSent = String(m.expediteur?._id || m.expediteur?.id || '') === String(user?._id || user?.id || '');
+                 return (
+                   <div key={m._id} onClick={() => setSelected(m)}
+                     className={cn(
+                       'relative flex items-start gap-4 px-5 py-4 cursor-pointer transition-all group',
+                       isActive ? 'bg-gold-primary/[0.06] border-l-2 border-gold-primary' : 'hover:bg-zinc-900/60',
+                       !m.lu && !isActive && 'bg-gold-primary/[0.025]',
+                     )}>
+                     {/* unread dot */}
+                     {!m.lu && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gold-primary rounded-r-full" />}
 
-                    {/* avatar */}
-                    <div className={cn(
-                      'h-10 w-10 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 border',
-                      isActive ? 'bg-gold-primary text-black border-gold-primary' : 'bg-zinc-800 text-zinc-400 border-white/5'
-                    )}>
-                      {initials(senderName)}
-                    </div>
+                     {/* avatar */}
+                     <div className={cn(
+                       'h-10 w-10 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 border',
+                       isActive ? 'bg-gold-primary text-black border-gold-primary' : 'bg-zinc-800 text-zinc-400 border-white/5'
+                     )}>
+                       {initials(senderName)}
+                     </div>
 
-                    {/* content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-0.5">
-                        <p className={cn('text-sm font-black truncate', !m.lu ? 'text-white' : 'text-zinc-400')}>
-                          {senderName}
-                        </p>
+                     {/* content */}
+                     <div className="flex-1 min-w-0">
+                       <div className="flex items-center justify-between gap-2 mb-0.5">
+                         <p className={cn('text-sm font-black truncate', !m.lu ? 'text-white' : 'text-zinc-400')}>
+                           {senderName}
+                           {isSent && <span className="ml-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 border border-white/10 rounded-md px-1.5 py-0.5">Envoyé</span>}
+                         </p>
                         <span className="text-[9px] text-zinc-600 shrink-0">{fmtShort(m.createdAt)}</span>
                       </div>
                       <p className={cn('text-xs font-bold truncate mb-0.5', !m.lu ? 'text-zinc-200' : 'text-zinc-500')}>

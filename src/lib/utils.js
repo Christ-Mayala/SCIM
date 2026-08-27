@@ -12,7 +12,11 @@ export const validateEmail = (email) => {
 
 export const validatePhone = (phone) => {
   const cleaned = String(phone || '').replace(/\s|\-|\(|\)/g, '');
-  return /^\+?\d{6,15}$/.test(cleaned);
+  const withCountry = cleaned.startsWith('+242') ? cleaned : `+242${cleaned.replace(/^0+/, '')}`;
+  if (!/^\+242\d{9}$/.test(withCountry)) return false;
+  const digits = withCountry.replace(/[^\d]/g, '');
+  const local = digits.slice(3);
+  return /^0[4-7]\d{7}$/.test(local);
 };
 
 export const formatPrice = (price) => {

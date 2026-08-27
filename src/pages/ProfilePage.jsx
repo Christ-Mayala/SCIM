@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
+import { normalizePhoneE164 } from '../lib/phone';
 import toast from 'react-hot-toast';
 import { IncompleteProfileBanner } from '../components/features/IncompleteProfileBanner';
 
@@ -78,7 +79,7 @@ const ProfilePage = () => {
     if (!formData.email) n.email = "L'email est requis";
     else if (!validateEmail(formData.email)) n.email = "Email invalide";
     if (!formData.telephone) n.telephone = 'Le téléphone est requis';
-    else if (!validatePhone(formData.telephone)) n.telephone = 'Format invalide';
+    else if (!validatePhone(formData.telephone)) n.telephone = 'Numéro invalide. Ex: 06 123 45 67';
     setErrors(n);
     return !Object.keys(n).length;
   };
@@ -86,7 +87,12 @@ const ProfilePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    const res = await updateProfile({ ...formData, _id: user?._id || user?.id });
+    const normalizedPhone = normalizePhoneE164(formData.telephone);
+    if (!normalizedPhone) {
+      setErrors((prev) => ({ ...prev, telephone: 'Numero de telephone invalide. Ex: 06 123 45 67' }));
+      return;
+    }
+    const res = await updateProfile({ ...formData, telephone: normalizedPhone, _id: user?._id || user?.id });
     if (res.success) setIsEditing(false);
   };
 

@@ -11,7 +11,7 @@ export const normalizePhoneE164 = (value) => {
   const raw = String(value || '').trim();
   if (!raw) return '';
 
-  const digits = raw.replace(/[^\d]/g, '');
+  let digits = raw.replace(/[^\d]/g, '');
   if (!digits || digits.length < 8) return '';
 
   if (raw.startsWith('+')) return `+${digits}`;

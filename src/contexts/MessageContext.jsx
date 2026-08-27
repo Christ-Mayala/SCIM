@@ -165,7 +165,7 @@ export const MessageProvider = ({ children }) => {
   );
 
   const fetchMessagesWithUser = useCallback(
-    async (otherUserId, page = 1, { silent = false } = {}) => {
+    async (otherUserId, page = 1, { silent = false, limit = 20 } = {}) => {
       if (!userId || !otherUserId) return;
       const conversationId = String(otherUserId);
       const requestId = ++conversationRequestIdRef.current;
@@ -177,7 +177,7 @@ export const MessageProvider = ({ children }) => {
 
       try {
         if (!silent) setConversationLoading(true);
-        const response = await api.get(`/message/${conversationId}`, { params: { page, limit: 20 } });
+        const response = await api.get(`/message/${conversationId}`, { params: { page, limit } });
         if (requestId !== conversationRequestIdRef.current) return;
         const list = response.data?.messages || response.data || [];
 

@@ -13,6 +13,7 @@ import { seoConfig } from '../utils/seoData';
 import { Button } from '../components/ui/Button';
 import { propertyAPI } from '../lib/api';
 import { validateEmail } from '../lib/utils';
+import { normalizePhoneE164 } from '../lib/phone';
 import toast from 'react-hot-toast';
 import { cn } from '../lib/utils';
 
@@ -92,18 +93,6 @@ const AMENITY_GROUPS = [
 ];
 
 const ALL_AMENITY_KEYS = AMENITY_GROUPS.flatMap(g => g.items.map(i => i.key));
-
-const normalizePhone = (v) => {
-  const raw = String(v || '').trim();
-  if (!raw) return '';
-  const digits = raw.replace(/[^\d]/g, '');
-  if (!digits) return raw;
-  if (raw.startsWith('+')) return `+${digits}`;
-  if (digits.startsWith('242')) return `+${digits}`;
-  if (digits.startsWith('00')) return `+${digits.slice(2)}`;
-  const local = digits.replace(/^0+/, '');
-  return local ? `+242${local}` : raw;
-};
 
 const INITIAL = {
   nomComplet: '', email: '', telephone: '',
@@ -265,12 +254,12 @@ const SubmitPropertyPage = () => {
                 {[
                   { name:'nomComplet', label:'Nom complet *', type:'text', placeholder:'Jean Dupont', icon: User },
                   { name:'email', label:'Email *', type:'email', placeholder:'jean@exemple.com', icon: Mail },
-                  { name:'telephone', label:'Téléphone *', type:'tel', placeholder:'+242 06 000 00 00', icon: Phone },
+                  { name:'telephone', label:'Téléphone *', type:'tel', placeholder:'06 000 00 00', icon: Phone },
                 ].map(f => (
                   <div key={f.name}>
                     <label className={L}><span className="flex items-center gap-1"><f.icon className="h-3 w-3"/>{f.label}</span></label>
                     <input name={f.name} type={f.type} value={form[f.name]} onChange={onChange}
-                      onBlur={f.name === 'telephone' ? () => setForm(p => ({...p, telephone: normalizePhone(p.telephone)})) : undefined}
+                      onBlur={f.name === 'telephone' ? () => setForm(p => ({...p, telephone: normalizePhoneE164(p.telephone)})) : undefined}
                       placeholder={f.placeholder} className={cn(F, errors[f.name] && 'border-red-500/40')} />
                     {errors[f.name] && <p className={E}>{errors[f.name]}</p>}
                   </div>

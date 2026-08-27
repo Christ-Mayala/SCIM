@@ -208,16 +208,7 @@ export const AuthProvider = ({ children }) => {
     async (token, refreshToken) => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
-        
-        // Stocker les tokens avant de récupérer le profil
-        if (token && token !== 'cookie_managed') {
-            localStorage.setItem('token', token);
-        }
-        if (refreshToken) {
-            // Si vous avez un mécanisme pour le refresh token côté client
-            localStorage.setItem('refreshToken', refreshToken);
-        }
-        
+
         const me = await authAPI.getProfile();
         const profileUser = me.data;
 
@@ -225,7 +216,7 @@ export const AuthProvider = ({ children }) => {
           throw new Error("Impossible de récupérer le profil utilisateur.");
         }
 
-        persistSession(token, profileUser);
+        persistSession(token, profileUser, refreshToken);
         dispatch({ type: 'SET_USER', payload: { user: profileUser, token } });
         toast.success('Connexion réussie !');
         return { success: true };

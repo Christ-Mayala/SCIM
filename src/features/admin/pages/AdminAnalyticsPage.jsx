@@ -93,7 +93,7 @@ const AdminAnalyticsPage = () => {
     return data.revenue.monthlyRevenue.map((d) => ({
       month: d.month?.slice(-2) || '',
       revenue: d.revenue || 0,
-      confirmed: d.confirmed || 0,
+      completed: d.completed || 0,
     }));
   }, [data.revenue]);
 
@@ -152,7 +152,7 @@ const AdminAnalyticsPage = () => {
     activeProperties: data.properties?.activeProperties || 0,
     totalUsers: data.users?.totalUsers || 0,
     totalRevenue: data.revenue?.totalRevenue || 0,
-    confirmedReservations: data.revenue?.totalConfirmedReservations || 0,
+    completedReservations: data.revenue?.totalCompletedReservations || 0,
     newUsers: data.users?.newUsers,
     newProperties: data.properties?.newProperties,
   };
@@ -203,7 +203,7 @@ const AdminAnalyticsPage = () => {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <KpiCard title="Total Revenus"       value={formatPrice(stats.totalRevenue)}      icon={Zap}       trend="pending" trendLabel={PERIOD_LABELS[activePeriod]} color="gold" />
-        <KpiCard title="Ventes Confirmées"   value={stats.confirmedReservations}          icon={CheckCircle} trend="pending" trendValue={`${confirmationRate}%`} trendLabel="taux de confirmation" color="emerald" />
+        <KpiCard title="Transactions terminées" value={stats.completedReservations} icon={CheckCircle} trend="pending" trendValue={`${confirmationRate}%`} trendLabel="taux de finalisation" color="emerald" />
         <KpiCard title="Annonces Actives"    value={stats.activeProperties}               icon={Home}      trend="pending" trendValue={`${stats.totalProperties} total`} trendLabel={typeof stats.newProperties === 'number' ? `+${stats.newProperties} (${PERIOD_LABELS[activePeriod].toLowerCase()})` : undefined} color="violet" />
         <KpiCard title="Utilisateurs"        value={stats.totalUsers}                     icon={Users}     trend="pending" trendLabel={typeof stats.newUsers === 'number' ? `+${stats.newUsers} (${PERIOD_LABELS[activePeriod].toLowerCase()})` : 'Comptes enregistrés'} color="blue" />
       </div>
@@ -221,9 +221,9 @@ const AdminAnalyticsPage = () => {
             <span className="flex items-center gap-1.5 text-[10px] font-black uppercase text-zinc-500">
               <span className="h-2 w-2 rounded-full bg-gold-primary" /> Revenus
             </span>
-            <span className="flex items-center gap-1.5 text-[10px] font-black uppercase text-zinc-500">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Confirmées
-            </span>
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase text-zinc-500">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Terminées
+              </span>
           </div>
         </div>
         <div className="h-72">
@@ -242,9 +242,9 @@ const AdminAnalyticsPage = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} dy={8} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 10 }} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(0)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}k` : v} />
-              <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} formatter={(v, n) => n === 'revenue' ? [formatPrice(v), 'Revenus'] : [v, 'Confirmées']} />
+              <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '12px' }} formatter={(v, n) => n === 'revenue' ? [formatPrice(v), 'Revenus'] : [v, 'Terminées']} />
               <Area type="monotone" dataKey="revenue" stroke="#d4af37" strokeWidth={2.5} fill="url(#gRev)" dot={{ fill: '#d4af37', r: 3, stroke: '#0d0d0d', strokeWidth: 2 }} activeDot={{ r: 5, strokeWidth: 0 }} />
-              <Area type="monotone" dataKey="confirmed" stroke="#10b981" strokeWidth={2} fill="url(#gConf)" dot={{ fill: '#10b981', r: 3, stroke: '#0d0d0d', strokeWidth: 2 }} />
+              <Area type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={2} fill="url(#gConf)" dot={{ fill: '#10b981', r: 3, stroke: '#0d0d0d', strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

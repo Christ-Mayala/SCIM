@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/checkbox';
 import { cn, validateEmail, validatePhone } from '../lib/utils';
+import { normalizePhoneE164 } from '../lib/phone';
 import { ROOT_API_URL } from '../lib/api';
 import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
@@ -81,7 +82,7 @@ const RegisterPage = () => {
     if (!formData.telephone) {
       newErrors.telephone = 'Le téléphone est requis';
     } else if (!validatePhone(formData.telephone)) {
-      newErrors.telephone = 'Format de téléphone invalide';
+      newErrors.telephone = 'Numéro invalide. Ex: 06 123 45 67';
     }
 
     if (!formData.password) {
@@ -112,7 +113,12 @@ const RegisterPage = () => {
 
     try {
       const { confirmPassword, acceptTerms, ...userData } = formData;
-      const result = await register(userData);
+      const normalizedPhone = normalizePhoneE164(userData.telephone);
+      if (!normalizedPhone) {
+        setErrors((prev) => ({ ...prev, telephone: 'Numero de telephone invalide. Ex: 06 123 45 67' }));
+        return;
+      }
+      const result = await register({ ...userData, telephone: normalizedPhone });
 
       if (result.success) {
         navigate('/dashboard', { replace: true });

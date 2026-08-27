@@ -13,10 +13,10 @@ import {Button} from '../components/ui/Button';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Modal from '../components/ui/Modal';
 import { formatPrice, formatDate, getImageUrl, getPropertyTypeIcon } from '../lib/utils';
+import { toWhatsAppNumber, normalizePhoneE164 } from '../lib/phone';
 import StarRating from '../components/common/StarRating';
 import { propertyAPI, reservationAPI } from '../lib/api';
 import { cn } from '../lib/utils';
-import { toWhatsAppNumber } from '../lib/phone';
 import SEOHead from '../components/seo/SEOHead';
 import { seoConfig, generatePropertyStructuredData } from '../utils/seoData';
 
@@ -203,11 +203,16 @@ const PropertyDetailPage = () => {
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     try {
+      const normalizedPhone = normalizePhoneE164(contactForm.phone);
+      if (!normalizedPhone) {
+        toast.error('Numero de telephone invalide. Ex: 06 123 45 67');
+        return;
+      }
       const subject = `Demande d'information • ${property?.titre || ''}`;
       const lines = [
         `Nom: ${contactForm.name}`,
         `Email: ${contactForm.email}`,
-        `Téléphone: ${contactForm.phone}`,
+        `Téléphone: ${normalizedPhone}`,
         `Propriété: ${property?.titre || ''} (#${property?._id || ''})`,
         `Ville: ${property?.ville || ''}`,
         '',
@@ -779,9 +784,10 @@ const PropertyDetailPage = () => {
                       }
                       try {
                         setReservationLoading(true);
-                        const reservationPhone = String(user?.telephone || contactForm.phone || '').trim();
+                        const rawPhone = String(user?.telephone || contactForm.phone || '').trim();
+                        const reservationPhone = normalizePhoneE164(rawPhone);
                         if (!reservationPhone) {
-                          toast.error('Ajoutez votre numero de telephone dans le profil avant de reserver.');
+                          toast.error('Ajoutez un numéro de téléphone valide (ex: 06 123 45 67) avant de réserver.');
                           return;
                         }
 
