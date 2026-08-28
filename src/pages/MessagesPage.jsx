@@ -96,11 +96,7 @@ const MessagesPage = () => {
   /* ── load inbox on mount to get notifications ── */
   useEffect(() => { fetchInbox(1); }, [fetchInbox]);
 
-  /* ── extract system notifications from conversations ──
-   * Ne dépend QUE de l'identité de la conversation admin et de son dernier
-   * message : dépendre de tout le tableau `conversations` provoquait une
-   * boucle infinie (fetchMessagesWithUser -> markThreadAsRead -> mutation de
-   * `conversations` -> re-déclenchement de cet effet -> refetch -> ...). */
+  /* ── extract system notifications from conversations ── */
   const adminConv = conversations.find(
     c => (c?.otherUser?.role === 'admin') || (c?.otherUser?.nom || '').toLowerCase().includes('admin')
   );
@@ -113,7 +109,8 @@ const MessagesPage = () => {
       return;
     }
     setNotifLoading(true);
-    fetchMessagesWithUser(adminConvId, 1, { limit: 50 })
+    // silent:true + noMarkRead:true : ne pas marquer comme lu automatiquement à l'ouverture
+    fetchMessagesWithUser(adminConvId, 1, { limit: 50, silent: true, noMarkRead: true })
       .finally(() => setNotifLoading(false));
   }, [adminConvId, adminConvLastMessageId]); // eslint-disable-line
 

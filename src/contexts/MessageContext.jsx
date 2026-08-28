@@ -165,7 +165,7 @@ export const MessageProvider = ({ children }) => {
   );
 
   const fetchMessagesWithUser = useCallback(
-    async (otherUserId, page = 1, { silent = false, limit = 20 } = {}) => {
+    async (otherUserId, page = 1, { silent = false, limit = 20, noMarkRead = false } = {}) => {
       if (!userId || !otherUserId) return;
       const conversationId = String(otherUserId);
       const requestId = ++conversationRequestIdRef.current;
@@ -185,7 +185,7 @@ export const MessageProvider = ({ children }) => {
         setConvPage(response.data?.page || page);
         setConvTotalPages(response.data?.totalPages || 1);
 
-        await markThreadAsRead(conversationId);
+        if (!noMarkRead) await markThreadAsRead(conversationId);
       } catch (_) {
         if (requestId === conversationRequestIdRef.current) {
           toast.error('Erreur lors du chargement des messages');
