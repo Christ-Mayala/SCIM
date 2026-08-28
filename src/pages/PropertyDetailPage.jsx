@@ -627,7 +627,13 @@ const PropertyDetailPage = () => {
                 <div className="space-y-4">
                   <Button 
                     className="w-full bg-gold-primary text-zinc-950 hover:bg-amber-300 h-16 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl transition-all hover:-translate-y-1 active:scale-[0.98]"
-                    onClick={() => setShowContactModal(true)}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        navigate('/login', { state: { from: `/property/${id}` } });
+                        return;
+                      }
+                      setShowContactModal(true);
+                    }}
                   >
                     Demande de Renseignement
                   </Button>
