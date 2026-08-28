@@ -83,7 +83,7 @@ const MessagesPage = () => {
   const [notifLoading, setNotifLoading] = useState(false);
   const [openNotification, setOpenNotification] = useState(null);
   const [notifPage, setNotifPage] = useState(1);
-  const NOTIFS_PER_PAGE = 3;
+  const NOTIFS_PER_PAGE = 5;
 
   const handleOpenNotification = (msg) => {
     setOpenNotification(msg);
@@ -115,12 +115,13 @@ const MessagesPage = () => {
   }, [adminConvId, adminConvLastMessageId]); // eslint-disable-line
 
   useEffect(() => {
-    const systemMessages = messages.filter(msg => {
-      const fromAdmin = msg?.expediteur?.role === 'admin' ||
-        (msg?.expediteur?._id && msg?.expediteur?._id !== (user?._id || user?.id));
-      return fromAdmin && isSystemMsg(msg);
+    // Tous les messages reçus DE l'admin (pas seulement les system messages)
+    const adminMessages = messages.filter(msg => {
+      const senderId = msg?.expediteur?._id || msg?.expediteur?.id;
+      const myId = user?._id || user?.id;
+      return senderId && myId && String(senderId) !== String(myId);
     });
-    const sorted = systemMessages.slice().reverse();
+    const sorted = adminMessages.slice().reverse();
     setNotifications(sorted);
     setNotifPage(1);
   }, [messages, user]);
