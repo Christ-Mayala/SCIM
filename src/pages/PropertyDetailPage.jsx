@@ -257,24 +257,47 @@ const PropertyDetailPage = () => {
   };
 
   const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: property.titre,
-          text: property.description,
-          url: window.location.href,
-        });
-        return;
-      }
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success('Lien copié dans le presse-papiers');
-    } catch (error) {
+    const url = window.location.href;
+    const title = property?.titre || 'Bien immobilier';
+    const text = property?.description || '';
+
+    // Essai 1 : Web Share API (mobile natif)
+    if (navigator.share) {
       try {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success('Lien copié dans le presse-papiers');
+        await navigator.share({ title, text, url });
+        return;
       } catch (e) {
-        console.log('Share fallback error:', e);
+        // AbortError = l'utilisateur a annulé → pas d'erreur à afficher
+        if (e?.name === 'AbortError') return;
+        // Autre erreur → continuer vers le fallback clipboard
       }
+    }
+
+    // Essai 2 : Clipboard API moderne (HTTPS uniquement)
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success('Lien copié dans le presse-papiers !');
+        return;
+      } catch (_) {
+        // Contexte non sécurisé ou permission refusée → fallback
+      }
+    }
+
+    // Essai 3 : execCommand (compatibilité max)
+    try {
+      const el = document.createElement('textarea');
+      el.value = url;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      toast.success('Lien copié dans le presse-papiers !');
+    } catch (_) {
+      toast.error('Impossible de copier le lien. Copiez manuellement : ' + url);
     }
   };
 
